@@ -10,6 +10,7 @@
 
 #define SUCCESS 0
 #define ERR 1
+#define LAYERS_NUM 4
 
 int init(void);
 int dinit(void);
@@ -29,7 +30,7 @@ void test_nn(void);
 int initialize_dummy_weights(void);
 
 static network_t network;
-int *num_neurons;
+static const int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
 float alpha;
 float *cost;
 float full_cost;
@@ -40,68 +41,68 @@ int n=1;
 
 int main(void)
 {
-    int i;
+    // int i;
 
-    srand(time(0));
+    // srand(time(0));
 
-    printf("Enter the number of Layers in Neural Network:\n");
-    scanf("%d",&network.layers_num);
+    // printf("Enter the number of Layers in Neural Network:\n");
+    // scanf("%d",&network.layers_num);
 
-    num_neurons = (int*) malloc(network.layers_num * sizeof(int));
-    memset(num_neurons,0,network.layers_num *sizeof(int));
+    // num_neurons = (int*) malloc(network.layers_num * sizeof(int));
+    // memset(num_neurons,0,network.layers_num *sizeof(int));
 
-    // Get number of neurons per layer_t
-    for(i=0;i<network.layers_num;i++)
-    {
-        printf("Enter number of neurons in layer_t[%d]: \n",i+1);
-        scanf("%d",&num_neurons[i]);
-    }
+    // // Get number of neurons per layer_t
+    // for(i=0;i<network.layers_num;i++)
+    // {
+    //     printf("Enter number of neurons in layer_t[%d]: \n",i+1);
+    //     scanf("%d",&num_neurons[i]);
+    // }
 
-    printf("\n");
+    // printf("\n");
 
-    // Initialize the neural network module
-    if(init()!= SUCCESS)
-    {
-        printf("Error in Initialization...\n");
-        exit(0);
-    }
+    // // Initialize the neural network module
+    // if(init()!= SUCCESS)
+    // {
+    //     printf("Error in Initialization...\n");
+    //     exit(0);
+    // }
 
-    printf("Enter the learning rate (Usually 0.15): \n");
-    scanf("%f",&alpha);
-    printf("\n");
+    // printf("Enter the learning rate (Usually 0.15): \n");
+    // scanf("%f",&alpha);
+    // printf("\n");
 
-    printf("Enter the number of training examples: \n");
-    scanf("%d",&num_training_ex);
-    printf("\n");
+    // printf("Enter the number of training examples: \n");
+    // scanf("%d",&num_training_ex);
+    // printf("\n");
 
-    input = (float**) malloc(num_training_ex * sizeof(float*));
-    for(i=0;i<num_training_ex;i++)
-    {
-        input[i] = (float*)malloc(num_neurons[0] * sizeof(float));
-    }
+    // input = (float**) malloc(num_training_ex * sizeof(float*));
+    // for(i=0;i<num_training_ex;i++)
+    // {
+    //     input[i] = (float*)malloc(num_neurons[0] * sizeof(float));
+    // }
 
-    desired_outputs = (float**) malloc(num_training_ex* sizeof(float*));
-    for(i=0;i<num_training_ex;i++)
-    {
-        desired_outputs[i] = (float*)malloc(num_neurons[network.layers_num-1] * sizeof(float));
-    }
+    // desired_outputs = (float**) malloc(num_training_ex* sizeof(float*));
+    // for(i=0;i<num_training_ex;i++)
+    // {
+    //     desired_outputs[i] = (float*)malloc(num_neurons[network.layers_num-1] * sizeof(float));
+    // }
 
-    cost = (float *) malloc(num_neurons[network.layers_num-1] * sizeof(float));
-    memset(cost,0,num_neurons[network.layers_num-1]*sizeof(float));
+    // cost = (float *) malloc(num_neurons[network.layers_num-1] * sizeof(float));
+    // memset(cost,0,num_neurons[network.layers_num-1]*sizeof(float));
 
-    // Get Training Examples
-    get_inputs();
+    // // Get Training Examples
+    // get_inputs();
 
-    // Get Output Labels
-    get_desired_outputs();
+    // // Get Output Labels
+    // get_desired_outputs();
 
-    train_neural_net();
-    test_nn();
+    // train_neural_net();
+    // test_nn();
 
-    if(dinit()!= SUCCESS)
-    {
-        printf("Error in Dinitialization...\n");
-    }
+    // if(dinit()!= SUCCESS)
+    // {
+    //     printf("Error in Dinitialization...\n");
+    // }
 
     return 0;
 }
@@ -109,7 +110,7 @@ int main(void)
 
 int init()
 {
-    if(create_architecture() != SUCCESS)
+    if(create_network(LAYERS_NUM, neurons_per_layer) != SUCCESS)
     {
         printf("Error in creating architecture...\n");
         return ERR;
@@ -122,29 +123,25 @@ int init()
 //Get Inputs
 void  get_inputs()
 {
-    int i,j;
+    for(int i=0;i<num_training_ex;i++)
+    {
+        printf("Enter the Inputs for training example[%d]:\n",i);
 
-        for(i=0;i<num_training_ex;i++)
+        for(int j=0;j<network.layers[0].neurons_num;j++)
         {
-            printf("Enter the Inputs for training example[%d]:\n",i);
-
-            for(j=0;j<num_neurons[0];j++)
-            {
-                scanf("%f",&input[i][j]);
-                
-            }
-            printf("\n");
+            scanf("%f",&input[i][j]);
+            
         }
+        printf("\n");
+    }
 }
 
 //Get Labels
 void get_desired_outputs()
 {
-    int i,j;
-    
-    for(i=0;i<num_training_ex;i++)
+    for(int i=0;i<num_training_ex;i++)
     {
-        for(j=0;j<num_neurons[network.layers_num-1];j++)
+        for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
         {
             printf("Enter the Desired Outputs (Labels) for training example[%d]: \n",i);
             scanf("%f",&desired_outputs[i][j]);
@@ -156,50 +153,11 @@ void get_desired_outputs()
 // Feed inputs to input layer_t
 void feed_input(int i)
 {
-    int j;
-
-    for(j=0;j<num_neurons[0];j++)
+    for(int j=0;j<network.layers[0].neurons_num;j++)
     {
         network.layers[0].neurons[j].actv = input[i][j];
         printf("Input: %f\n",network.layers[0].neurons[j].actv);
     }
-}
-
-// Create Neural Network Architecture
-int create_architecture()
-{
-    int i=0,j=0;
-    network.layers = (layer_t*) malloc(network.layers_num * sizeof(layer_t));
-
-    for(i=0;i<network.layers_num;i++)
-    {
-        network.layers[i] = create_layer(num_neurons[i]);      
-        network.layers[i].neurons_num = num_neurons[i];
-        printf("Created Layer: %d\n", i+1);
-        printf("Number of Neurons in Layer %d: %d\n", i+1,network.layers[i].neurons_num);
-
-        for(j=0;j<num_neurons[i];j++)
-        {
-            if(i < (network.layers_num-1)) 
-            {
-                network.layers[i].neurons[j] = create_neuron(num_neurons[i+1]);
-            }
-
-            printf("Neuron %d in Layer %d created\n",j+1,i+1);  
-        }
-        printf("\n");
-    }
-
-    printf("\n");
-
-    // Initialize the weights
-    if(initialize_weights() != SUCCESS)
-    {
-        printf("Error Initilizing weights...\n");
-        return ERR;
-    }
-
-    return SUCCESS;
 }
 
 int initialize_weights(void)
@@ -217,9 +175,9 @@ int initialize_weights(void)
     for(i=0;i<network.layers_num-1;i++)
     {
         
-        for(j=0;j<num_neurons[i];j++)
+        for(j=0;j<network.layers[i].neurons_num;j++)
         {
-            for(k=0;k<num_neurons[i+1];k++)
+            for(k=0;k<network.layers[i+1].neurons_num;k++)
             {
                 // Initialize Output Weights for each neuron
                 network.layers[i].neurons[j].weights[k] = ((double)rand())/((double)RAND_MAX);
@@ -235,7 +193,7 @@ int initialize_weights(void)
     }   
     printf("\n");
     
-    for (j=0; j<num_neurons[network.layers_num-1]; j++)
+    for (j=0; j<network.layers[network.layers_num-1].neurons_num; j++)
     {
         network.layers[network.layers_num-1].neurons[j].bias = ((double)rand())/((double)RAND_MAX);
     }
@@ -269,11 +227,11 @@ void update_weights(void)
     for(int i=0;i<network.layers_num-1;i++)
     {
         // for each neuron of the current layer
-        for(int j=0;j<num_neurons[i];j++)
+        for(int j=0;j<network.layers[i].neurons_num;j++)
         {
             neuron_t* neuron = &network.layers[i].neurons[j];
             // for each neuron of the next layer
-            for(int k=0;k<num_neurons[i+1];k++)
+            for(int k=0;k<network.layers[i+1].neurons_num;k++)
             {
                 // Update Weights
                 neuron->weights[k] = update_weight(neuron->weights[k], alpha, neuron->dw[k]);
@@ -295,12 +253,12 @@ void forward_prop(void)
         neuron_t* previous_neurons = network.layers[i-1].neurons;
 
         // for each neuron of the current layer
-        for(int j=0;j<num_neurons[i];j++)
+        for(int j=0;j<network.layers[i].neurons_num;j++)
         {
             current_neurons[j].z = current_neurons[j].bias;
 
             // for each neuron of the previous layer
-            for(int k=0;k<num_neurons[i-1];k++)
+            for(int k=0;k<network.layers[i-1].neurons_num;k++)
             {
                 // update the output of each neuron of the current layer
                 current_neurons[j].z  = update_output(previous_neurons[k].actv, previous_neurons[k].weights[j], current_neurons[j].z);
@@ -335,7 +293,7 @@ void compute_cost(int i)
     float tmpcost=0;
     float tcost=0;
 
-    for(int j=0;j<num_neurons[network.layers_num-1];j++)
+    for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
     {
         tmpcost = desired_outputs[i][j] - network.layers[network.layers_num-1].neurons[j].actv;
         cost[j] = (tmpcost * tmpcost)/2;
@@ -352,14 +310,14 @@ void back_prop(int p)
 {
     // Output Layer
     // for each neuron of the output layer
-    for(int j=0;j<num_neurons[network.layers_num-1];j++)
+    for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
     {           
         // compute delta error
         neuron_t* current_neuron = &(network.layers[network.layers_num-1].neurons[j]);
         current_neuron->dz = (current_neuron->actv - desired_outputs[p][j]) * sigmoid_derivative(current_neuron->actv);
 
         // for each neuron of the previous layer (the one before the output layer)
-        for(int k=0;k<num_neurons[network.layers_num-2];k++)
+        for(int k=0;k<network.layers[network.layers_num-2].neurons_num;k++)
         {   
             neuron_t* previous_neuron = &(network.layers[network.layers_num-2].neurons[k]);
             // compute the delta weight and the delta output 
@@ -375,14 +333,14 @@ void back_prop(int p)
     for(int i=network.layers_num-2;i>0;i--)
     {
         // for each neuron of the current layer
-        for(int j=0;j<num_neurons[i];j++)
+        for(int j=0;j<network.layers[i].neurons_num;j++)
         {
             neuron_t* current_neuron = &(network.layers[i].neurons[j]);
             // compute the partial derivative w.r.t. output
             current_neuron->dz = relu_derivative(current_neuron->dactv);
 
             // for each neuron of the previous layer
-            for(int k=0;k<num_neurons[i-1];k++)
+            for(int k=0;k<network.layers[i-1].neurons_num;k++)
             {
                 neuron_t* previous_neuron = &(network.layers[i-1].neurons[k]);
                 // compute the derivative w.r.t. weight
@@ -409,7 +367,7 @@ void test_nn(void)
     {
         printf("Enter input to test:\n");
 
-        for(i=0;i<num_neurons[0];i++)
+        for(i=0;i<network.layers[0].neurons_num;i++)
         {
             scanf("%f",&network.layers[0].neurons[i].actv);
         }

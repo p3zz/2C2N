@@ -8,4 +8,6 @@ typedef struct{
     int layers_num;
 } network_t;
 
+int create_network(int layers_num, const int* neurons_per_layer);
+
 #endif
