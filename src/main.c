@@ -101,7 +101,7 @@ int main(void)
     // {
     //     printf("Error in Dinitialization...\n");
     // }
-
+    destroy_network(&network);
     return 0;
 }
 

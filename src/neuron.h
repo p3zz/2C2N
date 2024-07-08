@@ -10,6 +10,7 @@ typedef struct
 	// each neuron is fully connected to the next layer
 	// it means that each neuron needs to carry a weight for every neuron of the next layer 
 	float *weights;
+	int weights_num;
 	// bias of the neuron
 	float bias;
 
@@ -27,5 +28,6 @@ typedef struct
 } neuron_t;
 
 neuron_t create_neuron(int num_out_weights);
+void destroy_neuron(neuron_t* neuron);
 
 #endif

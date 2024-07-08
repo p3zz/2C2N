@@ -170,3 +170,9 @@ int feed_input(network_t* network, float* inputs, int inputs_num)
     }
     return SUCCESS;
 }
+
+void destroy_network(network_t* network){
+	for(int i=0;i<network->layers_num;i++){
+        destroy_layer(&network->layers[i]);
+	}
+}

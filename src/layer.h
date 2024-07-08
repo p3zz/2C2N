@@ -11,5 +11,6 @@ typedef struct
 } layer_t;
 
 layer_t create_layer(int num_neurons);
+void destroy_layer(layer_t* layer);
 
 #endif
