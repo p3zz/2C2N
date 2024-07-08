@@ -9,10 +9,12 @@ typedef struct{
 } network_t;
 
 int create_network(int layers_num, const int* neurons_per_layer);
-void forward_propagation(network_t* network);
-int back_propagation(network_t* network, float* desired_outputs, int outputs_num);
-void update_weights(network_t* network, float learning_rate);
-int feed_input(network_t* network, float* inputs, int inputs_num);
+void forward_propagation(const network_t* network);
+int back_propagation(const network_t* network, const float* desired_outputs, int outputs_num);
+void update_weights(const network_t* network, float learning_rate);
+int feed_input(const network_t* network, const float* inputs, int inputs_num);
 void destroy_network(network_t* network);
+int compute_cost(const network_t* network, const float* output_targets, int output_targets_num);
+int train(const network_t* network, float* inputs, int inputs_num, float* output_targets, int output_targets_num, float learning_rate);
 
 #endif

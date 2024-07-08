@@ -38,7 +38,7 @@ int create_network(int layers_num, const int* neurons_per_layer)
 }
 
 // Back Propogate Error
-int back_propagation(network_t* network, float* desired_outputs, int outputs_num)
+int back_propagation(const network_t* network, const float* desired_outputs, int outputs_num)
 {
     if(outputs_num != network->layers[network->layers_num-1].neurons_num){
         return ERR;
@@ -96,7 +96,7 @@ int back_propagation(network_t* network, float* desired_outputs, int outputs_num
     return SUCCESS;
 }
 
-void forward_propagation(network_t* network)
+void forward_propagation(const network_t* network)
 {
     // for each layer of the network
     // start from the second layer so we skip the input one
@@ -137,7 +137,7 @@ void forward_propagation(network_t* network)
     }
 }
 
-void update_weights(network_t* network, float learning_rate)
+void update_weights(const network_t* network, float learning_rate)
 {
     // for each layer (excluding the output layer)
     for(int i=0;i<network->layers_num-1;i++)
@@ -159,7 +159,7 @@ void update_weights(network_t* network, float learning_rate)
 }
 
 // Feed inputs to input layer_t
-int feed_input(network_t* network, float* inputs, int inputs_num)
+int feed_input(const network_t* network, const float* inputs, int inputs_num)
 {
     if(network->layers[0].neurons_num != inputs_num){
         return ERR;
@@ -175,4 +175,37 @@ void destroy_network(network_t* network){
 	for(int i=0;i<network->layers_num;i++){
         destroy_layer(&network->layers[i]);
 	}
+    free(network->layers);
+}
+
+// Compute Total Cost
+int compute_cost(const network_t* network, const float* output_targets, int output_targets_num)
+{
+    layer_t* output_layer = &(network->layers[network->layers_num-1]);
+
+    if(output_targets_num != output_layer->neurons_num){
+        return ERR;
+    }
+    float total_cost = 0;
+
+    for(int i=0;i<output_layer->neurons_num;i++)
+    {
+        float tmpcost = output_targets[i] - output_layer->neurons[i].actv;
+        float cost = (tmpcost * tmpcost) / 2;
+        total_cost += cost;
+    }
+    return total_cost;
+}
+
+int train(const network_t* network, float* inputs, int inputs_num, float* output_targets, int output_targets_num, float learning_rate)
+{
+    if(feed_input(network, inputs, inputs_num) == ERR){
+        return ERR;
+    }
+    forward_propagation(network);
+    // float cost = compute_cost(network, output_targets, output_targets_num);
+    if(back_propagation(network, output_targets, output_targets_num) == ERR){
+        return ERR;
+    }
+    update_weights(network, learning_rate);
 }

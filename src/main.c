@@ -10,17 +10,10 @@
 
 #define LAYERS_NUM 4
 #define ITERATIONS_NUM 20000
-
-int init(void);
-
-void train(void);
-// void compute_cost(int i);
+#define LEARNING_RATE 0.1
 
 static network_t network;
-static const int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
-static float learning_rate;
-// float *cost;
-// float full_cost;
+static int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
 
 // each training sample has an array of values, one for each neuron of the input layer
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
@@ -35,148 +28,29 @@ static int outputs_num;
 
 // number of training samples
 static int num_training_ex;
-// int n=1;
 
 int main(void)
 {
-    // int i;
+    // TODO initialize inputs
+    // TODO initialize output targets
 
-    // srand(time(0));
-
-    // printf("Enter the number of Layers in Neural Network:\n");
-    // scanf("%d",&network.layers_num);
-
-    // num_neurons = (int*) malloc(network.layers_num * sizeof(int));
-    // memset(num_neurons,0,network.layers_num *sizeof(int));
-
-    // // Get number of neurons per layer_t
-    // for(i=0;i<network.layers_num;i++)
-    // {
-    //     printf("Enter number of neurons in layer_t[%d]: \n",i+1);
-    //     scanf("%d",&num_neurons[i]);
-    // }
-
-    // printf("\n");
-
-    // // Initialize the neural network module
-    // if(init()!= SUCCESS)
-    // {
-    //     printf("Error in Initialization...\n");
-    //     exit(0);
-    // }
-
-    // printf("Enter the learning rate (Usually 0.15): \n");
-    // scanf("%f",&learning_rate);
-    // printf("\n");
-
-    // printf("Enter the number of training examples: \n");
-    // scanf("%d",&num_training_ex);
-    // printf("\n");
-
-    // input = (float**) malloc(num_training_ex * sizeof(float*));
-    // for(i=0;i<num_training_ex;i++)
-    // {
-    //     input[i] = (float*)malloc(num_neurons[0] * sizeof(float));
-    // }
-
-    // desired_outputs = (float**) malloc(num_training_ex* sizeof(float*));
-    // for(i=0;i<num_training_ex;i++)
-    // {
-    //     desired_outputs[i] = (float*)malloc(num_neurons[network.layers_num-1] * sizeof(float));
-    // }
-
-    // cost = (float *) malloc(num_neurons[network.layers_num-1] * sizeof(float));
-    // memset(cost,0,num_neurons[network.layers_num-1]*sizeof(float));
-
-    // // Get Training Examples
-    // get_inputs();
-
-    // // Get Output Labels
-    // get_desired_outputs();
-
-    // train();
-    // test_nn();
-
-    // if(dinit()!= SUCCESS)
-    // {
-    //     printf("Error in Dinitialization...\n");
-    // }
-    destroy_network(&network);
-    return 0;
-}
-
-
-int init()
-{
-    if(create_network(LAYERS_NUM, neurons_per_layer) != SUCCESS)
+    if(create_network(LAYERS_NUM, neurons_per_layer) == ERR)
     {
-        printf("Error in creating architecture...\n");
+        printf("Error in creating network...\n");
         return ERR;
     }
 
-    printf("Neural Network Created Successfully...\n\n");
-    return SUCCESS;
-}
-
-// Train Neural Network
-void train(void)
-{
-    // Gradient Descent
     for(int it=0;it<ITERATIONS_NUM;it++)
     {
         for(int i=0;i<num_training_ex;i++)
         {
-            feed_input(&network, input[i], inputs_num);
-            forward_propagation(&network);
-            // compute_cost(i);
-            back_propagation(&network, desired_outputs[i], outputs_num);
-            update_weights(&network, learning_rate);
+            if(train(&network, input[i], inputs_num, desired_outputs[i], outputs_num, LEARNING_RATE) == ERR){
+                return ERR;
+            }
         }
     }
+
+    destroy_network(&network);
+
+    return SUCCESS;
 }
-
-// Compute Total Cost
-// void compute_cost(int i)
-// {
-//     float tmpcost=0;
-//     float tcost=0;
-
-//     for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
-//     {
-//         tmpcost = desired_outputs[i][j] - network.layers[network.layers_num-1].neurons[j].actv;
-//         cost[j] = (tmpcost * tmpcost)/2;
-//         tcost = tcost + cost[j];
-//     }   
-
-//     full_cost = (full_cost + tcost)/n;
-//     n++;
-//     // printf("Full Cost: %f\n",full_cost);
-// }
-
-
-// Test the trained network
-// void test_nn(void) 
-// {
-//     int i;
-//     while(1)
-//     {
-//         printf("Enter input to test:\n");
-
-//         for(i=0;i<network.layers[0].neurons_num;i++)
-//         {
-//             scanf("%f",&network.layers[0].neurons[i].actv);
-//         }
-//         forward_prop();
-//     }
-// }
-
-// TODO: Add different Activation functions
-//void activation_functions()
-
-// int dinit(void)
-// {
-//     // TODO:
-//     // Free up all the structures
-
-//     return SUCCESS;
-// }
