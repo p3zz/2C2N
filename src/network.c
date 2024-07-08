@@ -38,8 +38,11 @@ int create_network(int layers_num, const int* neurons_per_layer)
 }
 
 // Back Propogate Error
-void back_propagation(network_t* network, float* desired_outputs)
+int back_propagation(network_t* network, float* desired_outputs, int outputs_num)
 {
+    if(outputs_num != network->layers[network->layers_num-1].neurons_num){
+        return ERR;
+    }
     // Output Layer
     // for each neuron of the output layer
     for(int j=0;j<network->layers[network->layers_num-1].neurons_num;j++)
@@ -89,6 +92,8 @@ void back_propagation(network_t* network, float* desired_outputs)
             current_neuron->dbias = current_neuron->dz;
         }
     }
+
+    return SUCCESS;
 }
 
 void forward_propagation(network_t* network)
@@ -151,4 +156,17 @@ void update_weights(network_t* network, float learning_rate)
             neuron->bias = update_bias(neuron->bias, learning_rate,  neuron->dbias);
         }
     }   
+}
+
+// Feed inputs to input layer_t
+int feed_input(network_t* network, float* inputs, int inputs_num)
+{
+    if(network->layers[0].neurons_num != inputs_num){
+        return ERR;
+    }
+    for(int i=0;i<inputs_num;i++)
+    {
+        network->layers[0].neurons[i].actv = inputs[i];
+    }
+    return SUCCESS;
 }

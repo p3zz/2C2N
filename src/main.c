@@ -8,15 +8,11 @@
 #include "utils.h"
 #include "network.h"
 
-#define SUCCESS 0
-#define ERR 1
 #define LAYERS_NUM 4
 #define ITERATIONS_NUM 20000
 
 int init(void);
-int dinit(void);
 
-void feed_input(int i);
 void train(void);
 // void compute_cost(int i);
 
@@ -30,10 +26,12 @@ static float learning_rate;
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
 // EX: [[1, 2], [4, 1], [5, 8]]
 static float **input;
+static int inputs_num;
 
 // each training sample has an array of desired outputs, one for each neuron of the output layer
 // desired_outputs[TRAINING_EXAMPLES_NUM][OUTPUT_NEURONS_NUM]
 static float **desired_outputs;
+static int outputs_num;
 
 // number of training samples
 static int num_training_ex;
@@ -120,16 +118,6 @@ int init()
     return SUCCESS;
 }
 
-// Feed inputs to input layer_t
-void feed_input(int i)
-{
-    for(int j=0;j<network.layers[0].neurons_num;j++)
-    {
-        network.layers[0].neurons[j].actv = input[i][j];
-        printf("Input: %f\n",network.layers[0].neurons[j].actv);
-    }
-}
-
 // Train Neural Network
 void train(void)
 {
@@ -138,10 +126,10 @@ void train(void)
     {
         for(int i=0;i<num_training_ex;i++)
         {
-            feed_input(i);
+            feed_input(&network, input[i], inputs_num);
             forward_propagation(&network);
             // compute_cost(i);
-            back_propagation(&network, desired_outputs[i]);
+            back_propagation(&network, desired_outputs[i], outputs_num);
             update_weights(&network, learning_rate);
         }
     }

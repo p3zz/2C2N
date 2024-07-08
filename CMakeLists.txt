@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(NeuralNetwork)
 
-set(UTILS_FILES
+set(LIB_FILES
     src/utils.h
     src/utils.c
     src/neuron.c
@@ -13,7 +13,7 @@ set(UTILS_FILES
     src/network.c
 )
 
-add_library(utils ${UTILS_FILES})
+add_library(lib ${LIB_FILES})
 add_executable(main src/main.c)
 
-target_link_libraries(main m utils)
+target_link_libraries(main m lib)
