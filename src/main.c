@@ -16,18 +16,9 @@
 int init(void);
 int dinit(void);
 
-int create_architecture(void);
 void feed_input(int i);
 void train(void);
-void forward_prop(void);
 // void compute_cost(int i);
-void back_prop(int p);
-void update_weights(void);
-void get_inputs(void);
-void get_desired_outputs(void);
-void test_nn(void);
-
-int initialize_dummy_weights(void);
 
 static network_t network;
 static const int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
@@ -129,36 +120,6 @@ int init()
     return SUCCESS;
 }
 
-//Get Inputs
-// void  get_inputs()
-// {
-//     for(int i=0;i<num_training_ex;i++)
-//     {
-//         printf("Enter the Inputs for training example[%d]:\n",i);
-
-//         for(int j=0;j<network.layers[0].neurons_num;j++)
-//         {
-//             scanf("%f",&input[i][j]);
-            
-//         }
-//         printf("\n");
-//     }
-// }
-
-// //Get Labels
-// void get_desired_outputs()
-// {
-//     for(int i=0;i<num_training_ex;i++)
-//     {
-//         for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
-//         {
-//             printf("Enter the Desired Outputs (Labels) for training example[%d]: \n",i);
-//             scanf("%f",&desired_outputs[i][j]);
-//             printf("\n");
-//         }
-//     }
-// }
-
 // Feed inputs to input layer_t
 void feed_input(int i)
 {
@@ -178,76 +139,10 @@ void train(void)
         for(int i=0;i<num_training_ex;i++)
         {
             feed_input(i);
-            forward_prop();
+            forward_propagation(&network);
             // compute_cost(i);
-            back_prop(i);
-            update_weights();
-        }
-    }
-}
-
-void update_weights(void)
-{
-    // for each layer (excluding the output layer)
-    for(int i=0;i<network.layers_num-1;i++)
-    {
-        // for each neuron of the current layer
-        for(int j=0;j<network.layers[i].neurons_num;j++)
-        {
-            neuron_t* neuron = &network.layers[i].neurons[j];
-            // for each neuron of the next layer
-            for(int k=0;k<network.layers[i+1].neurons_num;k++)
-            {
-                // Update Weights
-                neuron->weights[k] = update_weight(neuron->weights[k], learning_rate, neuron->dw[k]);
-            }
-            
-            // Update Bias
-            neuron->bias = update_bias(neuron->bias, learning_rate,  neuron->dbias);
-        }
-    }   
-}
-
-void forward_prop(void)
-{
-    // for each layer of the network
-    // start from the second layer so we skip the input one
-    for(int i=1;i<network.layers_num;i++)
-    {   
-        // for each neuron of the current layer
-        for(int j=0;j<network.layers[i].neurons_num;j++)
-        {
-            neuron_t* current_neuron = &(network.layers[i].neurons[j]);
-            
-            current_neuron->z = current_neuron->bias;
-
-            // for each neuron of the previous layer
-            for(int k=0;k<network.layers[i-1].neurons_num;k++)
-            {
-                neuron_t* previous_neuron = &(network.layers[i-1].neurons[k]);
-                // update the output of each neuron of the current layer
-                current_neuron->z  = update_output(previous_neuron->actv, previous_neuron->weights[j], current_neuron->z);
-            }
-
-            // then apply to the output a given activation function based on the type of current layer
-            // the last layer is the output layer, the previous ones are hidden layers because we are starting from the second layer (layer[1])
-            // the first layer is the input layer
-            bool is_hidden = i < (network.layers_num - 1);
-            // Relu Activation Function for Hidden Layers
-            if(is_hidden)
-            {
-                current_neuron->actv = relu(current_neuron->z);
-            }
-            
-            // Sigmoid Activation function for Output Layer
-            else
-            {
-                current_neuron->actv = sigmoid(current_neuron->z);
-            }
-            
-            // print the output of the neuron
-            printf("Output: %d\n", (int)round(network.layers[i].neurons[j].actv));
-            printf("\n");
+            back_propagation(&network, desired_outputs[i]);
+            update_weights(&network, learning_rate);
         }
     }
 }
@@ -270,83 +165,30 @@ void forward_prop(void)
 //     // printf("Full Cost: %f\n",full_cost);
 // }
 
-// Back Propogate Error
-void back_prop(int p)
-{
-    // Output Layer
-    // for each neuron of the output layer
-    for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
-    {           
-        // compute delta error
-        neuron_t* current_neuron = &(network.layers[network.layers_num-1].neurons[j]);
-        current_neuron->dz = (current_neuron->actv - desired_outputs[p][j]) * sigmoid_derivative(current_neuron->actv);
-
-        // for each neuron of the previous layer (the one before the output layer)
-        for(int k=0;k<network.layers[network.layers_num-2].neurons_num;k++)
-        {   
-            neuron_t* previous_neuron = &(network.layers[network.layers_num-2].neurons[k]);
-            // compute the delta weight and the delta output 
-            previous_neuron->dw[j] = (current_neuron->dz * previous_neuron->actv);
-            previous_neuron->dactv = previous_neuron->weights[j] * current_neuron->dz;
-        }
-
-        current_neuron->dbias = current_neuron->dz;
-    }
-
-    // Hidden Layers
-    // for each hidden layer iterate backwards from the last hidden layer to the first
-    for(int i=network.layers_num-2;i>0;i--)
-    {
-        // for each neuron of the current layer
-        for(int j=0;j<network.layers[i].neurons_num;j++)
-        {
-            neuron_t* current_neuron = &(network.layers[i].neurons[j]);
-            // compute the partial derivative w.r.t. output
-            current_neuron->dz = relu_derivative(current_neuron->dactv);
-
-            // for each neuron of the previous layer
-            for(int k=0;k<network.layers[i-1].neurons_num;k++)
-            {
-                neuron_t* previous_neuron = &(network.layers[i-1].neurons[k]);
-                // compute the derivative w.r.t. weight
-                previous_neuron->dw[j] = current_neuron->dz * previous_neuron->actv;
-                
-                // if the current layer is not the input layer
-                if(i>1)
-                {
-                    // compute the derivative w.r.t. output
-                    previous_neuron->dactv = previous_neuron->weights[j] * current_neuron->dz;
-                }
-            }
-            // compute the derivative w.r.t. bias
-            current_neuron->dbias = current_neuron->dz;
-        }
-    }
-}
 
 // Test the trained network
-void test_nn(void) 
-{
-    int i;
-    while(1)
-    {
-        printf("Enter input to test:\n");
+// void test_nn(void) 
+// {
+//     int i;
+//     while(1)
+//     {
+//         printf("Enter input to test:\n");
 
-        for(i=0;i<network.layers[0].neurons_num;i++)
-        {
-            scanf("%f",&network.layers[0].neurons[i].actv);
-        }
-        forward_prop();
-    }
-}
+//         for(i=0;i<network.layers[0].neurons_num;i++)
+//         {
+//             scanf("%f",&network.layers[0].neurons[i].actv);
+//         }
+//         forward_prop();
+//     }
+// }
 
 // TODO: Add different Activation functions
 //void activation_functions()
 
-int dinit(void)
-{
-    // TODO:
-    // Free up all the structures
+// int dinit(void)
+// {
+//     // TODO:
+//     // Free up all the structures
 
-    return SUCCESS;
-}
+//     return SUCCESS;
+// }
