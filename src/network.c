@@ -12,31 +12,25 @@ int create_network(int layers_num, const int* neurons_per_layer)
 
     for(int i=0;i<network.layers_num;i++)
     {
-        network.layers[i] = create_layer(neurons_per_layer[i]);
-        network.layers[i].neurons_num = neurons_per_layer[i];
-        printf("Created Layer: %d\n", i+1);
-        printf("Number of Neurons in Layer %d: %d\n", i+1,network.layers[i].neurons_num);
+        // initialize layer
+        layer_t* current_layer = &network.layers[i];
+        *current_layer = create_layer(neurons_per_layer[i]);
+        current_layer->neurons_num = neurons_per_layer[i];
 
-        for(int j=0;j<neurons_per_layer[i];j++)
-        {
-            if(i < (network.layers_num-1)) 
-            {
-                network.layers[i].neurons[j] = create_neuron(neurons_per_layer[i+1]);
+        // initialize each neuron of the layer
+        for(int j=0;j<neurons_per_layer[i];j++){
+            neuron_t* current_neuron = &(current_layer->neurons[j]);
+            *current_neuron = create_neuron(network.layers[i+1].neurons_num);
+            // initialize each weight of the neuron
+            for(int k=0;k<network.layers[i+1].neurons_num;k++){
+                current_neuron->weights[k] = ((double)rand())/((double)RAND_MAX);
+                current_neuron->dw[k] = 0.0;
             }
-
-            printf("Neuron %d in Layer %d created\n",j+1,i+1);  
+            // initialize the bias of the neuron
+            current_neuron->bias = ((double)rand())/((double)RAND_MAX);
+            current_neuron->dbias = 0.0;
         }
-        printf("\n");
     }
-
-    printf("\n");
-
-    // // Initialize the weights
-    // if(initialize_weights() != SUCCESS_INIT_WEIGHTS)
-    // {
-    //     printf("Error Initilizing weights...\n");
-    //     return 1;
-    // }
 
     return 0;
 }

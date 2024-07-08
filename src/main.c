@@ -11,14 +11,14 @@
 #define SUCCESS 0
 #define ERR 1
 #define LAYERS_NUM 4
+#define ITERATIONS_NUM 20000
 
 int init(void);
 int dinit(void);
 
 int create_architecture(void);
-int initialize_weights(void);
 void feed_input(int i);
-void train_neural_net(void);
+void train(void);
 void forward_prop(void);
 // void compute_cost(int i);
 void back_prop(int p);
@@ -31,12 +31,21 @@ int initialize_dummy_weights(void);
 
 static network_t network;
 static const int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
-float learning_rate;
+static float learning_rate;
 // float *cost;
 // float full_cost;
-float **input;
-float **desired_outputs;
-int num_training_ex;
+
+// each training sample has an array of values, one for each neuron of the input layer
+// inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
+// EX: [[1, 2], [4, 1], [5, 8]]
+static float **input;
+
+// each training sample has an array of desired outputs, one for each neuron of the output layer
+// desired_outputs[TRAINING_EXAMPLES_NUM][OUTPUT_NEURONS_NUM]
+static float **desired_outputs;
+
+// number of training samples
+static int num_training_ex;
 // int n=1;
 
 int main(void)
@@ -96,7 +105,7 @@ int main(void)
     // // Get Output Labels
     // get_desired_outputs();
 
-    // train_neural_net();
+    // train();
     // test_nn();
 
     // if(dinit()!= SUCCESS)
@@ -121,34 +130,34 @@ int init()
 }
 
 //Get Inputs
-void  get_inputs()
-{
-    for(int i=0;i<num_training_ex;i++)
-    {
-        printf("Enter the Inputs for training example[%d]:\n",i);
+// void  get_inputs()
+// {
+//     for(int i=0;i<num_training_ex;i++)
+//     {
+//         printf("Enter the Inputs for training example[%d]:\n",i);
 
-        for(int j=0;j<network.layers[0].neurons_num;j++)
-        {
-            scanf("%f",&input[i][j]);
+//         for(int j=0;j<network.layers[0].neurons_num;j++)
+//         {
+//             scanf("%f",&input[i][j]);
             
-        }
-        printf("\n");
-    }
-}
+//         }
+//         printf("\n");
+//     }
+// }
 
-//Get Labels
-void get_desired_outputs()
-{
-    for(int i=0;i<num_training_ex;i++)
-    {
-        for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
-        {
-            printf("Enter the Desired Outputs (Labels) for training example[%d]: \n",i);
-            scanf("%f",&desired_outputs[i][j]);
-            printf("\n");
-        }
-    }
-}
+// //Get Labels
+// void get_desired_outputs()
+// {
+//     for(int i=0;i<num_training_ex;i++)
+//     {
+//         for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
+//         {
+//             printf("Enter the Desired Outputs (Labels) for training example[%d]: \n",i);
+//             scanf("%f",&desired_outputs[i][j]);
+//             printf("\n");
+//         }
+//     }
+// }
 
 // Feed inputs to input layer_t
 void feed_input(int i)
@@ -160,48 +169,13 @@ void feed_input(int i)
     }
 }
 
-int initialize_weights(void)
-{
-    for(int i=0;i<network.layers_num-1;i++)
-    {
-        for(int j=0;j<network.layers[i].neurons_num;j++)
-        {
-            // initialize Output Weights for each layer
-            for(int k=0;k<network.layers[i+1].neurons_num;k++)
-            {
-                network.layers[i].neurons[j].weights[k] = ((double)rand())/((double)RAND_MAX);
-                printf("%d:w[%d][%d]: %f\n",k,i,j, network.layers[i].neurons[j].weights[k]);
-                network.layers[i].neurons[j].dw[k] = 0.0;
-            }
-
-            // initialize bias for hidden layers
-            if(i>0) 
-            {
-                network.layers[i].neurons[j].bias = ((double)rand())/((double)RAND_MAX);
-            }
-        }
-    }   
-    printf("\n");
-    
-    // initialize biases for output layer
-    for (int j=0; j<network.layers[network.layers_num-1].neurons_num; j++)
-    {
-        network.layers[network.layers_num-1].neurons[j].bias = ((double)rand())/((double)RAND_MAX);
-    }
-
-    return SUCCESS;
-}
-
 // Train Neural Network
-void train_neural_net(void)
+void train(void)
 {
-    int i;
-    int it=0;
-
     // Gradient Descent
-    for(it=0;it<20000;it++)
+    for(int it=0;it<ITERATIONS_NUM;it++)
     {
-        for(i=0;i<num_training_ex;i++)
+        for(int i=0;i<num_training_ex;i++)
         {
             feed_input(i);
             forward_prop();
@@ -240,19 +214,19 @@ void forward_prop(void)
     // start from the second layer so we skip the input one
     for(int i=1;i<network.layers_num;i++)
     {   
-        neuron_t* current_neurons = network.layers[i].neurons;
-        neuron_t* previous_neurons = network.layers[i-1].neurons;
-
         // for each neuron of the current layer
         for(int j=0;j<network.layers[i].neurons_num;j++)
         {
-            current_neurons[j].z = current_neurons[j].bias;
+            neuron_t* current_neuron = &(network.layers[i].neurons[j]);
+            
+            current_neuron->z = current_neuron->bias;
 
             // for each neuron of the previous layer
             for(int k=0;k<network.layers[i-1].neurons_num;k++)
             {
+                neuron_t* previous_neuron = &(network.layers[i-1].neurons[k]);
                 // update the output of each neuron of the current layer
-                current_neurons[j].z  = update_output(previous_neurons[k].actv, previous_neurons[k].weights[j], current_neurons[j].z);
+                current_neuron->z  = update_output(previous_neuron->actv, previous_neuron->weights[j], current_neuron->z);
             }
 
             // then apply to the output a given activation function based on the type of current layer
@@ -262,13 +236,13 @@ void forward_prop(void)
             // Relu Activation Function for Hidden Layers
             if(is_hidden)
             {
-                current_neurons[j].actv = relu(current_neurons[j].z);
+                current_neuron->actv = relu(current_neuron->z);
             }
             
             // Sigmoid Activation function for Output Layer
             else
             {
-                current_neurons[j].actv = sigmoid(current_neurons[j].z);
+                current_neuron->actv = sigmoid(current_neuron->z);
             }
             
             // print the output of the neuron
