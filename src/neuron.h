@@ -3,15 +3,24 @@
 
 typedef struct
 {
-	float actv;
-	float *weights;
-	float bias;
+	// value of the output
 	float z;
+	// value of the activated output (Filtered by the activation function)
+	float actv;
+	// each neuron is fully connected to the next layer
+	// it means that each neuron needs to carry a weight for every neuron of the next layer 
+	float *weights;
+	// bias of the neuron
+	float bias;
 
-	float dactv;
-	float *dw;
-	float dbias;
+	// correction of the output
 	float dz;
+	// correction of the activated output
+	float dactv;
+	// correction of each weight
+	float *dw;
+	// correction of the bias
+	float dbias;
 
 	// TODO: Add function pointer for destructor
 

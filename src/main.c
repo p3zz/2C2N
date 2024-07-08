@@ -20,7 +20,7 @@ int initialize_weights(void);
 void feed_input(int i);
 void train_neural_net(void);
 void forward_prop(void);
-void compute_cost(int i);
+// void compute_cost(int i);
 void back_prop(int p);
 void update_weights(void);
 void get_inputs(void);
@@ -31,13 +31,13 @@ int initialize_dummy_weights(void);
 
 static network_t network;
 static const int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
-float alpha;
-float *cost;
-float full_cost;
+float learning_rate;
+// float *cost;
+// float full_cost;
 float **input;
 float **desired_outputs;
 int num_training_ex;
-int n=1;
+// int n=1;
 
 int main(void)
 {
@@ -68,7 +68,7 @@ int main(void)
     // }
 
     // printf("Enter the learning rate (Usually 0.15): \n");
-    // scanf("%f",&alpha);
+    // scanf("%f",&learning_rate);
     // printf("\n");
 
     // printf("Enter the number of training examples: \n");
@@ -162,29 +162,19 @@ void feed_input(int i)
 
 int initialize_weights(void)
 {
-    int i,j,k;
-
-    if(network.layers == NULL)
+    for(int i=0;i<network.layers_num-1;i++)
     {
-        printf("No network.layers in Neural Network...\n");
-        return ERR;
-    }
-
-    printf("Initializing weights...\n");
-
-    for(i=0;i<network.layers_num-1;i++)
-    {
-        
-        for(j=0;j<network.layers[i].neurons_num;j++)
+        for(int j=0;j<network.layers[i].neurons_num;j++)
         {
-            for(k=0;k<network.layers[i+1].neurons_num;k++)
+            // initialize Output Weights for each layer
+            for(int k=0;k<network.layers[i+1].neurons_num;k++)
             {
-                // Initialize Output Weights for each neuron
                 network.layers[i].neurons[j].weights[k] = ((double)rand())/((double)RAND_MAX);
                 printf("%d:w[%d][%d]: %f\n",k,i,j, network.layers[i].neurons[j].weights[k]);
                 network.layers[i].neurons[j].dw[k] = 0.0;
             }
 
+            // initialize bias for hidden layers
             if(i>0) 
             {
                 network.layers[i].neurons[j].bias = ((double)rand())/((double)RAND_MAX);
@@ -193,7 +183,8 @@ int initialize_weights(void)
     }   
     printf("\n");
     
-    for (j=0; j<network.layers[network.layers_num-1].neurons_num; j++)
+    // initialize biases for output layer
+    for (int j=0; j<network.layers[network.layers_num-1].neurons_num; j++)
     {
         network.layers[network.layers_num-1].neurons[j].bias = ((double)rand())/((double)RAND_MAX);
     }
@@ -214,7 +205,7 @@ void train_neural_net(void)
         {
             feed_input(i);
             forward_prop();
-            compute_cost(i);
+            // compute_cost(i);
             back_prop(i);
             update_weights();
         }
@@ -234,11 +225,11 @@ void update_weights(void)
             for(int k=0;k<network.layers[i+1].neurons_num;k++)
             {
                 // Update Weights
-                neuron->weights[k] = update_weight(neuron->weights[k], alpha, neuron->dw[k]);
+                neuron->weights[k] = update_weight(neuron->weights[k], learning_rate, neuron->dw[k]);
             }
             
             // Update Bias
-            neuron->bias = update_bias(neuron->bias, alpha,  neuron->dbias);
+            neuron->bias = update_bias(neuron->bias, learning_rate,  neuron->dbias);
         }
     }   
 }
@@ -288,22 +279,22 @@ void forward_prop(void)
 }
 
 // Compute Total Cost
-void compute_cost(int i)
-{
-    float tmpcost=0;
-    float tcost=0;
+// void compute_cost(int i)
+// {
+//     float tmpcost=0;
+//     float tcost=0;
 
-    for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
-    {
-        tmpcost = desired_outputs[i][j] - network.layers[network.layers_num-1].neurons[j].actv;
-        cost[j] = (tmpcost * tmpcost)/2;
-        tcost = tcost + cost[j];
-    }   
+//     for(int j=0;j<network.layers[network.layers_num-1].neurons_num;j++)
+//     {
+//         tmpcost = desired_outputs[i][j] - network.layers[network.layers_num-1].neurons[j].actv;
+//         cost[j] = (tmpcost * tmpcost)/2;
+//         tcost = tcost + cost[j];
+//     }   
 
-    full_cost = (full_cost + tcost)/n;
-    n++;
-    // printf("Full Cost: %f\n",full_cost);
-}
+//     full_cost = (full_cost + tcost)/n;
+//     n++;
+//     // printf("Full Cost: %f\n",full_cost);
+// }
 
 // Back Propogate Error
 void back_prop(int p)
