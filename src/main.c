@@ -9,45 +9,74 @@
 #include "network.h"
 
 #define LAYERS_NUM 4
-#define ITERATIONS_NUM 20000
-#define LEARNING_RATE 0.1
+#define ITERATIONS_NUM 100
+#define LEARNING_RATE 0.15
+#define TRAINING_EXAMPLES_LEN 4
+#define INPUT_LEN 2
+#define OUTPUT_LEN 1
 
-static network_t network;
-static int neurons_per_layer[LAYERS_NUM] = {3, 4, 5, 4};
+static network_t network = {0};
+static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, 4, 5, OUTPUT_LEN};
 
 // each training sample has an array of values, one for each neuron of the input layer
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
 // EX: [[1, 2], [4, 1], [5, 8]]
-static float **input;
-static int inputs_num;
+static float input[TRAINING_EXAMPLES_LEN][INPUT_LEN] = {0};
 
 // each training sample has an array of desired outputs, one for each neuron of the output layer
 // desired_outputs[TRAINING_EXAMPLES_NUM][OUTPUT_NEURONS_NUM]
-static float **desired_outputs;
-static int outputs_num;
+static float output_targets[TRAINING_EXAMPLES_LEN][OUTPUT_LEN] = {0};
 
-// number of training samples
-static int num_training_ex;
+static void initialize_inputs(){
+    input[0][0] = 0;
+    input[0][1] = 0;
+
+    input[1][0] = 0;
+    input[1][1] = 1;
+
+    input[2][0] = 1;
+    input[2][1] = 0;
+
+    input[3][0] = 1;
+    input[3][1] = 1;
+
+}
+
+static void initialize_outputs(){
+    output_targets[0][0] = 0;
+    output_targets[1][0] = 0;
+    output_targets[2][0] = 0;
+    output_targets[3][0] = 1;
+}
 
 int main(void)
 {
-    // TODO initialize inputs
-    // TODO initialize output targets
+    initialize_inputs();
+    initialize_outputs();
 
-    if(create_network(LAYERS_NUM, neurons_per_layer) == ERR)
-    {
-        printf("Error in creating network...\n");
-        return ERR;
-    }
+    float cost = 0;
+    network = create_network(LAYERS_NUM, neurons_per_layer);
 
     for(int it=0;it<ITERATIONS_NUM;it++)
     {
-        for(int i=0;i<num_training_ex;i++)
+        for(int i=0;i<TRAINING_EXAMPLES_LEN;i++)
         {
-            if(train(&network, input[i], inputs_num, desired_outputs[i], outputs_num, LEARNING_RATE) == ERR){
+            if(train(&network, input[i], INPUT_LEN, output_targets[i], OUTPUT_LEN, LEARNING_RATE, &cost) == ERR){
                 return ERR;
             }
         }
+        printf("%.3f\n", cost);
+    }
+
+    for(int i=0;i<TRAINING_EXAMPLES_LEN;i++)
+    {
+        if(feed_input(&network, input[i], INPUT_LEN) == ERR){
+            return ERR;
+        }
+        forward_propagation(&network);
+        float prediction = network.layers[LAYERS_NUM-1].neurons[0].actv;
+        float expected_output = output_targets[i][0];
+        printf("Expected output: %.3f, Prediction: %.3f\n", expected_output, prediction);
     }
 
     destroy_network(&network);

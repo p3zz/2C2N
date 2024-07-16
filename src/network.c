@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 // Create Neural Network Architecture
-int create_network(int layers_num, const int* neurons_per_layer)
+network_t create_network(int layers_num, const int* neurons_per_layer)
 {
     network_t network;
 
@@ -34,7 +34,7 @@ int create_network(int layers_num, const int* neurons_per_layer)
         }
     }
 
-    return 0;
+    return network;
 }
 
 // Back Propogate Error
@@ -179,7 +179,7 @@ void destroy_network(network_t* network){
 }
 
 // Compute Total Cost
-int compute_cost(const network_t* network, const float* output_targets, int output_targets_num)
+int compute_cost(const network_t* network, const float* output_targets, int output_targets_num, float* result)
 {
     layer_t* output_layer = &(network->layers[network->layers_num-1]);
 
@@ -194,16 +194,21 @@ int compute_cost(const network_t* network, const float* output_targets, int outp
         float cost = (tmpcost * tmpcost) / 2;
         total_cost += cost;
     }
-    return total_cost;
+
+    *result = total_cost;
+
+    return SUCCESS;
 }
 
-int train(const network_t* network, float* inputs, int inputs_num, float* output_targets, int output_targets_num, float learning_rate)
+int train(const network_t* network, const float* const inputs, int inputs_num, const float* const output_targets, int output_targets_num, float learning_rate, float* cost)
 {
     if(feed_input(network, inputs, inputs_num) == ERR){
         return ERR;
     }
     forward_propagation(network);
-    // float cost = compute_cost(network, output_targets, output_targets_num);
+    if(compute_cost(network, output_targets, output_targets_num, cost) == ERR){
+        return ERR;
+    }
     if(back_propagation(network, output_targets, output_targets_num) == ERR){
         return ERR;
     }
