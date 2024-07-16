@@ -21,10 +21,14 @@ network_t create_network(int layers_num, const int* neurons_per_layer)
 
         // initialize each neuron of the layer
         for(int j=0;j<neurons_per_layer[i];j++){
+            int weights_num = 0;
+            if(i < network.layers_num - 1){
+                weights_num = neurons_per_layer[i+1];
+            }
             neuron_t* current_neuron = &(current_layer->neurons[j]);
-            *current_neuron = create_neuron(network.layers[i+1].neurons_num);
+            *current_neuron = create_neuron(weights_num);
             // initialize each weight of the neuron
-            for(int k=0;k<network.layers[i+1].neurons_num;k++){
+            for(int k=0;k<weights_num;k++){
                 current_neuron->weights[k] = ((double)rand())/((double)RAND_MAX);
                 current_neuron->dw[k] = 0.0;
             }
