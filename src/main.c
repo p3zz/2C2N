@@ -12,11 +12,13 @@
 #define ITERATIONS_NUM 100
 #define LEARNING_RATE 0.15
 #define TRAINING_EXAMPLES_LEN 4
+
 #define INPUT_LEN 2
+#define HIDDEN_LEN 4
 #define OUTPUT_LEN 1
 
 static network_t network = {0};
-static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, 4, 5, OUTPUT_LEN};
+static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, HIDDEN_LEN, HIDDEN_LEN, OUTPUT_LEN};
 
 // each training sample has an array of values, one for each neuron of the input layer
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
@@ -57,15 +59,26 @@ int main(void)
     float cost = 0;
     network = create_network(LAYERS_NUM, neurons_per_layer);
 
+    for(int i=0;i<network.layers_num;i++){
+        printf("[LAYER %d] Neurons: %d\n", i, network.layers[i].neurons_num);
+        for(int j=0;j<network.layers[i].neurons_num;j++){
+            for(int k=0;k<network.layers[i].neurons[j].weights_num;k++){
+                // printf("[LAYER %d NEURON %d]\n", i, j);
+                printf("[LAYER %d NEURON %d WEIGHT %d] %.3f\n", i, j, k, network.layers[i].neurons[j].weights[k]);
+            }
+        }
+    }
+
     for(int it=0;it<ITERATIONS_NUM;it++)
     {
+        printf("Iteration #%d\n", it);
         for(int i=0;i<TRAINING_EXAMPLES_LEN;i++)
         {
             if(train(&network, input[i], INPUT_LEN, output_targets[i], OUTPUT_LEN, LEARNING_RATE, &cost) == ERR){
                 return ERR;
             }
+            printf("Cost: %.3f\n", cost);
         }
-        printf("%.3f\n", cost);
     }
 
     for(int i=0;i<TRAINING_EXAMPLES_LEN;i++)
@@ -76,7 +89,7 @@ int main(void)
         forward_propagation(&network);
         float prediction = network.layers[LAYERS_NUM-1].neurons[0].actv;
         float expected_output = output_targets[i][0];
-        printf("Expected output: %.3f, Prediction: %.3f\n", expected_output, prediction);
+        printf("Input: (%.1f %.1f), Expected output: %.3f, Prediction: %.3f\n", input[i][0], input[i][1], expected_output, prediction);
     }
 
     destroy_network(&network);

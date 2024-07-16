@@ -30,10 +30,6 @@ float update_output(float input, float weight, float bias){
     return input * weight + bias;
 }
 
-float update_weight(float weight, float learning_rate, float correction){
-    return weight - (learning_rate * correction);
-}
-
-float update_bias(float bias, float learning_rate, float correction){
-    return update_weight(bias, learning_rate, correction);
+float gradient_descent(float x, float rate, float dx){
+    return x - (rate * dx);
 }

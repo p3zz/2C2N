@@ -59,28 +59,27 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
             neuron_t* current_neuron = &(network->layers[i].neurons[j]);
             // compute the partial derivative w.r.t. output
             if(i == network->layers_num-1){
-                current_neuron->dz = (current_neuron->actv - desired_outputs[j]) * sigmoid_derivative(current_neuron->actv);
+                current_neuron->dz = (desired_outputs[j] - current_neuron->actv) * sigmoid_derivative(current_neuron->actv);
             }
             else{
                 current_neuron->dz = relu_derivative(current_neuron->dactv);
             }
 
-            // for each neuron of the previous layer
-            for(int k=0;k<network->layers[i-1].neurons_num;k++)
-            {
-                neuron_t* previous_neuron = &(network->layers[i-1].neurons[k]);
-                // compute the derivative w.r.t. weight
-                previous_neuron->dw[j] = current_neuron->dz * previous_neuron->actv;
-                
-                // if the current layer is not the input layer
-                if(i>1)
+            if(i > 0){
+                // for each neuron of the previous layer
+                for(int k=0;k<network->layers[i-1].neurons_num;k++)
                 {
+                    neuron_t* previous_neuron = &(network->layers[i-1].neurons[k]);
+                    // compute the derivative w.r.t. weight
+                    previous_neuron->dw[j] = current_neuron->dz * previous_neuron->actv;
+                    
                     // compute the derivative w.r.t. output
                     previous_neuron->dactv = current_neuron->dz * previous_neuron->weights[j];
                 }
+                // compute the derivative w.r.t. bias
+                current_neuron->dbias = current_neuron->dz;
             }
-            // compute the derivative w.r.t. bias
-            current_neuron->dbias = current_neuron->dz;
+            
         }
     }
 
@@ -130,7 +129,7 @@ void forward_propagation(const network_t* network)
     }
 }
 
-void update_weights(const network_t* network, float learning_rate)
+void gradient_descents(const network_t* network, float learning_rate)
 {
     // for each layer (excluding the output layer)
     for(int i=0;i<network->layers_num-1;i++)
@@ -142,11 +141,11 @@ void update_weights(const network_t* network, float learning_rate)
             // update each weight of the current neuron
             for(int k=0;k<network->layers[i+1].neurons_num;k++)
             {
-                neuron->weights[k] = update_weight(neuron->weights[k], learning_rate, neuron->dw[k]);
+                neuron->weights[k] = gradient_descent(neuron->weights[k], learning_rate, neuron->dw[k]);
             }
             
             // Update Bias of the current neuron
-            neuron->bias = update_bias(neuron->bias, learning_rate,  neuron->dbias);
+            neuron->bias = gradient_descent(neuron->bias, learning_rate,  neuron->dbias);
         }
     }   
 }
@@ -205,5 +204,5 @@ int train(const network_t* network, const float* const inputs, int inputs_num, c
     if(back_propagation(network, output_targets, output_targets_num) == ERR){
         return ERR;
     }
-    update_weights(network, learning_rate);
+    gradient_descents(network, learning_rate);
 }
