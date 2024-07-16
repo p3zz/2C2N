@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "time.h"
 
 // Create Neural Network Architecture
 network_t create_network(int layers_num, const int* neurons_per_layer)
 {
+    srand(time(NULL));
     network_t network;
 
     network.layers_num = layers_num;
@@ -33,7 +35,7 @@ network_t create_network(int layers_num, const int* neurons_per_layer)
                 current_neuron->dw[k] = 0.0;
             }
             // initialize the bias of the neuron
-            current_neuron->bias = ((double)rand())/((double)RAND_MAX);
+            current_neuron->bias = 0.0;
             current_neuron->dbias = 0.0;
         }
     }
@@ -47,36 +49,21 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
     if(outputs_num != network->layers[network->layers_num-1].neurons_num){
         return ERR;
     }
-    // Output Layer
-    // for each neuron of the output layer
-    for(int j=0;j<network->layers[network->layers_num-1].neurons_num;j++)
-    {           
-        // compute delta error
-        neuron_t* current_neuron = &(network->layers[network->layers_num-1].neurons[j]);
-        current_neuron->dz = (current_neuron->actv - desired_outputs[j]) * sigmoid_derivative(current_neuron->actv);
-
-        // for each neuron of the previous layer (the one before the output layer)
-        for(int k=0;k<network->layers[network->layers_num-2].neurons_num;k++)
-        {   
-            neuron_t* previous_neuron = &(network->layers[network->layers_num-2].neurons[k]);
-            // compute the delta weight and the delta output 
-            previous_neuron->dw[j] = (current_neuron->dz * previous_neuron->actv);
-            previous_neuron->dactv = previous_neuron->weights[j] * current_neuron->dz;
-        }
-
-        current_neuron->dbias = current_neuron->dz;
-    }
-
-    // Hidden Layers
-    // for each hidden layer iterate backwards from the last hidden layer to the first
-    for(int i=network->layers_num-2;i>0;i--)
+    
+    // for each layer iterate backwards from the output layer
+    for(int i=network->layers_num-1;i>0;i--)
     {
         // for each neuron of the current layer
         for(int j=0;j<network->layers[i].neurons_num;j++)
         {
             neuron_t* current_neuron = &(network->layers[i].neurons[j]);
             // compute the partial derivative w.r.t. output
-            current_neuron->dz = relu_derivative(current_neuron->dactv);
+            if(i == network->layers_num-1){
+                current_neuron->dz = (current_neuron->actv - desired_outputs[j]) * sigmoid_derivative(current_neuron->actv);
+            }
+            else{
+                current_neuron->dz = relu_derivative(current_neuron->dactv);
+            }
 
             // for each neuron of the previous layer
             for(int k=0;k<network->layers[i-1].neurons_num;k++)
@@ -89,7 +76,7 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
                 if(i>1)
                 {
                     // compute the derivative w.r.t. output
-                    previous_neuron->dactv = previous_neuron->weights[j] * current_neuron->dz;
+                    previous_neuron->dactv = current_neuron->dz * previous_neuron->weights[j];
                 }
             }
             // compute the derivative w.r.t. bias
@@ -114,11 +101,13 @@ void forward_propagation(const network_t* network)
             current_neuron->z = current_neuron->bias;
 
             // for each neuron of the previous layer
-            for(int k=0;k<network->layers[i-1].neurons_num;k++)
+            layer_t* previous_layer = &network->layers[i-1];
+            
+            for(int k=0;k<previous_layer->neurons_num;k++)
             {
-                neuron_t* previous_neuron = &(network->layers[i-1].neurons[k]);
+                neuron_t* previous_neuron = &(previous_layer->neurons[k]);
                 // update the output of each neuron of the current layer
-                current_neuron->z  = update_output(previous_neuron->actv, previous_neuron->weights[j], current_neuron->z);
+                current_neuron->z += (previous_neuron->actv * previous_neuron->weights[j]);
             }
 
             // then apply to the output a given activation function based on the type of current layer
