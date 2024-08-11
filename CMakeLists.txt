@@ -15,5 +15,15 @@ set(LIB_FILES
 
 add_library(lib ${LIB_FILES})
 add_executable(main src/main.c)
-
 target_link_libraries(main m lib)
+
+add_library(Unity STATIC
+    Unity/src/unity.c
+)
+
+target_include_directories(Unity PUBLIC
+    Unity/src
+)
+
+include(CTest)
+add_subdirectory(test)

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "time.h"
+#include <math.h>
 
 // Create Neural Network Architecture
 network_t create_network(int layers_num, const int* neurons_per_layer)
@@ -146,6 +147,23 @@ void gradient_descents(const network_t* network, float learning_rate)
     }   
 }
 
+int check_values(const network_t* network){
+    for(int i=0;i<network->layers_num;i++){
+        for(int j=0;j<network->layers[i].neurons_num;j++){
+            neuron_t* neuron = &network->layers[i].neurons[j];
+            if(isnan(neuron->actv) || isnan(neuron->bias) || isnan(neuron->z)){
+                return ERR;
+            }
+            for(int k=0;k<neuron->weights_num;k++){
+                if(isnan(neuron->weights[k])){
+                    return ERR;
+                }
+            }
+        }
+    }
+    return SUCCESS;
+}
+
 // Feed inputs to input layer_t
 int feed_input(const network_t* network, const float* inputs, int inputs_num)
 {
@@ -201,4 +219,7 @@ int train(const network_t* network, const float* const inputs, int inputs_num, c
         return ERR;
     }
     gradient_descents(network, learning_rate);
+    if(check_values(network) == ERR){
+        return ERR;
+    }
 }

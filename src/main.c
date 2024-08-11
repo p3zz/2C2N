@@ -9,8 +9,8 @@
 #include "network.h"
 
 #define LAYERS_NUM 3
-#define ITERATIONS_NUM 100000
-#define LEARNING_RATE 0.02
+#define ITERATIONS_NUM 10000
+#define LEARNING_RATE 0.05
 #define TRAINING_EXAMPLES_LEN 4
 
 #define INPUT_LEN 2
