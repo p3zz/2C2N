@@ -8,9 +8,9 @@
 #include "utils.h"
 #include "network.h"
 
-#define LAYERS_NUM 4
-#define ITERATIONS_NUM 100
-#define LEARNING_RATE 0.15
+#define LAYERS_NUM 3
+#define ITERATIONS_NUM 100000
+#define LEARNING_RATE 0.02
 #define TRAINING_EXAMPLES_LEN 4
 
 #define INPUT_LEN 2
@@ -18,7 +18,7 @@
 #define OUTPUT_LEN 1
 
 static network_t network = {0};
-static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, HIDDEN_LEN, HIDDEN_LEN, OUTPUT_LEN};
+static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, HIDDEN_LEN, OUTPUT_LEN};
 
 // each training sample has an array of values, one for each neuron of the input layer
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
@@ -71,13 +71,13 @@ int main(void)
 
     for(int it=0;it<ITERATIONS_NUM;it++)
     {
-        printf("Iteration #%d\n", it);
+        // printf("Iteration #%d\n", it);
         for(int i=0;i<TRAINING_EXAMPLES_LEN;i++)
         {
             if(train(&network, input[i], INPUT_LEN, output_targets[i], OUTPUT_LEN, LEARNING_RATE, &cost) == ERR){
                 return ERR;
             }
-            printf("Cost: %.3f\n", cost);
+            // printf("Cost: %.3f\n", cost);
         }
     }
 
