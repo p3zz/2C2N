@@ -1,5 +1,6 @@
 #include <unity.h>
 #include "stdbool.h"
+#include "network.h"
 
 void setUp()
 {
@@ -11,20 +12,22 @@ void tearDown()
 
 }
 
-void always_true(void){
+void test_always_true(void){
     TEST_ASSERT_TRUE(true);
+}
+
+void test_always_false(void){
+    TEST_ASSERT_TRUE(false);
 }
 
 int main(void)
 {
     UNITY_BEGIN();
 
-    /*
-     * Add in between
-     * RUN_TEST(func_name); 
-     */
+    RUN_TEST(test_always_true);
+    RUN_TEST(test_always_false);
 
-    UNITY_END();
+    int result = UNITY_END();
 
-    return 0;
+    return result;
 }
