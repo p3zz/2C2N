@@ -7,7 +7,7 @@ typedef struct{
     float** values;
 } matrix_t;
 
-void cross_correlation(const matrix_t* const m1, const matrix_t* const m2, matrix_t* result);
+void cross_correlation(const matrix_t* const m1, const matrix_t* const m2, matrix_t* result, int padding);
 matrix_t create_matrix(int rows_n, int cols_n);
 
 #endif
