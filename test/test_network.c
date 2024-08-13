@@ -74,6 +74,7 @@ void test_forward_propagation_1(void){
     network.layers[3].neurons[1].bias = 0.4;
 
     int res = feed_input(&network, input, 2);
+    TEST_ASSERT_EQUAL_INT(SUCCESS, res);
     forward_propagation(&network);
     // layer 0
     // neuron 0
@@ -110,6 +111,33 @@ void test_forward_propagation_1(void){
     // neuron 1
     TEST_ASSERT_EQUAL_FLOAT(3.429f, network.layers[3].neurons[1].z);
     TEST_ASSERT_EQUAL_FLOAT(3.429f, network.layers[3].neurons[1].actv);
+
+    res = back_propagation(&network, output_targets, 2);
+    TEST_ASSERT_EQUAL_INT(SUCCESS, res);
+
+    // layer 3
+    // neuron 0
+    TEST_ASSERT_EQUAL_FLOAT(2.524f, network.layers[3].neurons[0].dactv);
+    TEST_ASSERT_EQUAL_FLOAT(2.524f, network.layers[3].neurons[0].dbias);
+    // neuron 1
+    TEST_ASSERT_EQUAL_FLOAT(6.858f, network.layers[3].neurons[1].dactv);
+    TEST_ASSERT_EQUAL_FLOAT(6.858f, network.layers[3].neurons[1].dbias);
+
+    // layer 2
+    // neuron 0
+    TEST_ASSERT_EQUAL_FLOAT(4.316041, network.layers[2].neurons[0].dw[0]);
+    TEST_ASSERT_EQUAL_FLOAT(11.72718, network.layers[2].neurons[0].dw[1]);
+    TEST_ASSERT_EQUAL_FLOAT(6.496, network.layers[2].neurons[0].dactv);
+
+    // neuron 1
+    TEST_ASSERT_EQUAL_FLOAT(4.51796, network.layers[2].neurons[1].dw[0]);
+    TEST_ASSERT_EQUAL_FLOAT(12.27582, network.layers[2].neurons[1].dw[1]);
+    TEST_ASSERT_EQUAL_FLOAT(6.315, network.layers[2].neurons[1].dactv);
+
+    // neuron 2
+    TEST_ASSERT_EQUAL_FLOAT(5.14896, network.layers[2].neurons[2].dw[0]);
+    TEST_ASSERT_EQUAL_FLOAT(13.99032, network.layers[2].neurons[2].dw[1]);
+    TEST_ASSERT_EQUAL_FLOAT(1.624, network.layers[2].neurons[2].dactv);
 }
 
 int main(void)

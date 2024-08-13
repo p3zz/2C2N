@@ -55,32 +55,31 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
         return ERR;
     }
 
-    for(int i=0;i<network->layers_num;i++){
+    for(int i = network->layers_num; i >= 0; i--){
         layer_t* curr_layer = &network->layers[i];
         for(int j=0;j<curr_layer->neurons_num;j++){
             neuron_t* curr_neuron = &(curr_layer->neurons[j]);
             if(i == network->layers_num-1){
                 // dC / da_i(L) = 2*(a_i - target_i)
                 curr_neuron->dactv = 2*(curr_neuron->actv - desired_outputs[j]);
-                curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
             }
             else{
-                if(i > 0){
-                    layer_t* prev_layer = &network->layers[i-1];
-                    for(int k=0;k<prev_layer->neurons_num;k++){
-                        prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
-                    }
-                }
                 curr_neuron->dactv = 0.f;
                 layer_t* next_layer = &network->layers[i+1];
                 for(int k=0;k<next_layer->neurons_num;k++){
                     curr_neuron->dactv += (curr_neuron->weights[k] * next_layer->neurons[k].dactv_f(next_layer->neurons[k].z) * next_layer->neurons[k].dactv);
                 }
-                curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
+            }
+            curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
+            if(i>0){
+                layer_t* prev_layer = &network->layers[i-1];
+                for(int k=0;k<prev_layer->neurons_num;k++){
+                    prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
+                }
             }
         }
     }
-
+    return SUCCESS;
 }
 
 void forward_propagation(const network_t* network)
