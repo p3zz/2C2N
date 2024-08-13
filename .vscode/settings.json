@@ -4,6 +4,7 @@
         "stdbool.h": "c",
         "unity.h": "c",
         "system_error": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "internet": "c"
     }
 }

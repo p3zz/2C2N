@@ -7,8 +7,12 @@
 #include <math.h>
 
 // Create Neural Network Architecture
-network_t create_network(int layers_num, const int* neurons_per_layer)
-{
+network_t create_network(
+    int layers_num,
+    const int* neurons_per_layer,
+    const activation_function* f_per_layer,
+    const activation_function* df_per_layer
+){
     srand(time(NULL));
     network_t network;
 
@@ -29,14 +33,14 @@ network_t create_network(int layers_num, const int* neurons_per_layer)
                 weights_num = neurons_per_layer[i+1];
             }
             neuron_t* current_neuron = &(current_layer->neurons[j]);
-            *current_neuron = create_neuron(weights_num);
+            *current_neuron = create_neuron(weights_num, f_per_layer[i], df_per_layer[i]);
             // initialize each weight of the neuron
             for(int k=0;k<weights_num;k++){
                 current_neuron->weights[k] = ((double)rand())/((double)RAND_MAX);
                 current_neuron->dw[k] = 0.0;
             }
             // initialize the bias of the neuron
-            current_neuron->bias = 0.0;
+            current_neuron->bias = ((double)rand())/((double)RAND_MAX);
             current_neuron->dbias = 0.0;
         }
     }
@@ -58,21 +62,21 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
             if(i == network->layers_num-1){
                 // dC / da_i(L) = 2*(a_i - target_i)
                 curr_neuron->dactv = 2*(curr_neuron->actv - desired_outputs[j]);
-                curr_neuron->dbias = relu_derivative(curr_neuron->z) * curr_neuron->dactv;
+                curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
             }
             else{
                 if(i > 0){
                     layer_t* prev_layer = &network->layers[i-1];
                     for(int k=0;k<prev_layer->neurons_num;k++){
-                        prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * sigmoid_derivative(curr_neuron->z) * curr_neuron->dactv;
+                        prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
                     }
                 }
                 curr_neuron->dactv = 0.f;
                 layer_t* next_layer = &network->layers[i+1];
                 for(int k=0;k<next_layer->neurons_num;k++){
-                    curr_neuron->dactv += (curr_neuron->weights[k] * sigmoid_derivative(next_layer->neurons[k].z) * next_layer->neurons[k].dactv);
+                    curr_neuron->dactv += (curr_neuron->weights[k] * next_layer->neurons[k].dactv_f(next_layer->neurons[k].z) * next_layer->neurons[k].dactv);
                 }
-                curr_neuron->dbias = sigmoid_derivative(curr_neuron->z) * curr_neuron->dactv;
+                curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
             }
         }
     }
@@ -102,21 +106,8 @@ void forward_propagation(const network_t* network)
                 current_neuron->z += (previous_neuron->actv * previous_neuron->weights[j]);
             }
 
-            // then apply to the output a given activation function based on the type of current layer
-            // the last layer is the output layer, the previous ones are hidden layers because we are starting from the second layer (layer[1])
-            // the first layer is the input layer
-            bool is_hidden = i < (network->layers_num - 1);
-            // Relu Activation Function for Hidden Layers
-            if(is_hidden)
-            {
-                current_neuron->actv = relu(current_neuron->z);
-            }
-            
-            // Sigmoid Activation function for Output Layer
-            else
-            {
-                current_neuron->actv = sigmoid(current_neuron->z);
-            }
+            // then apply to the output a given activation function            
+            current_neuron->actv = current_neuron->actv_f(current_neuron->z);
 
             // printf("Forward : Layer %d neuron %d z %f a %f\n", i, j, current_neuron->z, current_neuron->actv);
             

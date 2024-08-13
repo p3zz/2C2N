@@ -4,6 +4,8 @@
 #define SUCCESS 0
 #define ERR 1
 
+typedef float(*activation_function)(float);
+
 float sigmoid(float x);
 float sigmoid_derivative(float x);
 

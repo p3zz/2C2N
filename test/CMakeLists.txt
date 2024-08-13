@@ -15,6 +15,7 @@ add_executable(test_network
 target_link_libraries(test_network
     lib
     unity
+    m
 )
 
 target_include_directories(test_network PRIVATE ../lib ../Unity)

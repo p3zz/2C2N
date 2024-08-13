@@ -9,7 +9,7 @@
 #include "network.h"
 
 #define LAYERS_NUM 3
-#define ITERATIONS_NUM 10000
+#define ITERATIONS_NUM 100
 #define LEARNING_RATE 0.05
 #define TRAINING_EXAMPLES_LEN 4
 
@@ -19,6 +19,8 @@
 
 static network_t network = {0};
 static const int neurons_per_layer[LAYERS_NUM] = {INPUT_LEN, HIDDEN_LEN, OUTPUT_LEN};
+static const activation_function actv_f[LAYERS_NUM] = {sigmoid, sigmoid, relu};
+static const activation_function dactv_f[LAYERS_NUM] = {sigmoid_derivative, sigmoid_derivative, relu_derivative};
 
 // each training sample has an array of values, one for each neuron of the input layer
 // inputs[TRAINING_EXAMPLES_NUM][INPUT_NEURONS_NUM]
@@ -57,7 +59,7 @@ int main(void)
     initialize_outputs();
 
     float cost = 0;
-    network = create_network(LAYERS_NUM, neurons_per_layer);
+    network = create_network(LAYERS_NUM, neurons_per_layer, actv_f, dactv_f);
 
     for(int i=0;i<network.layers_num;i++){
         printf("[LAYER %d] Neurons: %d\n", i, network.layers[i].neurons_num);
