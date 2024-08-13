@@ -5,6 +5,7 @@
         "unity.h": "c",
         "system_error": "c",
         "stdio.h": "c",
-        "internet": "c"
+        "internet": "c",
+        "common.h": "c"
     }
 }
