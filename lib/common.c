@@ -14,9 +14,9 @@ void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, m
                 for(int n=0;n<m2->cols_n;n++){
                     int row = i*stride + m - padding;
                     int col = j*stride + n - padding;
-                    if(row >= 0 && row < m1->rows_n && col >= 0 && col < m1->cols_n)
-                    // sum += matrix1[(i + m) * cols1 + (j + n)] * matrix2[m * cols2 + n];
-                    sum += (m1->values[row][col]) * m2->values[m][n];
+                    if(row >= 0 && row < m1->rows_n && col >= 0 && col < m1->cols_n){
+                        sum += (m1->values[row][col]) * m2->values[m][n];
+                    }
                 }
             }
             result->values[i][j] = sum;
