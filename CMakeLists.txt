@@ -9,4 +9,5 @@ add_subdirectory(lib)
 target_link_libraries(main m lib)
 target_include_directories(main PRIVATE lib)
 
+enable_testing()
 add_subdirectory(test)
