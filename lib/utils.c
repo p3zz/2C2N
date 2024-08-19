@@ -36,6 +36,6 @@ float gradient_descent(float x, float rate, float dx){
     return x - (rate * dx);
 }
 
-double generate_random(void){
-    return ((double)rand())/((double)RAND_MAX);
+float generate_random(void){
+    return ((float)rand())/((float)RAND_MAX);
 }

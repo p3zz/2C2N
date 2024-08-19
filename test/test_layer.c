@@ -24,16 +24,18 @@ void test_init_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(1, layer.stride);
     TEST_ASSERT_EQUAL_INT(2, layer.kernel->depth);
     TEST_ASSERT_EQUAL_INT(3, layer.kernel->layers[0].rows_n);
-    // TEST_ASSERT_EQUAL_INT(3, layer.kernel->layers[0].values[0][0]);
-    // TEST_ASSERT_EQUAL_INT(3, layer.kernel->layers[0].values[0][1]);
     TEST_ASSERT_EQUAL_INT(3, layer.kernel->layers[0].cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(0.8401877, layer.kernel->layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(0.3943829, layer.kernel->layers[0].values[0][1]);
     TEST_ASSERT_EQUAL_INT(3 ,layer.kernel->layers[1].rows_n);
     TEST_ASSERT_EQUAL_INT(3, layer.kernel->layers[1].cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(0.55397, layer.kernel->layers[1].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(0.6288709, layer.kernel->layers[1].values[0][2]);
 }
 
 int main(void)
 {
-    srand(1);
+    srand(0);
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);

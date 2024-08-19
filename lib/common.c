@@ -28,7 +28,7 @@ void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, m
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
-    m->values = (float**)malloc(rows_n * sizeof(float*));
+    m->values = (float**)malloc(m->rows_n * sizeof(float*));
     for(int i=0;i<m->rows_n;i++){
         m->values[i] = (float*)malloc(m->cols_n * sizeof(float));
         for(int j=0;j<m->cols_n;j++){
