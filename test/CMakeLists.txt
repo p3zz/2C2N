@@ -36,3 +36,18 @@ target_link_libraries(test_common
 target_include_directories(test_common PRIVATE ../lib ../Unity)
 
 add_test(test_common test_common)
+
+add_executable(test_layer
+    test_layer.c
+)
+
+target_link_libraries(test_layer
+    lib
+    unity
+    m
+)
+
+
+target_include_directories(test_layer PRIVATE ../lib ../Unity)
+
+add_test(test_layer test_layer)

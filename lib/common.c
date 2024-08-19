@@ -29,13 +29,17 @@ void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
     m->values = (float**)malloc(rows_n * sizeof(float*));
-    for(int i=0;i<rows_n;i++){
-        m->values[i] = (float*)malloc(cols_n * sizeof(float));
+    for(int i=0;i<m->rows_n;i++){
+        m->values[i] = (float*)malloc(m->cols_n * sizeof(float));
+        for(int j=0;j<m->cols_n;j++){
+            m->values[i][j] = generate_random();
+		}
     }
 }
 
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth){
     m->depth = depth;
+    m->layers = (matrix2d_t*)malloc(m->depth * sizeof(matrix2d_t));
     for(int i=0;i<m->depth;i++){
         create_matrix2d(&m->layers[i], rows_n, cols_n);
     }

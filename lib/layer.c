@@ -1,5 +1,6 @@
 #include "layer.h"
 #include <stdlib.h>
+#include "utils.h"
 
 layer_t create_layer(int neurons_num)
 {
@@ -21,13 +22,8 @@ void init_conv_layer(
 
 	create_matrix3d(layer->kernel, kernel_size, kernel_size, kernel_depth);
 
-	for(int i=0;i<layer->kernel->depth;i++){
-		for(int j=0;j<layer->kernel->layers[i].rows_n;j++){
-			for(int k=0;k<layer->kernel->layers[i].cols_n;k++){
-            	layer->kernel->layers[i].values[j][k] = ((double)rand())/((double)RAND_MAX);				
-			}
-		}
-	}
+	layer->padding = padding;
+	layer->stride = stride;
 }
 
 void destroy_layer(layer_t* layer){

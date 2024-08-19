@@ -18,5 +18,12 @@ typedef struct
 
 layer_t create_layer(int num_neurons);
 void destroy_layer(layer_t* layer);
+void init_conv_layer(
+	conv_layer_t* layer,
+	int kernel_size,
+	int kernel_depth,
+	int stride,
+	int padding
+);
 
 #endif

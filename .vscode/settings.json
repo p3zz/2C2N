@@ -6,6 +6,9 @@
         "system_error": "c",
         "stdio.h": "c",
         "internet": "c",
-        "common.h": "c"
+        "common.h": "c",
+        "stdlib.h": "c",
+        "layer.h": "c",
+        "network.h": "c"
     }
 }

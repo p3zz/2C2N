@@ -1,5 +1,6 @@
 #include <math.h>
 #include "utils.h"
+#include <stdlib.h>
 
 float sigmoid(float x){
     return 1.f / (1.f + expf(-x));
@@ -33,4 +34,8 @@ float update_output(float input, float weight, float bias){
 
 float gradient_descent(float x, float rate, float dx){
     return x - (rate * dx);
+}
+
+double generate_random(void){
+    return ((double)rand())/((double)RAND_MAX);
 }
