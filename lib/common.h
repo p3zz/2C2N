@@ -9,13 +9,13 @@ typedef struct{
 
 typedef struct {
     matrix2d_t* layers;
-    int layers_len;
+    int depth;
 } matrix3d_t;
 
 void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);
 int max_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result, int padding, int stride);
 int avg_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result, int padding, int stride);
 
-matrix2d_t create_matrix(int rows_n, int cols_n);
+void create_matrix(matrix2d_t* m, int rows_n, int cols_n);
 
 #endif

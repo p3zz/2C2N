@@ -2,7 +2,15 @@
 #define LAYER_H
 
 #include "neuron.h"
+#include "common.h"
 
+typedef struct{
+	int out_channels_n;
+	matrix3d_t* kernel;
+	int kernel_size;
+	int stride;
+	int padding;
+}conv_layer_t;
 
 typedef struct
 {
