@@ -11,16 +11,23 @@ layer_t create_layer(int neurons_num)
 
 void init_conv_layer(
 	conv_layer_t* layer,
-	int out_channels_n,
 	int kernel_size,
+	int kernel_depth,
 	int stride,
 	int padding)
 {
-	layer->kernel->depth = out_channels_n;
+
+	layer->kernel = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+
+	create_matrix3d(layer->kernel, kernel_size, kernel_size, kernel_depth);
+
 	for(int i=0;i<layer->kernel->depth;i++){
-		create_matrix(&layer->kernel->layers[i], kernel_size, kernel_size);
+		for(int j=0;j<layer->kernel->layers[i].rows_n;j++){
+			for(int k=0;k<layer->kernel->layers[i].cols_n;k++){
+            	layer->kernel->layers[i].values[j][k] = ((double)rand())/((double)RAND_MAX);				
+			}
+		}
 	}
-	layer->out_channels_n = out_channels_n;
 }
 
 void destroy_layer(layer_t* layer){

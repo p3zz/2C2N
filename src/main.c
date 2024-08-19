@@ -55,6 +55,8 @@ static void initialize_outputs(){
 
 int main(void)
 {
+
+    srand(time(NULL));
     initialize_inputs();
     initialize_outputs();
 

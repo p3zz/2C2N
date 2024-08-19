@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "time.h"
 #include <math.h>
 
 // Create Neural Network Architecture
@@ -13,7 +12,6 @@ network_t create_network(
     const activation_function* f_per_layer,
     const activation_function* df_per_layer
 ){
-    srand(time(NULL));
     network_t network;
 
     network.layers_num = layers_num;
