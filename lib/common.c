@@ -35,7 +35,7 @@ void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
 }
 
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth){
-    m->depth = cols_n;
+    m->depth = depth;
     for(int i=0;i<m->depth;i++){
         create_matrix2d(&m->layers[i], rows_n, cols_n);
     }
