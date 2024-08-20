@@ -40,6 +40,7 @@ void init_conv_layer(
 
 void process_pool_layer(const pool_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
 	output->depth = input->depth;
+	output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));
 	for(int i=0;i<input->depth;i++){
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:

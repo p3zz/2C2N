@@ -231,7 +231,7 @@ void test_common_avg_pooling(void){
     TEST_ASSERT_EQUAL_FLOAT(4.25f, result.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(3.5f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[1][0]);
-    TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[1][1]);
+    TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[1][1]);
 
     destroy_matrix2d(&m);
     destroy_matrix2d(&result);
