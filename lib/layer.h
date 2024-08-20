@@ -28,5 +28,6 @@ void init_conv_layer(
 	int padding
 );
 void destroy_conv_layer(conv_layer_t* layer);
+void feed_forward(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output);
 
 #endif

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "stdlib.h"
 #include "utils.h"
+#include "stdio.h"
 
 void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride){
     int output_rows = (m1->rows_n - m2->rows_n + 2 * padding) / stride + 1;
@@ -115,5 +116,30 @@ void matrix2d_relu(const matrix2d_t* const m, matrix2d_t* result){
         for(int j=0;j<m->rows_n;j++){
             result->values[i][j] = relu(m->values[i][j]);
         }
+    }
+}
+
+void matrix2d_sum_inplace(const matrix2d_t* const m, matrix2d_t* result){
+    for(int i=0;i<m->rows_n;i++){
+        for(int j=0;j<m->cols_n;j++){
+            result->values[i][j] += m->values[i][j];
+        }
+    }
+}
+
+void matrix2d_print(const matrix2d_t* const m){
+    for(int i=0;i<m->rows_n;i++){
+        printf("|");
+        for(int j=0;j<m->cols_n;j++){
+            printf("\t%.3f\t|", m->values[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void matrix3d_print(const matrix3d_t* const m){
+    for(int i=0;i<m->depth;i++){
+        printf("[Layer %d]\n", i);
+        matrix2d_print(&m->layers[i]);
     }
 }

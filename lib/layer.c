@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "common.h"
+#include "stdbool.h"
 
 layer_t create_layer(int neurons_num)
 {
@@ -30,14 +31,28 @@ void init_conv_layer(
 	layer->stride = stride;
 }
 
-// void feed_forward(conv_layer_t* layer, matrix3d_t* input, matrix3d_t* output){
-// 	create_matrix3d(output, )
-// 	for(int i=0;i<layer->kernel->depth;i++){
-// 		for(int j=0;j<input->depth;j++){
-
-// 		}
-// 	}
-// }
+// TODO check if depth of each kernel is equal to the number of channels of the input
+void feed_forward(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
+	matrix2d_t result = {0};
+	output->depth = layer->kernels_n;
+	output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));
+	for(int i=0;i<layer->kernels_n;i++){
+		for(int j=0;j<layer->kernels[i].depth;j++){
+			// compute the cross correlation between a channel of the input and its corresponding kernel
+			cross_correlation(&input->layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
+			//we only know here how big the result will be
+			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
+			// we need to allocate the memory for the result
+			if(j == 0){
+				create_matrix2d(&output->layers[i], result.rows_n, result.cols_n);
+			}
+			// then we sum the resulting matrix to the output
+			matrix2d_sum_inplace(&result, &output->layers[i]);
+			// and we free the result matrix
+			destroy_matrix2d(&result);
+		}
+	}
+}
 
 void destroy_conv_layer(conv_layer_t* layer){
 	for(int i=0;i<layer->kernels_n;i++){
