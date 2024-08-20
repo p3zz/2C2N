@@ -5,7 +5,8 @@
 #include "common.h"
 
 typedef struct{
-	matrix3d_t* kernel;
+	matrix3d_t* kernels;
+	int kernels_n;	
 	int stride;
 	int padding;
 }conv_layer_t;
@@ -22,8 +23,10 @@ void init_conv_layer(
 	conv_layer_t* layer,
 	int kernel_size,
 	int kernel_depth,
+	int kernels_n,
 	int stride,
 	int padding
 );
+void destroy_conv_layer(conv_layer_t* layer);
 
 #endif

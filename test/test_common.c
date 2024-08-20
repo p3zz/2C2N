@@ -50,6 +50,10 @@ void test_common_cross_correlation_nopadding(void){
     TEST_ASSERT_EQUAL_FLOAT(43.f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(74.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(43.f, result.values[1][1]);
+
+    destroy_matrix2d(&m1);
+    destroy_matrix2d(&m2);
+    destroy_matrix2d(&result);
 }
 
 void test_common_cross_correlation_padding(void){
@@ -100,6 +104,10 @@ void test_common_cross_correlation_padding(void){
     TEST_ASSERT_EQUAL_FLOAT(49.f, result.values[3][1]);
     TEST_ASSERT_EQUAL_FLOAT(46.f, result.values[3][2]);
     TEST_ASSERT_EQUAL_FLOAT(24.f, result.values[3][3]);
+    
+    destroy_matrix2d(&m1);
+    destroy_matrix2d(&m2);
+    destroy_matrix2d(&result);
 }
 
 void test_common_cross_correlation_nopadding_stride(void){
@@ -132,6 +140,10 @@ void test_common_cross_correlation_nopadding_stride(void){
     TEST_ASSERT_EQUAL_INT(1, result.rows_n);
     TEST_ASSERT_EQUAL_INT(1, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
+
+    destroy_matrix2d(&m1);
+    destroy_matrix2d(&m2);
+    destroy_matrix2d(&result);
 }
 
 void test_common_cross_correlation_padding_stride(void){
@@ -167,6 +179,10 @@ void test_common_cross_correlation_padding_stride(void){
     TEST_ASSERT_EQUAL_FLOAT(25.f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(41.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(43.f, result.values[1][1]);
+
+    destroy_matrix2d(&m1);
+    destroy_matrix2d(&m2);
+    destroy_matrix2d(&result);
 }
 
 void test_common_max_pooling(void){
@@ -190,6 +206,9 @@ void test_common_max_pooling(void){
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(9.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[1][1]);
+
+    destroy_matrix2d(&m);
+    destroy_matrix2d(&result);
 }
 
 void test_common_avg_pooling(void){
@@ -209,10 +228,13 @@ void test_common_avg_pooling(void){
     avg_pooling(&m, 2, &result, 0, 1);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(8.5f, result.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[0][1]);
-    TEST_ASSERT_EQUAL_FLOAT(12.f, result.values[1][0]);
-    TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[1][1]);
+    TEST_ASSERT_EQUAL_FLOAT(4.25f, result.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(3.5f, result.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[1][1]);
+
+    destroy_matrix2d(&m);
+    destroy_matrix2d(&result);
 }
 
 int main(void)
@@ -225,6 +247,7 @@ int main(void)
     RUN_TEST(test_common_cross_correlation_nopadding_stride);
     RUN_TEST(test_common_cross_correlation_padding_stride);
     RUN_TEST(test_common_max_pooling);
+    RUN_TEST(test_common_avg_pooling);
     int result = UNITY_END();
 
     return result;

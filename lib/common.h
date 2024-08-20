@@ -19,4 +19,7 @@ int avg_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n);
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth);
 
+void destroy_matrix3d(matrix3d_t* m);
+void destroy_matrix2d(matrix2d_t* m);
+
 #endif
