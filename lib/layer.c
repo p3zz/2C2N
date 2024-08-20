@@ -12,10 +12,11 @@ layer_t create_layer(int neurons_num)
 	return lay;
 }
 
-void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride){
+void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type){
 	layer->kernel_size = kernel_size;
 	layer->padding = padding;
 	layer->stride = stride;
+	layer->type = type;
 }
 
 void init_conv_layer(
