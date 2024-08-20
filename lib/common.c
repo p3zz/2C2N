@@ -60,7 +60,7 @@ void destroy_matrix3d(matrix3d_t* m){
     free(m->layers);
 }
 
-int max_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result, int padding, int stride){
+void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride){
     int output_rows = (mat->rows_n - kernel_size + 2 * padding) / stride + 1;
     int output_cols = (mat->cols_n - kernel_size + 2 * padding) / stride + 1;
 
@@ -85,7 +85,7 @@ int max_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result
     }
 }
 
-int avg_pooling(const matrix2d_t* const mat, int kernel_size, matrix2d_t* result, int padding, int stride){
+void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride){
     int output_rows = (mat->rows_n - kernel_size + 2 * padding) / stride + 1;
     int output_cols = (mat->cols_n - kernel_size + 2 * padding) / stride + 1;
 

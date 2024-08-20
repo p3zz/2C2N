@@ -4,12 +4,24 @@
 #include "neuron.h"
 #include "common.h"
 
+typedef enum{
+	POOLING_TYPE_AVERAGE,
+	POOLING_TYPE_MAX
+}pooling_type;
+
 typedef struct{
 	matrix3d_t* kernels;
 	int kernels_n;	
 	int stride;
 	int padding;
 }conv_layer_t;
+
+typedef struct{
+	int kernel_size;
+	int stride;
+	int padding;
+	pooling_type type;
+}pool_layer_t;
 
 typedef struct
 {
@@ -28,6 +40,6 @@ void init_conv_layer(
 	int padding
 );
 void destroy_conv_layer(conv_layer_t* layer);
-void feed_forward(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output);
+void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output);
 
 #endif

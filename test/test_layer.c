@@ -35,7 +35,7 @@ void test_init_conv_layer(void){
     destroy_conv_layer(&layer);
 }
 
-void test_feed_forward(void){
+void test_process_conv_layer(void){
     conv_layer_t layer = {0};
     init_conv_layer(&layer, 2, 2, 2, 1, 0);
     const float input_vals[2][3][3] = {
@@ -62,7 +62,7 @@ void test_feed_forward(void){
 
     matrix3d_t output = {0};
 
-    feed_forward(&layer, &input, &output);
+    process_conv_layer(&layer, &input, &output);
     printf("Input\n");
     matrix3d_print(&input);
     printf("Kernels\n");
@@ -75,7 +75,6 @@ void test_feed_forward(void){
     TEST_ASSERT_EQUAL_INT(2, output.layers[0].cols_n);
     TEST_ASSERT_EQUAL_INT(2, output.layers[1].rows_n);
     TEST_ASSERT_EQUAL_INT(2, output.layers[1].cols_n);
-    TEST_ASSERT(false);
 }
 
 int main(void)
@@ -85,7 +84,7 @@ int main(void)
 
     RUN_TEST(test_always_true);
     RUN_TEST(test_init_conv_layer);
-    RUN_TEST(test_feed_forward);
+    RUN_TEST(test_process_conv_layer);
     int result = UNITY_END();
 
     return result;

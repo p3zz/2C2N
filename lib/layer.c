@@ -12,6 +12,12 @@ layer_t create_layer(int neurons_num)
 	return lay;
 }
 
+void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride){
+	layer->kernel_size = kernel_size;
+	layer->padding = padding;
+	layer->stride = stride;
+}
+
 void init_conv_layer(
 	conv_layer_t* layer,
 	int kernel_size,
@@ -31,8 +37,23 @@ void init_conv_layer(
 	layer->stride = stride;
 }
 
+
+void process_pool_layer(const pool_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
+	output->depth = input->depth;
+	for(int i=0;i<input->depth;i++){
+		switch(layer->type){
+			case POOLING_TYPE_AVERAGE:
+				avg_pooling(&input->layers[i], &output->layers[i], layer->kernel_size, layer->padding, layer->stride);
+				break;
+			case POOLING_TYPE_MAX:
+				max_pooling(&input->layers[i], &output->layers[i], layer->kernel_size, layer->padding, layer->stride);
+				break;
+		}
+	}
+}
+
 // TODO check if depth of each kernel is equal to the number of channels of the input
-void feed_forward(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
+void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
 	matrix2d_t result = {0};
 	output->depth = layer->kernels_n;
 	output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));

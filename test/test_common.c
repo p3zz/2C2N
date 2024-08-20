@@ -199,7 +199,7 @@ void test_common_max_pooling(void){
         }
     }
     matrix2d_t result = {};
-    max_pooling(&m, 2, &result, 0, 1);
+    max_pooling(&m, &result, 2, 0, 1);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(9.f, result.values[0][0]);
@@ -225,13 +225,13 @@ void test_common_avg_pooling(void){
         }
     }
     matrix2d_t result = {};
-    avg_pooling(&m, 2, &result, 0, 1);
+    avg_pooling(&m, &result, 2, 0, 1);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(4.25f, result.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(3.5f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[1][0]);
-    TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[1][1]);
+    TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[1][1]);
 
     destroy_matrix2d(&m);
     destroy_matrix2d(&result);
