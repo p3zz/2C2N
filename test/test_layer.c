@@ -190,6 +190,26 @@ void test_process_pool_layer_max(void){
     destroy_matrix3d(&output);
 }
 
+void test_process_dense_layer(void){
+    dense_layer_t layer = {0};
+    init_dense_layer(&layer, 4, 2);
+
+    const float input_vals[4] = {3, 4, 2, 1};
+    matrix2d_t input = {0};
+    create_matrix2d(&input, 4, 1);
+    for(int i=0;i<input.rows_n;i++){
+        for(int j=0;j<input.cols_n;j++){
+            input.values[i][j] = input_vals[j];
+        }
+    }
+    matrix2d_t output = {0};
+    process_dense_layer(&layer, &input, &output);
+    TEST_ASSERT_EQUAL_INT(1, output.rows_n);
+    TEST_ASSERT_EQUAL_INT(2, output.cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(1.426118, output.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(9.270691, output.values[0][1]);
+}
+
 int main(void)
 {
     srand(0);
@@ -200,6 +220,7 @@ int main(void)
     RUN_TEST(test_process_conv_layer);
     RUN_TEST(test_process_pool_layer_average);
     RUN_TEST(test_process_pool_layer_max);
+    RUN_TEST(test_process_dense_layer);
     int result = UNITY_END();
 
     return result;

@@ -42,6 +42,20 @@ void init_conv_layer(
 	layer->stride = stride;
 }
 
+void init_dense_layer(dense_layer_t* layer, int input_n, int output_n){
+	create_matrix2d(&layer->weights, input_n, output_n);
+	create_matrix2d(&layer->biases, 1, output_n);
+}
+
+void process_dense_layer(const dense_layer_t* const layer, const matrix2d_t* const input, matrix2d_t* output){
+	create_matrix2d(output, 1, layer->biases.cols_n);
+	for(int i=0;i<output->cols_n;i++){
+		output->values[0][i] = layer->biases.values[0][i];
+		for(int j=0;j<layer->weights.rows_n;j++){
+			output->values[0][i] += (input->values[j][0] * layer->weights.values[j][i]);
+		}
+	}
+}
 
 void process_pool_layer(const pool_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
 	output->depth = input->depth;
@@ -89,6 +103,11 @@ void destroy_conv_layer(conv_layer_t* layer){
 		destroy_matrix3d(&layer->kernels[i]);
 	}
 	free(layer->kernels);
+}
+
+void destroy_dense_layer(dense_layer_t* layer){
+	destroy_matrix2d(&layer->weights);
+	destroy_matrix2d(&layer->biases);
 }
 
 void destroy_layer(layer_t* layer){

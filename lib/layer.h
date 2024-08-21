@@ -24,6 +24,11 @@ typedef struct{
 	pooling_type type;
 }pool_layer_t;
 
+typedef struct{
+	matrix2d_t weights;
+	matrix2d_t biases;
+}dense_layer_t;
+
 typedef struct
 {
 	int neurons_num;
@@ -45,5 +50,8 @@ void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const
 
 void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type);
 void process_pool_layer(const pool_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output);
+
+void init_dense_layer(dense_layer_t* layer, int input_n, int output_n);
+void process_dense_layer(const dense_layer_t* const layer, const matrix2d_t* const input, matrix2d_t* output);
 
 #endif
