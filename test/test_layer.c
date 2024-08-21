@@ -76,6 +76,14 @@ void test_process_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(2, output.layers[0].cols_n);
     TEST_ASSERT_EQUAL_INT(2, output.layers[1].rows_n);
     TEST_ASSERT_EQUAL_INT(2, output.layers[1].cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(13.55092, output.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(13.74786, output.layers[0].values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(13.13456, output.layers[0].values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(12.19739, output.layers[0].values[1][1]);
+    TEST_ASSERT_EQUAL_FLOAT(22.64161, output.layers[1].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(22.78511, output.layers[1].values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(21.07566, output.layers[1].values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(19.77494, output.layers[1].values[1][1]);
 
     destroy_conv_layer(&layer);
     destroy_matrix3d(&input);
