@@ -12,6 +12,7 @@ typedef enum{
 typedef struct{
 	matrix3d_t* kernels;
 	int kernels_n;	
+	matrix2d_t* biases;
 	int stride;
 	int padding;
 }conv_layer_t;

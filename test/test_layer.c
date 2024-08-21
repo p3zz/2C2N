@@ -70,6 +70,7 @@ void test_process_conv_layer(void){
     // matrix3d_print(&layer.kernels[1]);
     // printf("Output\n");
     // matrix3d_print(&output);
+    // TODO add output values check
     TEST_ASSERT_EQUAL_INT(2, output.depth);
     TEST_ASSERT_EQUAL_INT(2, output.layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(2, output.layers[0].cols_n);

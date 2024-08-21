@@ -33,6 +33,10 @@ void init_conv_layer(
 	for(int i=0;i<layer->kernels_n;i++){
 		create_matrix3d(&layer->kernels[i], kernel_size, kernel_size, kernel_depth);
 	}
+	
+	// we can only allocate the memory to keep a pointer to the biases, but their real size
+	// will be available once we have the size of the input channels
+	layer->biases = (matrix2d_t*)malloc(layer->kernels_n * sizeof(matrix2d_t));
 
 	layer->padding = padding;
 	layer->stride = stride;
@@ -68,6 +72,9 @@ void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const
 			// we need to allocate the memory for the result
 			if(j == 0){
 				create_matrix2d(&output->layers[i], result.rows_n, result.cols_n);
+				create_matrix2d(&layer->biases[i], result.rows_n, result.cols_n);
+				// perform an early sum of the biases to the final output layer
+				matrix2d_sum_inplace(&layer->biases[i], &output->layers[i]);
 			}
 			// then we sum the resulting matrix to the output
 			matrix2d_sum_inplace(&result, &output->layers[i]);
