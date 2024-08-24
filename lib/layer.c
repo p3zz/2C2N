@@ -4,9 +4,9 @@
 #include "common.h"
 #include "stdbool.h"
 
-layer_t create_layer(int neurons_num)
+layer_t_old create_layer(int neurons_num)
 {
-	layer_t lay;
+	layer_t_old lay;
 	lay.neurons_num = neurons_num;
 	lay.neurons = (neuron_t*) malloc(neurons_num * sizeof(neuron_t));
 	return lay;
@@ -25,7 +25,8 @@ void init_conv_layer(
 	int kernel_depth,
 	int kernels_n,
 	int stride,
-	int padding)
+	int padding
+)
 {
 	layer->kernels_n = kernels_n;
 	layer->kernels = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
@@ -110,7 +111,7 @@ void destroy_dense_layer(dense_layer_t* layer){
 	destroy_matrix2d(&layer->biases);
 }
 
-void destroy_layer(layer_t* layer){
+void destroy_layer(layer_t_old* layer){
 	for(int i=0;i<layer->neurons_num;i++){
 		destroy_neuron(&layer->neurons[i]);
 	}

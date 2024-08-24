@@ -4,7 +4,7 @@
 #include "layer.h"
 
 typedef struct{
-    layer_t* layers;
+    layer_t_old* layers;
     int layers_num;
 } network_t;
 

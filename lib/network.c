@@ -15,12 +15,12 @@ network_t create_network(
     network_t network;
 
     network.layers_num = layers_num;
-    network.layers = (layer_t*) malloc(layers_num * sizeof(layer_t));
+    network.layers = (layer_t_old*) malloc(layers_num * sizeof(layer_t_old));
 
     for(int i=0;i<network.layers_num;i++)
     {
         // initialize layer
-        layer_t* current_layer = &network.layers[i];
+        layer_t_old* current_layer = &network.layers[i];
         *current_layer = create_layer(neurons_per_layer[i]);
         current_layer->neurons_num = neurons_per_layer[i];
 
@@ -54,7 +54,7 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
     }
 
     for(int i = network->layers_num; i >= 0; i--){
-        layer_t* curr_layer = &network->layers[i];
+        layer_t_old* curr_layer = &network->layers[i];
         for(int j=0;j<curr_layer->neurons_num;j++){
             neuron_t* curr_neuron = &(curr_layer->neurons[j]);
             if(i == network->layers_num-1){
@@ -63,14 +63,14 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
             }
             else{
                 curr_neuron->dactv = 0.f;
-                layer_t* next_layer = &network->layers[i+1];
+                layer_t_old* next_layer = &network->layers[i+1];
                 for(int k=0;k<next_layer->neurons_num;k++){
                     curr_neuron->dactv += (curr_neuron->weights[k] * next_layer->neurons[k].dactv_f(next_layer->neurons[k].z) * next_layer->neurons[k].dactv);
                 }
             }
             curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
             if(i>0){
-                layer_t* prev_layer = &network->layers[i-1];
+                layer_t_old* prev_layer = &network->layers[i-1];
                 for(int k=0;k<prev_layer->neurons_num;k++){
                     prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
                 }
@@ -94,7 +94,7 @@ void forward_propagation(const network_t* network)
             current_neuron->z = current_neuron->bias;
 
             // for each neuron of the previous layer
-            layer_t* previous_layer = &network->layers[i-1];
+            layer_t_old* previous_layer = &network->layers[i-1];
             
             for(int k=0;k<previous_layer->neurons_num;k++)
             {
@@ -152,7 +152,7 @@ int check_values(const network_t* network){
     return SUCCESS;
 }
 
-// Feed inputs to input layer_t
+// Feed inputs to input layer_t_old
 int feed_input(const network_t* network, const float* inputs, int inputs_num)
 {
     if(network->layers[0].neurons_num != inputs_num){
@@ -175,7 +175,7 @@ void destroy_network(network_t* network){
 // Compute Total Cost
 int compute_cost(const network_t* network, const float* output_targets, int output_targets_num, float* result)
 {
-    layer_t* output_layer = &(network->layers[network->layers_num-1]);
+    layer_t_old* output_layer = &(network->layers[network->layers_num-1]);
 
     if(output_targets_num != output_layer->neurons_num){
         return ERR;

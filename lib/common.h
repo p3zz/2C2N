@@ -27,4 +27,7 @@ void matrix2d_sum_inplace(const matrix2d_t* const m, matrix2d_t* result);
 void matrix2d_print(const matrix2d_t* const m);
 void matrix3d_print(const matrix3d_t* const m);
 
+void matrix2d_relu(const matrix2d_t* const m, matrix2d_t* result);
+void matrix2d_relu_inplace(const matrix2d_t* const m);
+
 #endif

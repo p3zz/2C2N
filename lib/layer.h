@@ -9,6 +9,11 @@ typedef enum{
 	POOLING_TYPE_MAX
 }pooling_type;
 
+typedef enum{
+	ACTIVATION_TYPE_RELU,
+	ACTIVATION_TYPE_SIGMOID
+}activation_type;
+
 typedef struct{
 	matrix3d_t* kernels;
 	int kernels_n;	
@@ -29,14 +34,20 @@ typedef struct{
 	matrix2d_t biases;
 }dense_layer_t;
 
+typedef union{
+	conv_layer_t conv_layer;
+	pool_layer_t pool_layer;
+	dense_layer_t dense_layer;
+}layer_t;
+
 typedef struct
 {
 	int neurons_num;
 	neuron_t* neurons;
-} layer_t;
+} layer_t_old;
 
-layer_t create_layer(int num_neurons);
-void destroy_layer(layer_t* layer);
+layer_t_old create_layer(int num_neurons);
+void destroy_layer(layer_t_old* layer);
 void init_conv_layer(
 	conv_layer_t* layer,
 	int kernel_size,
