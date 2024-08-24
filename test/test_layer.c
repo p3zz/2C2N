@@ -19,7 +19,7 @@ void test_always_true(void){
 
 void test_init_conv_layer(void){
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, 3, 2, 1, 1, 0);
+    init_conv_layer(&layer, 3, 2, 1, 1, 0, ACTIVATION_TYPE_RELU);
     TEST_ASSERT_EQUAL_INT(0, layer.padding);
     TEST_ASSERT_EQUAL_INT(1, layer.stride);
     TEST_ASSERT_EQUAL_INT(1, layer.kernels_n);
@@ -37,7 +37,7 @@ void test_init_conv_layer(void){
 
 void test_process_conv_layer(void){
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, 2, 2, 2, 1, 0);
+    init_conv_layer(&layer, 2, 2, 2, 1, 0, ACTIVATION_TYPE_RELU);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -192,7 +192,7 @@ void test_process_pool_layer_max(void){
 
 void test_process_dense_layer(void){
     dense_layer_t layer = {0};
-    init_dense_layer(&layer, 4, 2);
+    init_dense_layer(&layer, 4, 2, ACTIVATION_TYPE_RELU);
 
     const float input_vals[4] = {3, 4, 2, 1};
     matrix2d_t input = {0};

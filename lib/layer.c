@@ -25,7 +25,8 @@ void init_conv_layer(
 	int kernel_depth,
 	int kernels_n,
 	int stride,
-	int padding
+	int padding,
+	activation_type activation_type
 )
 {
 	layer->kernels_n = kernels_n;
@@ -41,11 +42,13 @@ void init_conv_layer(
 
 	layer->padding = padding;
 	layer->stride = stride;
+	layer->activation_type = activation_type;
 }
 
-void init_dense_layer(dense_layer_t* layer, int input_n, int output_n){
+void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
 	create_matrix2d(&layer->weights, input_n, output_n);
 	create_matrix2d(&layer->biases, 1, output_n);
+	layer->activation_type = activation_type;
 }
 
 void process_dense_layer(const dense_layer_t* const layer, const matrix2d_t* const input, matrix2d_t* output){
@@ -55,6 +58,16 @@ void process_dense_layer(const dense_layer_t* const layer, const matrix2d_t* con
 		for(int j=0;j<layer->weights.rows_n;j++){
 			output->values[0][i] += (input->values[j][0] * layer->weights.values[j][i]);
 		}
+	}
+	switch(layer->activation_type){
+		case ACTIVATION_TYPE_RELU:
+			matrix2d_relu_inplace(output);
+			break;
+		case ACTIVATION_TYPE_SIGMOID:
+			matrix2d_sigmoid_inplace(output);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -95,6 +108,16 @@ void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const
 			matrix2d_sum_inplace(&result, &output->layers[i]);
 			// and we free the result matrix
 			destroy_matrix2d(&result);
+		}
+		switch(layer->activation_type){
+			case ACTIVATION_TYPE_RELU:
+				matrix2d_relu_inplace(&output->layers[i]);
+				break;
+			case ACTIVATION_TYPE_SIGMOID:
+				matrix2d_sigmoid_inplace(&output->layers[i]);
+				break;
+			default:
+				break;
 		}
 	}
 }

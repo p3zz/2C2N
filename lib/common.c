@@ -127,6 +127,23 @@ void matrix2d_relu_inplace(const matrix2d_t* const m){
     }
 }
 
+void matrix2d_sigmoid(const matrix2d_t* const m, matrix2d_t* result){
+    create_matrix2d(result, m->rows_n, m->cols_n);
+    for(int i=0;i<m->rows_n;i++){
+        for(int j=0;j<m->rows_n;j++){
+            result->values[i][j] = sigmoid(m->values[i][j]);
+        }
+    }
+}
+
+void matrix2d_sigmoid_inplace(const matrix2d_t* const m){
+    for(int i=0;i<m->rows_n;i++){
+        for(int j=0;j<m->rows_n;j++){
+            m->values[i][j] = sigmoid(m->values[i][j]);
+        }
+    }
+}
+
 void matrix2d_sum_inplace(const matrix2d_t* const m, matrix2d_t* result){
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->cols_n;j++){
