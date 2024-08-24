@@ -88,10 +88,10 @@ void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
 }
 
 // TODO check if depth of each kernel is equal to the number of channels of the input
-void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
+void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 	matrix2d_t result = {0};
-	output->depth = layer->kernels_n;
-	output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));
+	layer->output.depth = layer->kernels_n;
+	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			// compute the cross correlation between a channel of the input and its corresponding kernel
@@ -100,22 +100,22 @@ void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const
 			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
 			// we need to allocate the memory for the result
 			if(j == 0){
-				create_matrix2d(&output->layers[i], result.rows_n, result.cols_n);
+				create_matrix2d(&layer->output.layers[i], result.rows_n, result.cols_n);
 				create_matrix2d(&layer->biases[i], result.rows_n, result.cols_n);
 				// perform an early sum of the biases to the final output layer
-				matrix2d_sum_inplace(&layer->biases[i], &output->layers[i]);
+				matrix2d_sum_inplace(&layer->biases[i], &layer->output.layers[i]);
 			}
 			// then we sum the resulting matrix to the output
-			matrix2d_sum_inplace(&result, &output->layers[i]);
+			matrix2d_sum_inplace(&result, &layer->output.layers[i]);
 			// and we free the result matrix
 			destroy_matrix2d(&result);
 		}
 		switch(layer->activation_type){
 			case ACTIVATION_TYPE_RELU:
-				matrix2d_relu_inplace(&output->layers[i]);
+				matrix2d_relu_inplace(&layer->output.layers[i]);
 				break;
 			case ACTIVATION_TYPE_SIGMOID:
-				matrix2d_sigmoid_inplace(&output->layers[i]);
+				matrix2d_sigmoid_inplace(&layer->output.layers[i]);
 				break;
 			default:
 				break;

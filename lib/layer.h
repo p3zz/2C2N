@@ -21,6 +21,8 @@ typedef struct{
 	int stride;
 	int padding;
 	activation_type activation_type;
+	matrix3d_t output;
+	matrix3d_t output_activated;
 }conv_layer_t;
 
 typedef struct{
@@ -53,6 +55,7 @@ typedef struct
 
 layer_t_old create_layer(int num_neurons);
 void destroy_layer(layer_t_old* layer);
+
 void init_conv_layer(
 	conv_layer_t* layer,
 	int kernel_size,
@@ -63,7 +66,7 @@ void init_conv_layer(
 	activation_type activation_type
 );
 void destroy_conv_layer(conv_layer_t* layer);
-void process_conv_layer(const conv_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output);
+void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input);
 
 void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type);
 void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);

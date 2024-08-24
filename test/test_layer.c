@@ -60,9 +60,7 @@ void test_process_conv_layer(void){
         }
     }
 
-    matrix3d_t output = {0};
-
-    process_conv_layer(&layer, &input, &output);
+    process_conv_layer(&layer, &input);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Kernels\n");
@@ -71,23 +69,22 @@ void test_process_conv_layer(void){
     // printf("Output\n");
     // matrix3d_print(&output);
     // TODO add output values check
-    TEST_ASSERT_EQUAL_INT(2, output.depth);
-    TEST_ASSERT_EQUAL_INT(2, output.layers[0].rows_n);
-    TEST_ASSERT_EQUAL_INT(2, output.layers[0].cols_n);
-    TEST_ASSERT_EQUAL_INT(2, output.layers[1].rows_n);
-    TEST_ASSERT_EQUAL_INT(2, output.layers[1].cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(13.55092, output.layers[0].values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(13.74786, output.layers[0].values[0][1]);
-    TEST_ASSERT_EQUAL_FLOAT(13.13456, output.layers[0].values[1][0]);
-    TEST_ASSERT_EQUAL_FLOAT(12.19739, output.layers[0].values[1][1]);
-    TEST_ASSERT_EQUAL_FLOAT(22.64161, output.layers[1].values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(22.78511, output.layers[1].values[0][1]);
-    TEST_ASSERT_EQUAL_FLOAT(21.07566, output.layers[1].values[1][0]);
-    TEST_ASSERT_EQUAL_FLOAT(19.77494, output.layers[1].values[1][1]);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.depth);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(13.55092, layer.output.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(13.74786, layer.output.layers[0].values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(13.13456, layer.output.layers[0].values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(12.19739, layer.output.layers[0].values[1][1]);
+    TEST_ASSERT_EQUAL_FLOAT(22.64161, layer.output.layers[1].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(22.78511, layer.output.layers[1].values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(21.07566, layer.output.layers[1].values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(19.77494, layer.output.layers[1].values[1][1]);
 
     destroy_conv_layer(&layer);
     destroy_matrix3d(&input);
-    destroy_matrix3d(&output);
 }
 
 void test_process_pool_layer_average(void){
@@ -203,6 +200,7 @@ void test_process_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(1.426118, layer.output.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(9.270691, layer.output.values[0][1]);
     destroy_dense_layer(&layer);
+    destroy_matrix2d(&input);
 }
 
 int main(void)
