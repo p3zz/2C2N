@@ -38,6 +38,15 @@ void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
     }
 }
 
+void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output){
+	create_matrix2d(output, input->rows_n, input->cols_n);
+    for(int i=0;i<input->rows_n;i++){
+        for(int j=0;j<input->cols_n;j++){
+            output->values[i][j] = input->values[i][j];
+        }
+    }
+}
+
 void destroy_matrix2d(matrix2d_t* m){
     for(int i=0;i<m->rows_n;i++){
         free(m->values[i]);

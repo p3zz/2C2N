@@ -51,36 +51,37 @@ void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activatio
 	layer->activation_type = activation_type;
 }
 
-void process_dense_layer(const dense_layer_t* const layer, const matrix2d_t* const input, matrix2d_t* output){
-	create_matrix2d(output, 1, layer->biases.cols_n);
-	for(int i=0;i<output->cols_n;i++){
-		output->values[0][i] = layer->biases.values[0][i];
+void process_dense_layer(dense_layer_t* layer, const matrix2d_t* const input){
+	create_matrix2d(&layer->output, 1, layer->biases.cols_n);
+	for(int i=0;i<layer->output.cols_n;i++){
+		layer->output.values[0][i] = layer->biases.values[0][i];
 		for(int j=0;j<layer->weights.rows_n;j++){
-			output->values[0][i] += (input->values[j][0] * layer->weights.values[j][i]);
+			layer->output.values[0][i] += (input->values[j][0] * layer->weights.values[j][i]);
 		}
 	}
+	matrix2d_copy(&layer->output, &layer->output_activated);
 	switch(layer->activation_type){
 		case ACTIVATION_TYPE_RELU:
-			matrix2d_relu_inplace(output);
+			matrix2d_relu_inplace(&layer->output_activated);
 			break;
 		case ACTIVATION_TYPE_SIGMOID:
-			matrix2d_sigmoid_inplace(output);
+			matrix2d_sigmoid_inplace(&layer->output_activated);
 			break;
 		default:
 			break;
 	}
 }
 
-void process_pool_layer(const pool_layer_t* const layer, const matrix3d_t* const input, matrix3d_t* output){
-	output->depth = input->depth;
-	output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));
+void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
+	layer->output.depth = input->depth;
+	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
 	for(int i=0;i<input->depth;i++){
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:
-				avg_pooling(&input->layers[i], &output->layers[i], layer->kernel_size, layer->padding, layer->stride);
+				avg_pooling(&input->layers[i], &layer->output.layers[i], layer->kernel_size, layer->padding, layer->stride);
 				break;
 			case POOLING_TYPE_MAX:
-				max_pooling(&input->layers[i], &output->layers[i], layer->kernel_size, layer->padding, layer->stride);
+				max_pooling(&input->layers[i], &layer->output.layers[i], layer->kernel_size, layer->padding, layer->stride);
 				break;
 		}
 	}
@@ -132,6 +133,12 @@ void destroy_conv_layer(conv_layer_t* layer){
 void destroy_dense_layer(dense_layer_t* layer){
 	destroy_matrix2d(&layer->weights);
 	destroy_matrix2d(&layer->biases);
+	destroy_matrix2d(&layer->output);
+	destroy_matrix2d(&layer->output_activated);
+}
+
+void destroy_pool_layer(pool_layer_t* layer){
+	destroy_matrix3d(&layer->output);
 }
 
 void destroy_layer(layer_t_old* layer){
