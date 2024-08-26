@@ -32,5 +32,6 @@ void matrix2d_relu_inplace(const matrix2d_t* const m);
 void matrix2d_sigmoid(const matrix2d_t* const m, matrix2d_t* result);
 void matrix2d_sigmoid_inplace(const matrix2d_t* const m);
 void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output);
+void matrix2d_flatten(const matrix2d_t* const m, matrix2d_t* result);
 
 #endif

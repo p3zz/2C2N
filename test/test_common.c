@@ -237,6 +237,29 @@ void test_common_avg_pooling(void){
     destroy_matrix2d(&result);
 }
 
+void test_common_matrix2d_flatten(void){
+    const float m_values[3][3] = {
+        {4.f, 3.f, 8.f},
+        {9.f, 1.f, 2.f},
+        {7.f, 7.f, 6.f}
+    };
+    matrix2d_t m = {0};
+    create_matrix2d(&m, 3, 3);
+    for(int i=0;i<m.rows_n;i++){
+        for(int j=0;j<m.cols_n;j++){
+            m.values[i][j] = m_values[i][j];
+        }
+    }
+    matrix2d_t result = {};
+    matrix2d_flatten(&m, &result);
+    TEST_ASSERT_EQUAL_INT(1, result.rows_n);
+    TEST_ASSERT_EQUAL_INT(9, result.cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(1.f, result.values[0][4]);
+    TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[0][6]);
+    TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[0][8]);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -248,6 +271,7 @@ int main(void)
     RUN_TEST(test_common_cross_correlation_padding_stride);
     RUN_TEST(test_common_max_pooling);
     RUN_TEST(test_common_avg_pooling);
+    RUN_TEST(test_common_matrix2d_flatten);
     int result = UNITY_END();
 
     return result;

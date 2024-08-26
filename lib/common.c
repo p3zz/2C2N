@@ -177,3 +177,14 @@ void matrix3d_print(const matrix3d_t* const m){
         matrix2d_print(&m->layers[i]);
     }
 }
+
+void matrix2d_flatten(const matrix2d_t* const m, matrix2d_t* result){
+    int idx = 0;
+    create_matrix2d(result, 1, m->rows_n * m->cols_n);
+    for(int i=0;i<m->rows_n;i++){
+        for(int j=0;j<m->cols_n;j++){
+            result->values[0][idx] = m->values[i][j];
+            idx++;
+        }
+    }
+}
