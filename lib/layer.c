@@ -118,6 +118,13 @@ void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
 	}
 }
 
+void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
+    create_matrix2d(result, output->rows_n, output->cols_n);
+	for(int i=0;i<output->cols_n;i++){
+        result->values[0][i] = 2*(output->values[0][i] - target_output->values[0][i]);
+    }
+}
+
 // TODO check if depth of each kernel is equal to the number of channels of the input
 void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 	matrix2d_t result = {0};

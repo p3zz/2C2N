@@ -244,11 +244,9 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
 
     matrix2d_t d_input = {0};
-    create_matrix2d(&d_input, 1, 2);
-    
-    for(int i=0;i<d_input.cols_n;i++){
-        d_input.values[0][i] = 2*(layer.output_activated.values[0][i] - output_target.values[0][i]);
-    }
+    // create_matrix2d(&d_input, 1, 2);
+
+    compute_cost_derivative(&layer.output_activated, &output_target, &d_input);
 
     TEST_ASSERT_EQUAL_FLOAT(2.524f, d_input.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(6.858f, d_input.values[0][1]);
@@ -270,6 +268,72 @@ void test_backpropagation_dense_layer(void){
     destroy_matrix2d(&d_input);
 }
 
+void test_perceptron_or(void){
+    const float learning_rate = 0.05f;
+    const int iterations_n = 10000;
+
+    matrix3d_t inputs = {0};
+    create_matrix3d(&inputs, 1, 2, 4);
+    inputs.layers[0].values[0][0] = 0;
+    inputs.layers[0].values[0][1] = 0;
+
+    inputs.layers[1].values[0][0] = 0;
+    inputs.layers[1].values[0][1] = 1;
+
+    inputs.layers[2].values[0][0] = 1;
+    inputs.layers[2].values[0][1] = 0;
+
+    inputs.layers[3].values[0][0] = 1;
+    inputs.layers[3].values[0][1] = 1;
+
+    matrix3d_t output_targets = {0};
+    create_matrix3d(&output_targets, 1, 1, 4);
+    output_targets.layers[0].values[0][0] = 0;
+
+    output_targets.layers[1].values[0][0] = 1;
+
+    output_targets.layers[2].values[0][0] = 1;
+
+    output_targets.layers[3].values[0][0] = 1;
+    
+    dense_layer_t input_layer = {0};
+    init_dense_layer(&input_layer, 2, 4, ACTIVATION_TYPE_RELU);
+    
+    dense_layer_t hidden_layer = {0};
+    init_dense_layer(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
+
+    matrix2d_t d_input = {0};
+
+    for(int i=0;i<iterations_n;i++){
+        for(int j=0;j<inputs.depth;j++){
+            feed_dense_layer(&input_layer, &inputs.layers[j]);
+            process_dense_layer(&input_layer);
+            feed_dense_layer(&hidden_layer, &input_layer.output_activated);
+            process_dense_layer(&hidden_layer);
+            compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
+            backpropagation_dense_layer(&hidden_layer, &d_input, learning_rate);
+            backpropagation_dense_layer(&input_layer, &d_input, learning_rate);
+            destroy_matrix2d(&d_input);
+        }
+    }
+
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.rows_n);
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.cols_n);
+
+    for(int i=0;i<inputs.depth;i++){
+        feed_dense_layer(&input_layer, &inputs.layers[i]);
+        process_dense_layer(&input_layer);
+        feed_dense_layer(&hidden_layer, &input_layer.output_activated);
+        process_dense_layer(&hidden_layer);
+        TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
+    }
+
+    destroy_matrix3d(&inputs);
+    destroy_matrix3d(&output_targets);
+    destroy_dense_layer(&input_layer);
+    destroy_dense_layer(&hidden_layer);
+}
+
 int main(void)
 {
     srand(0);
@@ -282,6 +346,7 @@ int main(void)
     RUN_TEST(test_process_pool_layer_max);
     RUN_TEST(test_process_dense_layer);
     RUN_TEST(test_backpropagation_dense_layer);
+    RUN_TEST(test_perceptron_or);
     int result = UNITY_END();
 
     return result;
