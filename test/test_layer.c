@@ -186,21 +186,88 @@ void test_process_dense_layer(void){
     dense_layer_t layer = {0};
     init_dense_layer(&layer, 4, 2, ACTIVATION_TYPE_RELU);
 
-    const float input_vals[4] = {3, 4, 2, 1};
+    const float input_vals[4] = {3.f, 4.f, 2.f, 1.f};
     matrix2d_t input = {0};
-    create_matrix2d(&input, 4, 1);
-    for(int i=0;i<input.rows_n;i++){
-        for(int j=0;j<input.cols_n;j++){
-            input.values[i][j] = input_vals[j];
-        }
+    create_matrix2d(&input, 1, 4);
+    for(int j=0;j<input.cols_n;j++){
+        input.values[0][j] = input_vals[j];
     }
-    process_dense_layer(&layer, &input);
+    feed_dense_layer(&layer, &input);
+    matrix2d_print(&layer.inputs);
+    matrix2d_print(&layer.weights);
+    matrix2d_print(&layer.biases);
+    
+    process_dense_layer(&layer);
     TEST_ASSERT_EQUAL_INT(1, layer.output.rows_n);
     TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(1.426118, layer.output.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(9.270691, layer.output.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(5.76589, layer.output.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.480252, layer.output.values[0][1]);
     destroy_dense_layer(&layer);
     destroy_matrix2d(&input);
+}
+
+void test_backpropagation_dense_layer(void){
+    dense_layer_t layer = {0};
+    init_dense_layer(&layer, 3, 2, ACTIVATION_TYPE_RELU);
+
+    const float input_vals[3] = {1.71f, 1.79f, 2.04f};
+    const float output_targets[2] = {1.f, 0.f};
+
+    matrix2d_t input = {0};
+    create_matrix2d(&input, 1, 3);
+    for(int j=0;j<input.cols_n;j++){
+        input.values[0][j] = input_vals[j];
+    }
+
+    matrix2d_t output_target = {0};
+    create_matrix2d(&output_target, 1, 2);
+    for(int j=0;j<output_target.cols_n;j++){
+        output_target.values[0][j] = output_targets[j];
+    }
+
+    layer.weights.values[0][0] = 0.4;
+    layer.weights.values[0][1] = 0.8;
+
+    layer.weights.values[1][0] = 0.6;
+    layer.weights.values[1][1] = 0.7;
+
+    layer.weights.values[2][0] = 0.1;
+    layer.weights.values[2][1] = 0.2;
+
+    layer.biases.values[0][0] = 0.3;
+    layer.biases.values[0][1] = 0.4;
+
+    feed_dense_layer(&layer, &input);
+    process_dense_layer(&layer);
+
+    TEST_ASSERT_EQUAL_FLOAT(2.262f, layer.output.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
+
+    matrix2d_t d_input = {0};
+    create_matrix2d(&d_input, 1, 2);
+    
+    for(int i=0;i<d_input.cols_n;i++){
+        d_input.values[0][i] = 2*(layer.output_activated.values[0][i] - output_target.values[0][i]);
+    }
+
+    TEST_ASSERT_EQUAL_FLOAT(2.524f, d_input.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.858f, d_input.values[0][1]);
+
+    backpropagation_dense_layer(&layer, &d_input, 0.15f);
+
+    TEST_ASSERT_EQUAL_FLOAT(6.496, layer.d_inputs.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.315, layer.d_inputs.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(1.624, layer.d_inputs.values[0][2]);
+
+    TEST_ASSERT_EQUAL_FLOAT(-0.2474061, layer.weights.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(-0.9590769, layer.weights.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(-0.077694, layer.weights.values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(-1.141373, layer.weights.values[1][1]);
+
+    destroy_dense_layer(&layer);
+    destroy_matrix2d(&input);
+    destroy_matrix2d(&output_target);
+    destroy_matrix2d(&d_input);
 }
 
 int main(void)
@@ -214,6 +281,7 @@ int main(void)
     RUN_TEST(test_process_pool_layer_average);
     RUN_TEST(test_process_pool_layer_max);
     RUN_TEST(test_process_dense_layer);
+    RUN_TEST(test_backpropagation_dense_layer);
     int result = UNITY_END();
 
     return result;

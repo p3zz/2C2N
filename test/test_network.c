@@ -138,6 +138,12 @@ void test_forward_propagation_1(void){
     TEST_ASSERT_EQUAL_FLOAT(5.14896, network.layers[2].neurons[2].dw[0]);
     TEST_ASSERT_EQUAL_FLOAT(13.99032, network.layers[2].neurons[2].dw[1]);
     TEST_ASSERT_EQUAL_FLOAT(1.624, network.layers[2].neurons[2].dactv);
+
+    gradient_descents(&network, 0.15f);
+    TEST_ASSERT_EQUAL_FLOAT(-0.2474061, network.layers[2].neurons[0].weights[0]);
+    TEST_ASSERT_EQUAL_FLOAT(-0.9590769, network.layers[2].neurons[0].weights[1]);
+    TEST_ASSERT_EQUAL_FLOAT(-0.077694, network.layers[2].neurons[1].weights[0]);
+    TEST_ASSERT_EQUAL_FLOAT(-1.141373, network.layers[2].neurons[1].weights[1]);
 }
 
 int main(void)

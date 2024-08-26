@@ -65,16 +65,14 @@ int back_propagation(const network_t* network, const float* desired_outputs, int
                 curr_neuron->dactv = 0.f;
                 layer_t_old* next_layer = &network->layers[i+1];
                 for(int k=0;k<next_layer->neurons_num;k++){
-                    curr_neuron->dactv += (curr_neuron->weights[k] * next_layer->neurons[k].dactv_f(next_layer->neurons[k].z) * next_layer->neurons[k].dactv);
+                    neuron_t* next_neuron = &next_layer->neurons[k];
+                    curr_neuron->dactv += (curr_neuron->weights[k] * next_neuron->dactv_f(next_neuron->z) * next_neuron->dactv);
+                    if(i > 0){
+                        curr_neuron->dw[k] = curr_neuron->actv * next_neuron->dactv_f(next_neuron->z) * next_neuron->dactv;
+                    }
                 }
             }
             curr_neuron->dbias = curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
-            if(i>0){
-                layer_t_old* prev_layer = &network->layers[i-1];
-                for(int k=0;k<prev_layer->neurons_num;k++){
-                    prev_layer->neurons[k].dw[j] = prev_layer->neurons[k].actv * curr_neuron->dactv_f(curr_neuron->z) * curr_neuron->dactv;
-                }
-            }
         }
     }
     return SUCCESS;

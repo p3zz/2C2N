@@ -3,16 +3,12 @@
 
 #include "neuron.h"
 #include "common.h"
+#include "stdbool.h"
 
 typedef enum{
 	POOLING_TYPE_AVERAGE,
 	POOLING_TYPE_MAX
 }pooling_type;
-
-typedef enum{
-	ACTIVATION_TYPE_RELU,
-	ACTIVATION_TYPE_SIGMOID
-}activation_type;
 
 typedef struct{
 	matrix3d_t* kernels;
@@ -34,11 +30,13 @@ typedef struct{
 }pool_layer_t;
 
 typedef struct{
+	matrix2d_t inputs;
 	matrix2d_t weights;
 	matrix2d_t biases;
 	activation_type activation_type;
 	matrix2d_t output;
 	matrix2d_t output_activated;
+	matrix2d_t d_inputs;
 }dense_layer_t;
 
 typedef union{
@@ -73,7 +71,9 @@ void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
 void destroy_pool_layer(pool_layer_t* layer);
 
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type);
-void process_dense_layer(dense_layer_t* layer, const matrix2d_t* const input);
+void feed_dense_layer(dense_layer_t* layer, const matrix2d_t* const input);
+void process_dense_layer(dense_layer_t* layer);
+void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate);
 void destroy_dense_layer(dense_layer_t* layer);
 
 #endif

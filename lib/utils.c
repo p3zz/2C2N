@@ -28,6 +28,36 @@ float relu_derivative(float x){
     }
 }
 
+float activate(float x, activation_type type){
+    float result = x;
+    switch(type){
+		case ACTIVATION_TYPE_RELU:
+			result = relu(x);
+			break;
+		case ACTIVATION_TYPE_SIGMOID:
+			result = sigmoid(x);
+			break;
+		default:
+			break;
+	}
+    return result;
+}
+
+float d_activate(float x, activation_type type){
+    float result = x;
+    switch(type){
+		case ACTIVATION_TYPE_RELU:
+			result = relu_derivative(x);
+			break;
+		case ACTIVATION_TYPE_SIGMOID:
+			result = sigmoid_derivative(x);
+			break;
+		default:
+			break;
+	}
+    return result;
+}
+
 float update_output(float input, float weight, float bias){
     return input * weight + bias;
 }
