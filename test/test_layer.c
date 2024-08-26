@@ -312,7 +312,7 @@ void test_perceptron_or(void){
             process_dense_layer(&hidden_layer);
             compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
             backpropagation_dense_layer(&hidden_layer, &d_input, learning_rate);
-            backpropagation_dense_layer(&input_layer, &d_input, learning_rate);
+            backpropagation_dense_layer(&input_layer, &hidden_layer.d_inputs, learning_rate);
             destroy_matrix2d(&d_input);
         }
     }
