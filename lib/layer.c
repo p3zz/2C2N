@@ -164,8 +164,12 @@ void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 void destroy_conv_layer(conv_layer_t* layer){
 	for(int i=0;i<layer->kernels_n;i++){
 		destroy_matrix3d(&layer->kernels[i]);
+		destroy_matrix2d(&layer->biases[i]);
 	}
 	free(layer->kernels);
+	free(layer->biases);
+	destroy_matrix3d(&layer->output);
+	destroy_matrix3d(&layer->output_activated);
 }
 
 void destroy_dense_layer(dense_layer_t* layer){
