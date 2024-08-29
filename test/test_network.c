@@ -1,6 +1,7 @@
 #include <unity.h>
 #include "stdbool.h"
 #include "network.h"
+#include "stdlib.h"
 
 void setUp()
 {
@@ -148,6 +149,7 @@ void test_forward_propagation_1(void){
 
 int main(void)
 {
+    srand(0);
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);

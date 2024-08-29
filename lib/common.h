@@ -1,6 +1,8 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include "stdbool.h"
+
 typedef struct{
     int rows_n;
     int cols_n;
@@ -16,7 +18,7 @@ void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, m
 void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 
-void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n);
+void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random);
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth);
 
 void destroy_matrix3d(matrix3d_t* m);

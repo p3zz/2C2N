@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "common.h"
 #include "string.h"
+#include "stdlib.h"
 
 void setUp()
 {
@@ -24,7 +25,7 @@ void test_common_cross_correlation_nopadding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    create_matrix2d(&m1, 3, 3, true);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -36,7 +37,7 @@ void test_common_cross_correlation_nopadding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    create_matrix2d(&m2, 2, 2, true);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -63,7 +64,7 @@ void test_common_cross_correlation_padding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    create_matrix2d(&m1, 3, 3, true);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -75,7 +76,7 @@ void test_common_cross_correlation_padding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    create_matrix2d(&m2, 2, 2, true);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -117,7 +118,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    create_matrix2d(&m1, 3, 3, true);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -129,7 +130,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    create_matrix2d(&m2, 2, 2, true);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -153,7 +154,7 @@ void test_common_cross_correlation_padding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    create_matrix2d(&m1, 3, 3, true);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -165,7 +166,7 @@ void test_common_cross_correlation_padding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    create_matrix2d(&m2, 2, 2, true);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -192,7 +193,7 @@ void test_common_max_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    create_matrix2d(&m, 3, 3, true);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -218,7 +219,7 @@ void test_common_avg_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    create_matrix2d(&m, 3, 3, true);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -244,7 +245,7 @@ void test_common_matrix2d_flatten(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    create_matrix2d(&m, 3, 3, true);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -262,6 +263,7 @@ void test_common_matrix2d_flatten(void){
 
 int main(void)
 {
+    srand(0);
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);

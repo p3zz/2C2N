@@ -188,7 +188,7 @@ void test_process_dense_layer(void){
 
     const float input_vals[4] = {3.f, 4.f, 2.f, 1.f};
     matrix2d_t input = {0};
-    create_matrix2d(&input, 1, 4);
+    create_matrix2d(&input, 1, 4, true);
     for(int j=0;j<input.cols_n;j++){
         input.values[0][j] = input_vals[j];
     }
@@ -214,13 +214,13 @@ void test_backpropagation_dense_layer(void){
     const float output_targets[2] = {1.f, 0.f};
 
     matrix2d_t input = {0};
-    create_matrix2d(&input, 1, 3);
+    create_matrix2d(&input, 1, 3, true);
     for(int j=0;j<input.cols_n;j++){
         input.values[0][j] = input_vals[j];
     }
 
     matrix2d_t output_target = {0};
-    create_matrix2d(&output_target, 1, 2);
+    create_matrix2d(&output_target, 1, 2, true);
     for(int j=0;j<output_target.cols_n;j++){
         output_target.values[0][j] = output_targets[j];
     }
@@ -244,7 +244,7 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
 
     matrix2d_t d_input = {0};
-    // create_matrix2d(&d_input, 1, 2);
+    // create_matrix2d(&d_input, 1, 2, true);
 
     compute_cost_derivative(&layer.output_activated, &output_target, &d_input);
 
