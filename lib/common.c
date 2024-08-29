@@ -80,6 +80,18 @@ void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output){
     }
 }
 
+void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end){
+    int output_rows = row_end - row_start + 1;
+    int output_cols = col_end - col_start + 1;
+    create_matrix2d(output, output_rows, output_cols, false);
+
+    for(int i=0;i<output_rows;i++){
+        for(int j=0;j<output_cols;j++){
+            output->values[i][j] = input->values[i+output_rows-1][j+output_cols-1];
+        }
+    }
+}
+
 void destroy_matrix2d(matrix2d_t* m){
     for(int i=0;i<m->rows_n;i++){
         free(m->values[i]);

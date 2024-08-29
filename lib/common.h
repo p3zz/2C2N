@@ -36,5 +36,6 @@ void matrix2d_sigmoid_inplace(const matrix2d_t* const m);
 void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output);
 void matrix2d_flatten(const matrix2d_t* const m, matrix2d_t* result);
 void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output);
+void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end);
 
 #endif

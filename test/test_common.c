@@ -276,7 +276,8 @@ void test_common_matrix2d_rotate180(void){
     }
     matrix2d_t result = {0};
     matrix2d_rotate180(&m, &result);
-
+    TEST_ASSERT_EQUAL_INT(3, result.rows_n);
+    TEST_ASSERT_EQUAL_INT(3, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[0][2]);
@@ -289,6 +290,51 @@ void test_common_matrix2d_rotate180(void){
     
     destroy_matrix2d(&m);
     destroy_matrix2d(&result);
+}
+
+void test_common_matrix3d_submatrix(void){
+    const float m_values[3][3] = {
+        {4.f, 3.f, 8.f},
+        {9.f, 1.f, 2.f},
+        {7.f, 7.f, 6.f}
+    };
+    matrix2d_t m = {0};
+    create_matrix2d(&m, 3, 3, false);
+    for(int i=0;i<m.rows_n;i++){
+        for(int j=0;j<m.cols_n;j++){
+            m.values[i][j] = m_values[i][j];
+        }
+    }
+    matrix2d_t result = {0};
+    matrix2d_submatrix(&m, &result, 1, 2, 1, 2);
+
+    TEST_ASSERT_EQUAL_INT(2, result.rows_n);
+    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(1.f, result.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(2.f, result.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[1][1]);
+}
+
+void test_common_matrix3d_submatrix_2(void){
+    const float m_values[3][3] = {
+        {4.f, 3.f, 8.f},
+        {9.f, 1.f, 2.f},
+        {7.f, 7.f, 6.f}
+    };
+    matrix2d_t m = {0};
+    create_matrix2d(&m, 3, 3, false);
+    for(int i=0;i<m.rows_n;i++){
+        for(int j=0;j<m.cols_n;j++){
+            m.values[i][j] = m_values[i][j];
+        }
+    }
+    matrix2d_t result = {0};
+    matrix2d_submatrix(&m, &result, 0, 0, 1, 1);
+
+    TEST_ASSERT_EQUAL_INT(1, result.rows_n);
+    TEST_ASSERT_EQUAL_INT(1, result.cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(3.f, result.values[0][0]);
 }
 
 int main(void)
@@ -305,6 +351,7 @@ int main(void)
     RUN_TEST(test_common_avg_pooling);
     RUN_TEST(test_common_matrix2d_flatten);
     RUN_TEST(test_common_matrix2d_rotate180);
+    RUN_TEST(test_common_matrix3d_submatrix);
     int result = UNITY_END();
 
     return result;
