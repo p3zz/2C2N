@@ -17,7 +17,7 @@ void zero_pad(const matrix2d_t* const m, matrix2d_t* result, int padding){
     }
 }
 
-void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride){
+void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride){
     matrix2d_t m1_pad = {0};
     zero_pad(m1, &m1_pad, padding);
 
@@ -25,8 +25,6 @@ void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, m
     int output_cols = (m1_pad.cols_n - m2->cols_n) / stride + 1;
 
     create_matrix2d(result, output_rows, output_cols, true);
-    matrix2d_print(&m1_pad);
-    matrix2d_print(m2);
 
     for(int i=0;i<result->rows_n;i++){
         for(int j=0;j<result->cols_n;j++){
@@ -43,6 +41,25 @@ void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, m
     }
 
     destroy_matrix2d(&m1_pad);
+}
+
+float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result){
+    float sum = 0;
+    for(int i=0;i<m1->rows_n;i++){
+        for(int j=0;j<m1->rows_n;j++){
+            sum += (m1->values[i][j] * m2->values[i][j]);
+        }
+    }
+    return sum;
+}
+
+void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result){
+    create_matrix2d(result, m1->rows_n, m1->cols_n, false);
+    for(int i=0;i<m1->rows_n;i++){
+        for(int j=0;j<m1->rows_n;j++){
+            result->values[i][j] = (m1->values[i][j] * m2->values[i][j]);
+        }
+    }
 }
 
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random){

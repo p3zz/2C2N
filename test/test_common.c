@@ -44,7 +44,7 @@ void test_common_cross_correlation_nopadding(void){
         }
     }
     matrix2d_t result = {};
-    cross_correlation(&m1, &m2, &result, 0, 1);
+    full_cross_correlation(&m1, &m2, &result, 0, 1);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
@@ -83,7 +83,7 @@ void test_common_cross_correlation_padding(void){
         }
     }
     matrix2d_t result = {};
-    cross_correlation(&m1, &m2, &result, 1, 1);
+    full_cross_correlation(&m1, &m2, &result, 1, 1);
     TEST_ASSERT_EQUAL_INT(4, result.rows_n);
     TEST_ASSERT_EQUAL_INT(4, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][0]);
@@ -137,7 +137,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         }
     }
     matrix2d_t result = {};
-    cross_correlation(&m1, &m2, &result, 0, 2);
+    full_cross_correlation(&m1, &m2, &result, 0, 2);
     TEST_ASSERT_EQUAL_INT(1, result.rows_n);
     TEST_ASSERT_EQUAL_INT(1, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
@@ -173,7 +173,7 @@ void test_common_cross_correlation_padding_stride(void){
         }
     }
     matrix2d_t result = {};
-    cross_correlation(&m1, &m2, &result, 1, 2);
+    full_cross_correlation(&m1, &m2, &result, 1, 2);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][0]);

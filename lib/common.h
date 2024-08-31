@@ -14,9 +14,10 @@ typedef struct {
     int depth;
 } matrix3d_t;
 
-void cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);
+void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);
 void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
+float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result);
 
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random);
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth);
@@ -37,5 +38,6 @@ void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output);
 void matrix2d_flatten(const matrix2d_t* const m, matrix2d_t* result);
 void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output);
 void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end);
+void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result);
 
 #endif

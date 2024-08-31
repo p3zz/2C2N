@@ -133,7 +133,7 @@ void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			// compute the cross correlation between a channel of the input and its corresponding kernel
-			cross_correlation(&input->layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
+			full_cross_correlation(&input->layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
 			//we only know here how big the result will be
 			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
 			// we need to allocate the memory for the result
@@ -162,7 +162,25 @@ void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 }
 
 void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate){
-	
+	matrix2d_t output_rot = {0};
+	matrix2d_t input_sub = {0};
+	matrix2d_t input_rot = {0};
+	// for each kernel of the layer
+	for(int i=0;i<layer->kernels_n;i++){
+		// rotate the corresponding output by 180
+		matrix2d_rotate180(&layer->output_activated.layers[i], &output_rot);
+		// full_cross_correlation(&output_rot, )
+		matrix3d_t* kernel = &layer->kernels[i];
+		// allocate space for the sub-matrix of the input
+		create_matrix2d(&input_sub, kernel->layers[0].rows_n, kernel->layers[0].cols_n, false);
+		for(int j=0;j<kernel->depth;j++){
+			for(int m=0;m<kernel->layers[j].rows_n;m++){
+				for(int n=0;n<kernel->layers[j].cols_n;n++){
+				}
+			}
+		}
+		destroy_matrix2d(&output_rot);
+	}
 }
 
 void destroy_conv_layer(conv_layer_t* layer){
