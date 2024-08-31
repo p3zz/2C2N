@@ -177,7 +177,13 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 	matrix2d_t d_kernel = {0};
 	// for each kernel of the layer
 	for(int i=0;i<layer->kernels_n;i++){
-		matrix2d_mul(&layer->output_activated.layers[i], &input->layers[i], &d_output);
+		matrix2d_copy(&layer->output.layers[i], &d_output);
+		for(int m=0;m<d_output.rows_n;m++){
+			for(int n=0;n<d_output.cols_n;n++){
+				d_output.values[m][n] = d_activate(d_output.values[m][n], layer->activation_type);
+			}
+		}
+		matrix2d_mul_inplace(&d_output, &input->layers[i]);
 		// for each layer of the current kernel compute the derivative
 		// using the cross correlation between the j-th input and the i-th output (rotated)
 		matrix3d_t* kernel = &layer->kernels[i];

@@ -56,7 +56,7 @@ float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, 
 void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result){
     create_matrix2d(result, m1->rows_n, m1->cols_n, false);
     for(int i=0;i<m1->rows_n;i++){
-        for(int j=0;j<m1->rows_n;j++){
+        for(int j=0;j<m1->cols_n;j++){
             result->values[i][j] = (m1->values[i][j] * m2->values[i][j]);
         }
     }
@@ -64,7 +64,7 @@ void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix
 
 void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2){
     for(int i=0;i<m1->rows_n;i++){
-        for(int j=0;j<m1->rows_n;j++){
+        for(int j=0;j<m1->cols_n;j++){
             m1->values[i][j] *= m2->values[i][j];
         }
     }

@@ -319,11 +319,9 @@ void test_backpropagation_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(2, d_input.depth);
     TEST_ASSERT_EQUAL_INT(2, d_input.layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(2, d_input.layers[0].cols_n);
-    matrix3d_print(&d_input);
     matrix3d_print(&layer.kernels[0]);
     backpropagation_conv_layer(&layer, &d_input, learning_rate);
     matrix3d_print(&layer.kernels[0]);
-    matrix3d_print(&layer.kernels[1]);
     destroy_matrix3d(&input);
     destroy_matrix3d(&d_input);
     destroy_conv_layer(&layer);
