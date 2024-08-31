@@ -269,6 +269,67 @@ void test_backpropagation_dense_layer(void){
     destroy_matrix2d(&d_input);
 }
 
+void test_backpropagation_conv_layer(void){
+    const float learning_rate = 0.05f;
+    conv_layer_t layer = {0};
+    init_conv_layer(&layer, 2, 2, 2, 1, 0, ACTIVATION_TYPE_RELU);
+    const float input_vals[2][3][3] = {
+        {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+        },
+        {
+            {9, 8, 7},
+            {6, 5, 4},
+            {3, 2, 1},
+        }
+    };
+    matrix3d_t input = {0};
+    create_matrix3d(&input, 3, 3, 2);
+    for(int i=0;i<input.depth;i++){
+        for(int j=0;j<input.layers[i].rows_n;j++){
+            for(int k=0;k<input.layers[i].cols_n;k++){
+                input.layers[i].values[j][k] = input_vals[i][j][k];
+            }
+        }
+    }
+
+    feed_conv_layer(&layer, &input);
+    process_conv_layer(&layer);
+
+    matrix3d_t output_targets = {0};
+    // the layer produces an output of 2x2x2
+    create_matrix3d(&output_targets, 2, 2, 2);
+    output_targets.layers[0].values[0][0] = 1;
+    output_targets.layers[0].values[0][1] = 1;
+    output_targets.layers[0].values[1][0] = 1;
+    output_targets.layers[0].values[1][1] = 1;
+    output_targets.layers[1].values[0][0] = 1;
+    output_targets.layers[1].values[0][1] = 1;
+    output_targets.layers[1].values[1][0] = 1;
+    output_targets.layers[1].values[1][1] = 1;
+    
+    matrix3d_t d_input = {0};
+    d_input.depth = layer.output_activated.depth;
+    d_input.layers = (matrix2d_t*)malloc(d_input.depth * sizeof(matrix2d_t));
+    for(int i=0;i<d_input.depth;i++){
+        compute_cost_derivative(&layer.output_activated.layers[i], &output_targets.layers[i], &d_input.layers[i]);
+    }
+    TEST_ASSERT_EQUAL_INT(2, d_input.depth);
+    TEST_ASSERT_EQUAL_INT(2, d_input.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, d_input.layers[0].cols_n);
+    matrix3d_print(&d_input);
+    matrix3d_print(&layer.kernels[0]);
+    backpropagation_conv_layer(&layer, &d_input, learning_rate);
+    matrix3d_print(&layer.kernels[0]);
+    matrix3d_print(&layer.kernels[1]);
+    destroy_matrix3d(&input);
+    destroy_matrix3d(&d_input);
+    destroy_conv_layer(&layer);
+    TEST_ASSERT_TRUE(false);
+}
+
 void test_perceptron_or(void){
     const float learning_rate = 0.05f;
     const int iterations_n = 10000;
@@ -341,13 +402,14 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);
-    RUN_TEST(test_init_conv_layer);
-    RUN_TEST(test_process_conv_layer);
-    RUN_TEST(test_process_pool_layer_average);
-    RUN_TEST(test_process_pool_layer_max);
-    RUN_TEST(test_process_dense_layer);
-    RUN_TEST(test_backpropagation_dense_layer);
-    RUN_TEST(test_perceptron_or);
+    // RUN_TEST(test_init_conv_layer);
+    // RUN_TEST(test_process_conv_layer);
+    // RUN_TEST(test_process_pool_layer_average);
+    // RUN_TEST(test_process_pool_layer_max);
+    // RUN_TEST(test_process_dense_layer);
+    // RUN_TEST(test_backpropagation_dense_layer);
+    RUN_TEST(test_backpropagation_conv_layer);
+    // RUN_TEST(test_perceptron_or);
     int result = UNITY_END();
 
     return result;

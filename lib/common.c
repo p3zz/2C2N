@@ -62,6 +62,14 @@ void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix
     }
 }
 
+void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2){
+    for(int i=0;i<m1->rows_n;i++){
+        for(int j=0;j<m1->rows_n;j++){
+            m1->values[i][j] *= m2->values[i][j];
+        }
+    }
+}
+
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
@@ -101,6 +109,21 @@ void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output){
     for(int i=0;i<input->rows_n;i++){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[input->rows_n - i - 1][input->cols_n - j - 1];
+        }
+    }
+}
+
+void matrix2d_rotate180_inplace(const matrix2d_t* const input){
+    float aux = 0;
+    int i_opposite = 0;
+    int j_opposite = 0;
+    for(int i=0;i<input->rows_n;i++){
+        for(int j=0;j<input->cols_n;j++){
+            i_opposite = input->rows_n - i - 1;
+            j_opposite = input->cols_n - j - 1;
+            aux = input->values[i][j];
+            input->values[i][j] = input->values[i_opposite][j_opposite];
+            input->values[i_opposite][j_opposite] = aux;
         }
     }
 }

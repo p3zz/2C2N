@@ -67,6 +67,7 @@ void init_conv_layer(
 	activation_type activation_type
 );
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input);
+void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate);
 void destroy_conv_layer(conv_layer_t* layer);
 void process_conv_layer(conv_layer_t* layer);
 
