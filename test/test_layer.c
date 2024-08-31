@@ -60,7 +60,8 @@ void test_process_conv_layer(void){
         }
     }
 
-    process_conv_layer(&layer, &input);
+    feed_conv_layer(&layer, &input);
+    process_conv_layer(&layer);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Kernels\n");

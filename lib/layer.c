@@ -125,15 +125,19 @@ void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* c
     }
 }
 
+void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
+	matrix3d_copy(input, &layer->input);
+}
+
 // TODO check if depth of each kernel is equal to the number of channels of the input
-void process_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
+void process_conv_layer(conv_layer_t* layer){
 	matrix2d_t result = {0};
 	layer->output.depth = layer->kernels_n;
 	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			// compute the cross correlation between a channel of the input and its corresponding kernel
-			full_cross_correlation(&input->layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
+			full_cross_correlation(&layer->input.layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
 			//we only know here how big the result will be
 			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
 			// we need to allocate the memory for the result
@@ -184,6 +188,7 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 }
 
 void destroy_conv_layer(conv_layer_t* layer){
+	destroy_matrix3d(&layer->input);
 	for(int i=0;i<layer->kernels_n;i++){
 		destroy_matrix3d(&layer->kernels[i]);
 		destroy_matrix2d(&layer->biases[i]);

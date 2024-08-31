@@ -40,4 +40,6 @@ void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output);
 void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end);
 void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result);
 
+void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output);
+
 #endif

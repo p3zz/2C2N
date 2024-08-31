@@ -88,6 +88,14 @@ void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output){
     }
 }
 
+void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output){
+    output->depth = input->depth;
+    output->layers = (matrix2d_t*)malloc(output->depth * sizeof(matrix2d_t));
+    for(int i=0;i<output->depth;i++){
+        matrix2d_copy(&input->layers[i], &output->layers[i]);
+    }
+}
+
 void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output){
     create_matrix2d(output, input->rows_n, input->cols_n, false);
     for(int i=0;i<input->rows_n;i++){
