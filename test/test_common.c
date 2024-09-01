@@ -200,13 +200,32 @@ void test_common_max_pooling(void){
         }
     }
     matrix2d_t result = {};
-    max_pooling(&m, &result, 2, 0, 1);
+    matrix3d_t indexes = {0};
+    max_pooling(&m, &result, &indexes, 2, 0, 1);
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].cols_n);
+
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[1].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[1].cols_n);
+
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+
     TEST_ASSERT_EQUAL_FLOAT(9.f, result.values[0][0]);
+    TEST_ASSERT_EQUAL_INT(1, indexes.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_INT(0, indexes.layers[1].values[0][0]);
+
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][1]);
+    TEST_ASSERT_EQUAL_INT(0, indexes.layers[0].values[0][1]);
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[1].values[0][1]);
+
     TEST_ASSERT_EQUAL_FLOAT(9.f, result.values[1][0]);
+    TEST_ASSERT_EQUAL_INT(1, indexes.layers[0].values[1][0]);
+    TEST_ASSERT_EQUAL_INT(0, indexes.layers[1].values[1][0]);
+
     TEST_ASSERT_EQUAL_FLOAT(7.f, result.values[1][1]);
+    TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].values[1][1]);
+    TEST_ASSERT_EQUAL_INT(1, indexes.layers[1].values[1][1]);
 
     destroy_matrix2d(&m);
     destroy_matrix2d(&result);

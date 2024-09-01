@@ -26,11 +26,13 @@ typedef struct{
 }conv_layer_t;
 
 typedef struct{
+	matrix3d_t input;
 	int kernel_size;
 	int stride;
 	int padding;
 	pooling_type type;
 	matrix3d_t output;
+	matrix3d_t* indexes;
 }pool_layer_t;
 
 typedef struct{
@@ -73,7 +75,8 @@ void destroy_conv_layer(conv_layer_t* layer);
 void process_conv_layer(conv_layer_t* layer);
 
 void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type);
-void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
+void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
+void process_pool_layer(pool_layer_t* layer);
 void destroy_pool_layer(pool_layer_t* layer);
 
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type);

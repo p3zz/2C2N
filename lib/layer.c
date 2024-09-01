@@ -103,16 +103,22 @@ void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const i
 	}
 }
 
-void process_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
-	layer->output.depth = input->depth;
+void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
+	matrix3d_copy(input, &layer->input);
+}
+
+void process_pool_layer(pool_layer_t* layer){
+	layer->output.depth = layer->input.depth;
 	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
-	for(int i=0;i<input->depth;i++){
+	layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
+
+	for(int i=0;i<layer->input.depth;i++){
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:
-				avg_pooling(&input->layers[i], &layer->output.layers[i], layer->kernel_size, layer->padding, layer->stride);
+				avg_pooling(&layer->input.layers[i], &layer->output.layers[i], layer->kernel_size, layer->padding, layer->stride);
 				break;
 			case POOLING_TYPE_MAX:
-				max_pooling(&input->layers[i], &layer->output.layers[i], layer->kernel_size, layer->padding, layer->stride);
+				max_pooling(&layer->input.layers[i], &layer->output.layers[i], &layer->indexes[i], layer->kernel_size, layer->padding, layer->stride);
 				break;
 		}
 	}

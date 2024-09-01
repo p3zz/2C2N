@@ -15,7 +15,7 @@ typedef struct {
 } matrix3d_t;
 
 void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);
-void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
+void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, matrix3d_t* indexes, int kernel_size, int padding, int stride);
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result);
 void convolution(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding);

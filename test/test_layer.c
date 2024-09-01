@@ -114,7 +114,8 @@ void test_process_pool_layer_average(void){
         }
     }
 
-    process_pool_layer(&layer, &input);
+    feed_pool_layer(&layer, &input);
+    process_pool_layer(&layer);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Output\n");
@@ -162,7 +163,8 @@ void test_process_pool_layer_max(void){
         }
     }
 
-    process_pool_layer(&layer, &input);
+    feed_pool_layer(&layer, &input);
+    process_pool_layer(&layer);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Output\n");

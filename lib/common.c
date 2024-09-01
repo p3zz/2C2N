@@ -183,27 +183,35 @@ void destroy_matrix3d(matrix3d_t* m){
     free(m->layers);
 }
 
-void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride){
+void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, matrix3d_t* indexes, int kernel_size, int padding, int stride){
     int output_rows = (mat->rows_n - kernel_size + 2 * padding) / stride + 1;
     int output_cols = (mat->cols_n - kernel_size + 2 * padding) / stride + 1;
 
     create_matrix2d(result, output_rows, output_cols, true);
 
+    create_matrix3d(indexes, result->rows_n, result->cols_n, 2);
+
     for(int i=0;i<result->rows_n;i++){
         for(int j=0;j<result->cols_n;j++){
             float max = 0;
+            int max_i = 0;
+            int max_j = 0;
             for(int m=0;m<kernel_size;m++){
                 for(int n=0;n<kernel_size;n++){
                     int row = i*stride + m - padding;
                     int col = j*stride + n - padding;
                     if(row >= 0 && row < mat->rows_n && col >= 0 && col < mat->cols_n){
                         if(mat->values[row][col] > max){
-                            max = mat->values[row][col];
+                            max_i = row;
+                            max_j = col;
+                            max = mat->values[max_i][max_j];
                         }
                     }
                 }
             }
             result->values[i][j] = max;
+            indexes->layers[0].values[i][j] = max_i;
+            indexes->layers[1].values[i][j] = max_j;
         }
     }
 }
