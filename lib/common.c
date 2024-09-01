@@ -43,6 +43,13 @@ void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const 
     destroy_matrix2d(&m1_pad);
 }
 
+void convolution(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding){
+    matrix2d_t m2_rot = {0};
+    matrix2d_rotate180(m2, &m2_rot);
+    full_cross_correlation(m1, &m2_rot, result, padding, 1);
+    destroy_matrix2d(&m2_rot);
+}
+
 float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result){
     float sum = 0;
     for(int i=0;i<m1->rows_n;i++){
@@ -93,6 +100,20 @@ void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[i][j];
         }
+    }
+}
+
+void matrix2d_erase(matrix2d_t* input){
+    for(int i=0;i<input->rows_n;i++){
+        for(int j=0;j<input->cols_n;j++){
+            input->values[i][j] = 0.f;
+        }
+    }
+}
+
+void matrix3d_erase(matrix3d_t* input){
+    for(int i=0;i<input->depth;i++){
+        matrix2d_erase(&input->layers[i]);
     }
 }
 

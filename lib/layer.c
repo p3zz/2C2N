@@ -129,6 +129,8 @@ void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* c
 
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy(input, &layer->input);
+	matrix3d_copy(input, &layer->d_input);
+	matrix3d_erase(&layer->d_input);
 }
 
 // TODO check if depth of each kernel is equal to the number of channels of the input
@@ -173,10 +175,18 @@ void process_conv_layer(conv_layer_t* layer){
 }
 
 void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate){
+	// matrix used to store the product (element x element) between the input and the derivative of the activation function of each
+	// output of the layer
 	matrix2d_t d_output = {0};
-	matrix2d_t d_kernel = {0};
+	matrix3d_t* d_kernel = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
+	// matrix used to store the result of each convolution between the input (from the next layer) and the kernel
+	matrix2d_t d_input_aux = {0};
 	// for each kernel of the layer
 	for(int i=0;i<layer->kernels_n;i++){
+		// allocate layers of d_kernel[i]
+		d_kernel[i].depth = layer->kernels[i].depth;
+		d_kernel[i].layers = (matrix2d_t*)malloc(d_kernel[i].depth*sizeof(matrix2d_t));
+
 		matrix2d_copy(&layer->output.layers[i], &d_output);
 		for(int m=0;m<d_output.rows_n;m++){
 			for(int n=0;n<d_output.cols_n;n++){
@@ -184,25 +194,40 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			}
 		}
 		matrix2d_mul_inplace(&d_output, &input->layers[i]);
+		
 		// for each layer of the current kernel compute the derivative
 		// using the cross correlation between the j-th input and the i-th output (rotated)
 		matrix3d_t* kernel = &layer->kernels[i];
 		for(int j=0;j<kernel->depth;j++){
+			// compute the derivative for the correction of the kernel
 			// TODO correct also we the stride
-			full_cross_correlation(&layer->input.layers[j], &d_output, &d_kernel, layer->padding, 1);
-			for(int m=0;m<kernel->layers[j].rows_n;m++){
-				for(int n=0;n<kernel->layers[j].cols_n;n++){
-					kernel->layers[j].values[m][n] = gradient_descent(kernel->layers[j].values[m][n], learning_rate, d_kernel.values[m][n]);
-				}
+			full_cross_correlation(&layer->input.layers[j], &d_output, &d_kernel[i].layers[j], layer->padding, 1);
+			// compute the derivative for the correction of the input
+			convolution(&d_output, &kernel->layers[j], &d_input_aux, kernel->layers[j].rows_n - input->layers[j].rows_n + 1);
+			if(i == 0){
+				create_matrix2d(&layer->d_input.layers[j], d_input_aux.rows_n, d_input_aux.cols_n, false);
 			}
-			destroy_matrix2d(&d_kernel);
+			matrix2d_sum_inplace(&d_input_aux, &layer->d_input.layers[j]);
+			destroy_matrix2d(&d_input_aux);
 		}
 		destroy_matrix2d(&d_output);
+	}
+
+	// update weights
+	for(int i=0;i<layer->kernels_n;i++){
+		for(int j=0;j<layer->kernels[i].depth;j++){
+			for(int m=0;m<layer->kernels[i].layers[j].rows_n;m++){
+				for(int n=0;n<layer->kernels[i].layers[j].cols_n;n++){
+					layer->kernels[i].layers[j].values[m][n] = gradient_descent(layer->kernels[i].layers[j].values[m][n], learning_rate, d_kernel[i].layers[j].values[m][n]);
+				}
+			}
+		}
 	}
 }
 
 void destroy_conv_layer(conv_layer_t* layer){
 	destroy_matrix3d(&layer->input);
+	destroy_matrix3d(&layer->d_input);
 	for(int i=0;i<layer->kernels_n;i++){
 		destroy_matrix3d(&layer->kernels[i]);
 		destroy_matrix2d(&layer->biases[i]);

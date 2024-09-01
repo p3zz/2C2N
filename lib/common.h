@@ -18,6 +18,7 @@ void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const 
 void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result);
+void convolution(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding);
 
 void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random);
 void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth);
@@ -41,6 +42,8 @@ void matrix2d_rotate180_inplace(const matrix2d_t* const input);
 void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end);
 void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result);
 void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2);
+void matrix2d_erase(matrix2d_t* input);
+void matrix3d_erase(matrix3d_t* input);
 
 void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output);
 

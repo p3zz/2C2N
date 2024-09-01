@@ -22,6 +22,7 @@ typedef struct{
 	activation_type activation_type;
 	matrix3d_t output;
 	matrix3d_t output_activated;
+	matrix3d_t d_input;
 }conv_layer_t;
 
 typedef struct{
