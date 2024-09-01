@@ -376,7 +376,7 @@ int main(void)
     RUN_TEST(test_common_avg_pooling);
     RUN_TEST(test_common_matrix2d_rotate180);
     RUN_TEST(test_common_matrix3d_submatrix);
-    // RUN_TEST(test_common_matrix3d_submatrix_2);
+    RUN_TEST(test_common_matrix3d_submatrix_2);
     RUN_TEST(test_common_matrix2d_reshape);
     RUN_TEST(test_common_matrix2d_reshape_2);
     int result = UNITY_END();

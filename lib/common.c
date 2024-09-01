@@ -156,7 +156,7 @@ void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int r
 
     for(int i=0;i<output_rows;i++){
         for(int j=0;j<output_cols;j++){
-            output->values[i][j] = input->values[i+output_rows-1][j+output_cols-1];
+            output->values[i][j] = input->values[i+row_start][j+col_start];
         }
     }
 }
