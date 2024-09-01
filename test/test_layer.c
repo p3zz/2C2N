@@ -329,10 +329,12 @@ void test_backpropagation_conv_layer(void){
     matrix3d_print(&layer.kernels[0]);
     printf("[after] bias\n");
     matrix2d_print(&layer.biases[0]);
+    printf("[after] d_input\n");
+    matrix3d_print(&layer.d_input);
     destroy_matrix3d(&input);
     destroy_matrix3d(&d_input);
     destroy_conv_layer(&layer);
-    TEST_ASSERT_TRUE(false);
+    // TEST_ASSERT_TRUE(false);
 }
 
 void test_perceptron_or(void){

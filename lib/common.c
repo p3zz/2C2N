@@ -292,13 +292,14 @@ void matrix3d_print(const matrix3d_t* const m){
     }
 }
 
-void matrix2d_flatten(const matrix2d_t* const m, matrix2d_t* result){
-    int idx = 0;
-    create_matrix2d(result, 1, m->rows_n * m->cols_n, true);
-    for(int i=0;i<m->rows_n;i++){
-        for(int j=0;j<m->cols_n;j++){
-            result->values[0][idx] = m->values[i][j];
-            idx++;
-        }
+void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n, int cols_n){
+    int m_elems_n = m->rows_n * m->cols_n;
+    int result_elems_n = rows_n * cols_n;
+    if(m_elems_n != result_elems_n){
+        return;
+    }
+    create_matrix2d(result, rows_n, cols_n, false);
+    for (int i = 0; i < result_elems_n; i++) {
+        result->values[i / result->cols_n][i % result->cols_n] = m->values[i / m->cols_n][i % m->cols_n];
     }
 }
