@@ -230,6 +230,10 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			}
 		}
 	}
+	for(int i=0;i<layer->kernels_n;i++){
+		destroy_matrix3d(&d_kernel[i]);
+	}
+	free(d_kernel);
 }
 
 void destroy_conv_layer(conv_layer_t* layer){
