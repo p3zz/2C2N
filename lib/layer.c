@@ -210,6 +210,13 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			matrix2d_sum_inplace(&d_input_aux, &layer->d_input.layers[j]);
 			destroy_matrix2d(&d_input_aux);
 		}
+
+		// update biases
+		for(int m=0;m<d_output.rows_n;m++){
+			for(int n=0;n<d_output.rows_n;n++){
+				layer->biases->values[m][n] = gradient_descent(layer->biases->values[m][n], d_output.values[m][n], learning_rate);
+			}
+		}
 		destroy_matrix2d(&d_output);
 	}
 
