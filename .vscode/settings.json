@@ -12,6 +12,9 @@
         "network.h": "c",
         "chrono": "c",
         "executor": "c",
-        "functional": "c"
+        "functional": "c",
+        "random": "c",
+        "limits": "c",
+        "semaphore": "c"
     }
 }

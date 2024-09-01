@@ -124,6 +124,21 @@ void process_pool_layer(pool_layer_t* layer){
 	}
 }
 
+// TODO add avg_pooling handling, this is correct just for max_pooling
+void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
+	matrix3d_copy(&layer->input, &layer->d_input);
+	matrix3d_erase(&layer->d_input);
+	for(int i=0;i<layer->d_input.depth;i++){
+		for(int m=0;m<layer->indexes[i].layers[0].rows_n;m++){
+			for(int n=0;n<layer->indexes[i].layers[0].cols_n;n++){
+				int row_i = layer->indexes[i].layers[0].values[m][n];
+				int col_i = layer->indexes[i].layers[1].values[m][n];
+				layer->d_input.layers[i].values[row_i][col_i] += input->layers[i].values[m][n];
+			}
+		}
+	}
+}
+
 void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
     create_matrix2d(result, output->rows_n, output->cols_n, true);
 	for(int i=0;i<output->rows_n;i++){
