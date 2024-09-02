@@ -13,6 +13,7 @@ layer_t_old create_layer(int neurons_num)
 }
 
 // ------------------------------ INIT ------------------------------
+// TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type){
 	layer->kernel_size = kernel_size;
 	layer->padding = padding;
@@ -20,6 +21,7 @@ void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stri
 	layer->type = type;
 }
 
+// TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_conv_layer(
 	conv_layer_t* layer,
 	int kernel_size,
@@ -46,6 +48,7 @@ void init_conv_layer(
 	layer->activation_type = activation_type;
 }
 
+// TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
 	create_matrix2d(&layer->inputs, 1, input_n, true);
 	create_matrix2d(&layer->d_inputs, 1, input_n, true);
@@ -64,6 +67,9 @@ void feed_dense_layer(dense_layer_t* layer, const matrix2d_t* const input){
 
 void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy(input, &layer->input);
+	layer->output.depth = layer->input.depth;
+	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
+	layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
 }
 
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
@@ -95,10 +101,6 @@ void process_dense_layer(dense_layer_t* layer){
 }
 
 void process_pool_layer(pool_layer_t* layer){
-	layer->output.depth = layer->input.depth;
-	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
-	layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
-
 	for(int i=0;i<layer->input.depth;i++){
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:
