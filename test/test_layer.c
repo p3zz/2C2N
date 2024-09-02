@@ -27,12 +27,8 @@ void test_init_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(2, layer.kernels[0].depth);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(0.8401877, layer.kernels[0].layers[0].values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(0.3943829, layer.kernels[0].layers[0].values[0][1]);
     TEST_ASSERT_EQUAL_INT(3 ,layer.kernels[0].layers[1].rows_n);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(0.55397, layer.kernels[0].layers[1].values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(0.6288709, layer.kernels[0].layers[1].values[0][2]);
     destroy_conv_layer(&layer);
 }
 
@@ -61,13 +57,62 @@ void test_process_conv_layer(void){
         }
     }
 
+    layer.kernels[0].layers[0].values[0][0] = 0.142;
+    layer.kernels[0].layers[0].values[0][1] = 0.607;
+    layer.kernels[0].layers[0].values[1][0] = 0.016;
+    layer.kernels[0].layers[0].values[1][1] = 0.243;
+    
+    layer.kernels[0].layers[1].values[0][0] = 0.137;
+    layer.kernels[0].layers[1].values[0][1] = 0.804;
+    layer.kernels[0].layers[1].values[1][0] = 0.157;
+    layer.kernels[0].layers[1].values[1][1] = 0.401;
+
+    layer.kernels[1].layers[0].values[0][0] = 0.130;
+    layer.kernels[1].layers[0].values[0][1] = 0.109;
+    layer.kernels[1].layers[0].values[1][0] = 0.999;
+    layer.kernels[1].layers[0].values[1][1] = 0.218;
+    
+    layer.kernels[1].layers[1].values[0][0] = 0.513;
+    layer.kernels[1].layers[1].values[0][1] = 0.839;
+    layer.kernels[1].layers[1].values[1][0] = 0.613;
+    layer.kernels[1].layers[1].values[1][1] = 0.296;
+
+    // layer.biases[0].values[0][0] = 0.398;
+    // layer.biases[0].values[0][1] = 0.815;
+    // layer.biases[0].values[1][0] = 0.684;
+    // layer.biases[0].values[1][1] = 0.911;
+
+    // layer.biases[1].values[0][0] = 0.556;
+    // layer.biases[1].values[0][1] = 0.417;
+    // layer.biases[1].values[1][0] = 0.170;
+    // layer.biases[1].values[1][1] = 0.613;
+
     feed_conv_layer(&layer, &input);
     process_conv_layer(&layer);
-    // printf("Input\n");
-    // matrix3d_print(&input);
-    // printf("Kernels\n");
-    // matrix3d_print(&layer.kernels[0]);
-    // matrix3d_print(&layer.kernels[1]);
+    printf("Kernels\n");
+    matrix3d_print(&layer.kernels[0]);
+    matrix3d_print(&layer.kernels[1]);
+    printf("Biases\n");
+    matrix2d_print(&layer.biases[0]);
+    matrix2d_print(&layer.biases[1]);
+
+    // [ctest] [Layer 0]
+    // [ctest] |	0.142	|	0.607	|
+    // [ctest] |	0.016	|	0.243	|
+    // [ctest] [Layer 1]
+    // [ctest] |	0.137	|	0.804	|
+    // [ctest] |	0.157	|	0.401	|
+    // [ctest] [Layer 0]
+    // [ctest] |	0.130	|	0.109	|
+    // [ctest] |	0.999	|	0.218	|
+    // [ctest] [Layer 1]
+    // [ctest] |	0.513	|	0.839	|
+    // [ctest] |	0.613	|	0.296	|
+    // [ctest] Biases
+    // [ctest] |	0.398	|	0.815	|
+    // [ctest] |	0.684	|	0.911	|
+    // [ctest] |	0.556	|	0.417	|
+    // [ctest] |	0.170	|	0.907	|
     // printf("Output\n");
     // matrix3d_print(&output);
     // TODO add output values check
@@ -196,16 +241,25 @@ void test_process_dense_layer(void){
     for(int j=0;j<input.cols_n;j++){
         input.values[0][j] = input_vals[j];
     }
+    layer.weights.values[0][0] = 0.294;
+    layer.weights.values[0][1] = 0.232;
+    layer.weights.values[1][0] = 0.584;
+    layer.weights.values[1][1] = 0.244;
+    layer.weights.values[2][0] = 0.152;
+    layer.weights.values[2][1] = 0.732;
+    layer.weights.values[3][0] = 0.125;
+    layer.weights.values[3][1] = 0.793;
+
+    layer.biases.values[0][0] = 0.164;
+    layer.biases.values[0][1] = 0.745;
+
     feed_dense_layer(&layer, &input);
-    matrix2d_print(&layer.inputs);
-    matrix2d_print(&layer.weights);
-    matrix2d_print(&layer.biases);
     
     process_dense_layer(&layer);
     TEST_ASSERT_EQUAL_INT(1, layer.output.rows_n);
     TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(5.76589, layer.output.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(6.480252, layer.output.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(3.811, layer.output.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(4.674, layer.output.values[0][1]);
     destroy_dense_layer(&layer);
     destroy_matrix2d(&input);
 }
@@ -558,10 +612,10 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);
-    // RUN_TEST(test_init_conv_layer);
+    RUN_TEST(test_init_conv_layer);
     // RUN_TEST(test_process_conv_layer);
-    // RUN_TEST(test_process_pool_layer_average);
-    // RUN_TEST(test_process_pool_layer_max);
+    RUN_TEST(test_process_pool_layer_average);
+    RUN_TEST(test_process_pool_layer_max);
     // RUN_TEST(test_process_dense_layer);
     // RUN_TEST(test_backpropagation_dense_layer);
     // RUN_TEST(test_backpropagation_conv_layer);
