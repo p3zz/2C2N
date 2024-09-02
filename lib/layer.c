@@ -124,17 +124,49 @@ void process_pool_layer(pool_layer_t* layer){
 	}
 }
 
+// https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/
 // TODO add avg_pooling handling, this is correct just for max_pooling
 void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy(&layer->input, &layer->d_input);
 	matrix3d_erase(&layer->d_input);
-	for(int i=0;i<layer->d_input.depth;i++){
-		for(int m=0;m<layer->indexes[i].layers[0].rows_n;m++){
-			for(int n=0;n<layer->indexes[i].layers[0].cols_n;n++){
-				int row_i = layer->indexes[i].layers[0].values[m][n];
-				int col_i = layer->indexes[i].layers[1].values[m][n];
-				layer->d_input.layers[i].values[row_i][col_i] += input->layers[i].values[m][n];
+	switch(layer->type){
+		case POOLING_TYPE_MAX: {
+			for(int i=0;i<layer->d_input.depth;i++){
+				for(int m=0;m<layer->indexes[i].layers[0].rows_n;m++){
+					for(int n=0;n<layer->indexes[i].layers[0].cols_n;n++){
+						int row_i = layer->indexes[i].layers[0].values[m][n];
+						int col_i = layer->indexes[i].layers[1].values[m][n];
+						layer->d_input.layers[i].values[row_i][col_i] += input->layers[i].values[m][n];
+					}
+				}
 			}
+			break;
+		}
+
+		case POOLING_TYPE_AVERAGE: {
+			for(int l=0;l<layer->output.depth;l++){
+				matrix2d_t* output_layer = &layer->output.layers[l];
+				for (int h = 0; h < output_layer->rows_n; h++) {
+					for (int w = 0; w < output_layer->cols_n; w++) {
+						// The gradient from the output for this pooled region
+						float gradient = input->layers[l].values[h][w];
+						
+						// Distribute the gradient to each input element in the pooling region
+						for (int i = 0; i < layer->kernel_size; i++) {
+							for (int j = 0; j < layer->kernel_size; j++) {
+								int input_h = h * layer->stride + i;
+								int input_w = w * layer->stride + j;
+								
+								// Ensure we're within bounds (important for cases where pooling window goes out of input bounds)
+								if (input_h < layer->input.layers[l].rows_n && input_w < layer->input.layers[l].cols_n) {
+									layer->d_input.layers[l].values[input_h][input_w] += gradient / (float)(layer->kernel_size * layer->kernel_size);
+								}
+							}
+						}
+					}
+				}
+			}
+			break;
 		}
 	}
 }
@@ -281,6 +313,13 @@ void destroy_dense_layer(dense_layer_t* layer){
 
 void destroy_pool_layer(pool_layer_t* layer){
 	destroy_matrix3d(&layer->output);
+	destroy_matrix3d(&layer->input);
+	destroy_matrix3d(&layer->d_input);
+	if(layer->type == POOLING_TYPE_MAX){
+		for(int i=0;i<layer->input.depth;i++){
+			destroy_matrix3d(&layer->indexes[i]);
+		}
+	}
 }
 
 void destroy_layer(layer_t_old* layer){
