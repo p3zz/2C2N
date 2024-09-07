@@ -88,7 +88,7 @@ void test_process_conv_layer(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, input_height, input_width, input_depth);
+    matrix3d_init(&input, input_height, input_width, input_depth);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -154,7 +154,7 @@ void test_process_conv_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(19.314, layer.output.layers[1].values[1][1]);
 
     destroy_conv_layer(&layer);
-    destroy_matrix3d(&input);
+    matrix3d_destroy(&input);
 }
 
 void test_process_pool_layer_average(void){
@@ -173,7 +173,7 @@ void test_process_pool_layer_average(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    matrix3d_init(&input, 3, 3, 2);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -202,7 +202,7 @@ void test_process_pool_layer_average(void){
     TEST_ASSERT_EQUAL_FLOAT(4, layer.output.layers[1].values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(3, layer.output.layers[1].values[1][1]);
     
-    destroy_matrix3d(&input);
+    matrix3d_destroy(&input);
     destroy_pool_layer(&layer);
 }
 
@@ -222,7 +222,7 @@ void test_process_pool_layer_max(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    matrix3d_init(&input, 3, 3, 2);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -251,7 +251,7 @@ void test_process_pool_layer_max(void){
     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[1].values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(5, layer.output.layers[1].values[1][1]);
     destroy_pool_layer(&layer);
-    destroy_matrix3d(&input);
+    matrix3d_destroy(&input);
 }
 
 void test_process_dense_layer(void){
@@ -260,7 +260,7 @@ void test_process_dense_layer(void){
 
     const float input_vals[4] = {3.f, 4.f, 2.f, 1.f};
     matrix2d_t input = {0};
-    create_matrix2d(&input, 1, 4);
+    matrix2d_init(&input, 1, 4);
     for(int j=0;j<input.cols_n;j++){
         input.values[0][j] = input_vals[j];
     }
@@ -284,7 +284,7 @@ void test_process_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.811, layer.output.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(4.674, layer.output.values[0][1]);
     destroy_dense_layer(&layer);
-    destroy_matrix2d(&input);
+    matrix2d_destroy(&input);
 }
 
 void test_backpropagation_dense_layer(void){
@@ -295,13 +295,13 @@ void test_backpropagation_dense_layer(void){
     const float output_targets[2] = {1.f, 0.f};
 
     matrix2d_t input = {0};
-    create_matrix2d(&input, 1, 3);
+    matrix2d_init(&input, 1, 3);
     for(int j=0;j<input.cols_n;j++){
         input.values[0][j] = input_vals[j];
     }
 
     matrix2d_t output_target = {0};
-    create_matrix2d(&output_target, 1, 2);
+    matrix2d_init(&output_target, 1, 2);
     for(int j=0;j<output_target.cols_n;j++){
         output_target.values[0][j] = output_targets[j];
     }
@@ -325,7 +325,7 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
 
     matrix2d_t d_input = {0};
-    create_matrix2d(&d_input, output_target.rows_n, output_target.cols_n);
+    matrix2d_init(&d_input, output_target.rows_n, output_target.cols_n);
 
     compute_cost_derivative(&layer.output_activated, &output_target, &d_input);
 
@@ -344,9 +344,9 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(-1.141373, layer.weights.values[1][1]);
 
     destroy_dense_layer(&layer);
-    destroy_matrix2d(&input);
-    destroy_matrix2d(&output_target);
-    destroy_matrix2d(&d_input);
+    matrix2d_destroy(&input);
+    matrix2d_destroy(&output_target);
+    matrix2d_destroy(&d_input);
 }
 
 void test_backpropagation_conv_layer(void){
@@ -373,7 +373,7 @@ void test_backpropagation_conv_layer(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    matrix3d_init(&input, 3, 3, 2);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -417,7 +417,7 @@ void test_backpropagation_conv_layer(void){
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
-    create_matrix3d(&output_targets, 2, 2, 2);
+    matrix3d_init(&output_targets, 2, 2, 2);
     output_targets.layers[0].values[0][0] = 1;
     output_targets.layers[0].values[0][1] = 1;
     output_targets.layers[0].values[1][0] = 1;
@@ -428,7 +428,7 @@ void test_backpropagation_conv_layer(void){
     output_targets.layers[1].values[1][1] = 1;
     
     matrix3d_t d_input = {0};
-    create_matrix3d(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output_activated.depth);
+    matrix3d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output_activated.depth);
     for(int i=0;i<d_input.depth;i++){
         compute_cost_derivative(&layer.output_activated.layers[i], &output_targets.layers[i], &d_input.layers[i]);
     }
@@ -451,9 +451,9 @@ void test_backpropagation_conv_layer(void){
     printf("[after] d_input\n");
     matrix3d_print(&layer.d_input);
 
-    destroy_matrix3d(&input);
-    destroy_matrix3d(&output_targets);
-    destroy_matrix3d(&d_input);
+    matrix3d_destroy(&input);
+    matrix3d_destroy(&output_targets);
+    matrix3d_destroy(&d_input);
     destroy_conv_layer(&layer);
     // TEST_ASSERT_TRUE(false);
 }
@@ -474,7 +474,7 @@ void test_backpropagation_max_pool_layer(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    matrix3d_init(&input, 3, 3, 2);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -488,7 +488,7 @@ void test_backpropagation_max_pool_layer(void){
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
-    create_matrix3d(&output_targets, 2, 2, 2);
+    matrix3d_init(&output_targets, 2, 2, 2);
     output_targets.layers[0].values[0][0] = 1;
     output_targets.layers[0].values[0][1] = 1;
     output_targets.layers[0].values[1][0] = 1;
@@ -499,7 +499,7 @@ void test_backpropagation_max_pool_layer(void){
     output_targets.layers[1].values[1][1] = 1;
 
     matrix3d_t d_input = {0};
-    create_matrix3d(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output.depth);
+    matrix3d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output.depth);
     for(int i=0;i<d_input.depth;i++){
         compute_cost_derivative(&layer.output.layers[i], &output_targets.layers[i], &d_input.layers[i]);
     }
@@ -523,9 +523,9 @@ void test_backpropagation_max_pool_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(16.0, layer.d_input.layers[0].values[2][2]);
 
     destroy_pool_layer(&layer);
-    destroy_matrix3d(&d_input);
-    destroy_matrix3d(&input);
-    destroy_matrix3d(&output_targets);
+    matrix3d_destroy(&d_input);
+    matrix3d_destroy(&input);
+    matrix3d_destroy(&output_targets);
 }
 
 void test_backpropagation_avg_pool_layer(void){
@@ -544,7 +544,7 @@ void test_backpropagation_avg_pool_layer(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    matrix3d_init(&input, 3, 3, 2);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -558,7 +558,7 @@ void test_backpropagation_avg_pool_layer(void){
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
-    create_matrix3d(&output_targets, 2, 2, 2);
+    matrix3d_init(&output_targets, 2, 2, 2);
     output_targets.layers[0].values[0][0] = 1;
     output_targets.layers[0].values[0][1] = 1;
     output_targets.layers[0].values[1][0] = 1;
@@ -569,7 +569,7 @@ void test_backpropagation_avg_pool_layer(void){
     output_targets.layers[1].values[1][1] = 1;
 
     matrix3d_t d_input = {0};
-    create_matrix3d(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output.depth);
+    matrix3d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, layer.output.depth);
     for(int i=0;i<d_input.depth;i++){
         compute_cost_derivative(&layer.output.layers[i], &output_targets.layers[i], &d_input.layers[i]);
     }
@@ -598,9 +598,9 @@ void test_backpropagation_avg_pool_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.0, layer.d_input.layers[0].values[2][2]);
 
     destroy_pool_layer(&layer);
-    destroy_matrix3d(&d_input);
-    destroy_matrix3d(&input);
-    destroy_matrix3d(&output_targets);
+    matrix3d_destroy(&d_input);
+    matrix3d_destroy(&input);
+    matrix3d_destroy(&output_targets);
 }
 
 void test_perceptron_or(void){
@@ -613,7 +613,7 @@ void test_perceptron_or(void){
     dense_layer_t hidden_layer = {0};
     matrix2d_t d_input = {0};
 
-    create_matrix3d(&inputs, 1, 2, 4);
+    matrix3d_init(&inputs, 1, 2, 4);
     inputs.layers[0].values[0][0] = 0;
     inputs.layers[0].values[0][1] = 0;
 
@@ -626,7 +626,7 @@ void test_perceptron_or(void){
     inputs.layers[3].values[0][0] = 1;
     inputs.layers[3].values[0][1] = 1;
 
-    create_matrix3d(&output_targets, 1, 1, 4);
+    matrix3d_init(&output_targets, 1, 1, 4);
     output_targets.layers[0].values[0][0] = 0;
 
     output_targets.layers[1].values[0][0] = 1;
@@ -639,7 +639,7 @@ void test_perceptron_or(void){
     
     init_dense_layer(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    create_matrix2d(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
+    matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
 
     for(int i=0;i<iterations_n;i++){
         for(int j=0;j<inputs.depth;j++){
@@ -666,9 +666,9 @@ void test_perceptron_or(void){
         TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
     }
 
-    destroy_matrix3d(&inputs);
-    destroy_matrix2d(&d_input);
-    destroy_matrix3d(&output_targets);
+    matrix3d_destroy(&inputs);
+    matrix2d_destroy(&d_input);
+    matrix3d_destroy(&output_targets);
     destroy_dense_layer(&input_layer);
     destroy_dense_layer(&hidden_layer);
 }
@@ -683,7 +683,7 @@ void test_perceptron_and(void){
     dense_layer_t hidden_layer = {0};
     matrix2d_t d_input = {0};
 
-    create_matrix3d(&inputs, 1, 2, 4);
+    matrix3d_init(&inputs, 1, 2, 4);
     inputs.layers[0].values[0][0] = 0;
     inputs.layers[0].values[0][1] = 0;
 
@@ -696,7 +696,7 @@ void test_perceptron_and(void){
     inputs.layers[3].values[0][0] = 1;
     inputs.layers[3].values[0][1] = 1;
 
-    create_matrix3d(&output_targets, 1, 1, 4);
+    matrix3d_init(&output_targets, 1, 1, 4);
     output_targets.layers[0].values[0][0] = 0;
 
     output_targets.layers[1].values[0][0] = 0;
@@ -709,7 +709,7 @@ void test_perceptron_and(void){
     
     init_dense_layer(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    create_matrix2d(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
+    matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
 
     for(int i=0;i<iterations_n;i++){
         for(int j=0;j<inputs.depth;j++){
@@ -736,9 +736,9 @@ void test_perceptron_and(void){
         TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
     }
 
-    destroy_matrix3d(&inputs);
-    destroy_matrix2d(&d_input);
-    destroy_matrix3d(&output_targets);
+    matrix3d_destroy(&inputs);
+    matrix2d_destroy(&d_input);
+    matrix3d_destroy(&output_targets);
     destroy_dense_layer(&input_layer);
     destroy_dense_layer(&hidden_layer);
 }

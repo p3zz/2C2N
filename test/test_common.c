@@ -26,7 +26,7 @@ void test_common_cross_correlation_nopadding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    matrix2d_init(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -38,7 +38,7 @@ void test_common_cross_correlation_nopadding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    matrix2d_init(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -51,7 +51,7 @@ void test_common_cross_correlation_nopadding(void){
     int result_height;
     int result_width;
     compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
@@ -60,9 +60,9 @@ void test_common_cross_correlation_nopadding(void){
     TEST_ASSERT_EQUAL_FLOAT(74.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(43.f, result.values[1][1]);
 
-    destroy_matrix2d(&m1);
-    destroy_matrix2d(&m2);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m1);
+    matrix2d_destroy(&m2);
+    matrix2d_destroy(&result);
 }
 
 void test_common_cross_correlation_padding(void){
@@ -72,7 +72,7 @@ void test_common_cross_correlation_padding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    matrix2d_init(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -84,7 +84,7 @@ void test_common_cross_correlation_padding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    matrix2d_init(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -97,7 +97,7 @@ void test_common_cross_correlation_padding(void){
     int result_height;
     int result_width;
     compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(4, result.rows_n);
     TEST_ASSERT_EQUAL_INT(4, result.cols_n);
@@ -121,9 +121,9 @@ void test_common_cross_correlation_padding(void){
     TEST_ASSERT_EQUAL_FLOAT(46.f, result.values[3][2]);
     TEST_ASSERT_EQUAL_FLOAT(24.f, result.values[3][3]);
     
-    destroy_matrix2d(&m1);
-    destroy_matrix2d(&m2);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m1);
+    matrix2d_destroy(&m2);
+    matrix2d_destroy(&result);
 }
 
 void test_common_cross_correlation_nopadding_stride(void){
@@ -133,7 +133,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    matrix2d_init(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -145,7 +145,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    matrix2d_init(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -158,15 +158,15 @@ void test_common_cross_correlation_nopadding_stride(void){
     int result_height;
     int result_width;
     compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(1, result.rows_n);
     TEST_ASSERT_EQUAL_INT(1, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
 
-    destroy_matrix2d(&m1);
-    destroy_matrix2d(&m2);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m1);
+    matrix2d_destroy(&m2);
+    matrix2d_destroy(&result);
 }
 
 void test_common_cross_correlation_padding_stride(void){
@@ -176,7 +176,7 @@ void test_common_cross_correlation_padding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3);
+    matrix2d_init(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -188,7 +188,7 @@ void test_common_cross_correlation_padding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2);
+    matrix2d_init(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -201,7 +201,7 @@ void test_common_cross_correlation_padding_stride(void){
     int result_height;
     int result_width;
     compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
@@ -210,9 +210,9 @@ void test_common_cross_correlation_padding_stride(void){
     TEST_ASSERT_EQUAL_FLOAT(41.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(43.f, result.values[1][1]);
 
-    destroy_matrix2d(&m1);
-    destroy_matrix2d(&m2);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m1);
+    matrix2d_destroy(&m2);
+    matrix2d_destroy(&result);
 }
 
 void test_common_max_pooling(void){
@@ -222,7 +222,7 @@ void test_common_max_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -237,10 +237,10 @@ void test_common_max_pooling(void){
     int result_height;
     int result_width;
     compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
 
     matrix3d_t indexes = {0};
-    create_matrix3d(&indexes, result_height, result_width, 2);
+    matrix3d_init(&indexes, result_height, result_width, 2);
 
     max_pooling(&m, &result, &indexes, kernel_size, padding, stride);
 
@@ -269,8 +269,8 @@ void test_common_max_pooling(void){
     TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].values[1][1]);
     TEST_ASSERT_EQUAL_INT(1, indexes.layers[1].values[1][1]);
 
-    destroy_matrix2d(&m);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m);
+    matrix2d_destroy(&result);
 }
 
 void test_common_avg_pooling(void){
@@ -280,7 +280,7 @@ void test_common_avg_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -295,7 +295,7 @@ void test_common_avg_pooling(void){
     int result_width;
     compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
     matrix2d_t result = {};
-    create_matrix2d(&result, result_height, result_width);
+    matrix2d_init(&result, result_height, result_width);
 
     avg_pooling(&m, &result, kernel_size, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
@@ -305,8 +305,8 @@ void test_common_avg_pooling(void){
     TEST_ASSERT_EQUAL_FLOAT(6.f, result.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[1][1]);
 
-    destroy_matrix2d(&m);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m);
+    matrix2d_destroy(&result);
 }
 
 void test_common_matrix2d_rotate180(void){
@@ -316,7 +316,7 @@ void test_common_matrix2d_rotate180(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -336,8 +336,8 @@ void test_common_matrix2d_rotate180(void){
     TEST_ASSERT_EQUAL_FLOAT(3.f, result.values[2][1]);
     TEST_ASSERT_EQUAL_FLOAT(4.f, result.values[2][2]);
     
-    destroy_matrix2d(&m);
-    destroy_matrix2d(&result);
+    matrix2d_destroy(&m);
+    matrix2d_destroy(&result);
 }
 
 void test_common_matrix3d_submatrix(void){
@@ -347,7 +347,7 @@ void test_common_matrix3d_submatrix(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -371,7 +371,7 @@ void test_common_matrix3d_submatrix_2(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -391,7 +391,7 @@ void test_common_matrix2d_reshape(void){
         {9.f, 1.f, 2.f},
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 2, 3);
+    matrix2d_init(&m, 2, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -416,7 +416,7 @@ void test_common_matrix2d_reshape_2(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3);
+    matrix2d_init(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];

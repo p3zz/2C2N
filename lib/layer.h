@@ -1,9 +1,9 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "neuron.h"
 #include "common.h"
 #include "stdbool.h"
+#include "utils.h"
 
 typedef enum{
 	POOLING_TYPE_AVERAGE,
@@ -51,15 +51,6 @@ typedef union{
 	pool_layer_t pool_layer;
 	dense_layer_t dense_layer;
 }layer_t;
-
-typedef struct
-{
-	int neurons_num;
-	neuron_t* neurons;
-} layer_t_old;
-
-layer_t_old create_layer(int num_neurons);
-void destroy_layer(layer_t_old* layer);
 
 void init_conv_layer(
 	conv_layer_t* layer,

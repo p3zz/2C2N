@@ -39,7 +39,7 @@ float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, 
 }
 
 void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result){
-    create_matrix2d(result, m1->rows_n, m1->cols_n);
+    matrix2d_init(result, m1->rows_n, m1->cols_n);
     for(int i=0;i<m1->rows_n;i++){
         for(int j=0;j<m1->cols_n;j++){
             result->values[i][j] = (m1->values[i][j] * m2->values[i][j]);
@@ -55,7 +55,7 @@ void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2
     }
 }
 
-void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
+void matrix2d_init(matrix2d_t* m, int rows_n, int cols_n){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
     m->values = (float**)malloc(m->rows_n * sizeof(float*));
@@ -68,7 +68,7 @@ void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
 }
 
 void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output){
-	create_matrix2d(output, input->rows_n, input->cols_n);
+	matrix2d_init(output, input->rows_n, input->cols_n);
     for(int i=0;i<input->rows_n;i++){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[i][j];
@@ -130,7 +130,7 @@ void matrix3d_copy_inplace(const matrix3d_t* const input, const matrix3d_t* outp
 }
 
 void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output){
-    create_matrix2d(output, input->rows_n, input->cols_n);
+    matrix2d_init(output, input->rows_n, input->cols_n);
     for(int i=0;i<input->rows_n;i++){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[input->rows_n - i - 1][input->cols_n - j - 1];
@@ -156,7 +156,7 @@ void matrix2d_rotate180_inplace(const matrix2d_t* const input){
 void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end){
     int output_rows = row_end - row_start + 1;
     int output_cols = col_end - col_start + 1;
-    create_matrix2d(output, output_rows, output_cols);
+    matrix2d_init(output, output_rows, output_cols);
 
     for(int i=0;i<output_rows;i++){
         for(int j=0;j<output_cols;j++){
@@ -165,24 +165,24 @@ void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int r
     }
 }
 
-void destroy_matrix2d(matrix2d_t* m){
+void matrix2d_destroy(matrix2d_t* m){
     for(int i=0;i<m->rows_n;i++){
         free(m->values[i]);
     }
     free(m->values);
 }
 
-void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth){
+void matrix3d_init(matrix3d_t* m, int rows_n, int cols_n, int depth){
     m->depth = depth;
     m->layers = (matrix2d_t*)malloc(m->depth * sizeof(matrix2d_t));
     for(int i=0;i<m->depth;i++){
-        create_matrix2d(&m->layers[i], rows_n, cols_n);
+        matrix2d_init(&m->layers[i], rows_n, cols_n);
     }
 }
 
-void destroy_matrix3d(matrix3d_t* m){
+void matrix3d_destroy(matrix3d_t* m){
     for(int i=0;i<m->depth;i++){
-        destroy_matrix2d(&m->layers[i]);
+        matrix2d_destroy(&m->layers[i]);
     }
     free(m->layers);
 }
@@ -302,7 +302,7 @@ void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n,
     if(m_elems_n != result_elems_n){
         return;
     }
-    create_matrix2d(result, rows_n, cols_n);
+    matrix2d_init(result, rows_n, cols_n);
     for (int i = 0; i < result_elems_n; i++) {
         result->values[i / result->cols_n][i % result->cols_n] = m->values[i / m->cols_n][i % m->cols_n];
     }

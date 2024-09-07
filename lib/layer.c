@@ -4,14 +4,6 @@
 #include "common.h"
 #include "stdbool.h"
 
-layer_t_old create_layer(int neurons_num)
-{
-	layer_t_old lay;
-	lay.neurons_num = neurons_num;
-	lay.neurons = (neuron_t*) malloc(neurons_num * sizeof(neuron_t));
-	return lay;
-}
-
 // ------------------------------ INIT ------------------------------
 void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
 	if(input_width == 0 || input_height == 0 || input_depth == 0 || kernel_size == 0 || stride == 0){
@@ -23,8 +15,8 @@ void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int
 	layer->stride = stride;
 	layer->type = type;
 	
-	create_matrix3d(&layer->input, input_height, input_width , input_depth);
-	create_matrix3d(&layer->d_input, input_height, input_width, input_depth);
+	matrix3d_init(&layer->input, input_height, input_width , input_depth);
+	matrix3d_init(&layer->d_input, input_height, input_width, input_depth);
 	
 	matrix2d_t* sample = &layer->input.layers[0];
 	
@@ -32,7 +24,7 @@ void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int
     int output_cols = 0;
 	compute_output_size(sample->rows_n, sample->cols_n, kernel_size, padding, stride, &output_rows, &output_cols);
 
-	create_matrix3d(&layer->output, output_rows, output_cols, input_depth);
+	matrix3d_init(&layer->output, output_rows, output_cols, input_depth);
 
 	// if it's a max pooling layer, we need to keep track of the index of each element of the output matrix w.r.t. the input matrix
 	// for instance, if the first slice of the input has the max element of the kernel at (1,0), the first element of indexes
@@ -41,7 +33,7 @@ void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int
 	if(layer->type == POOLING_TYPE_MAX){
 		layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
 		for(int i=0;i<layer->output.depth;i++){
-			create_matrix3d(&layer->indexes[i], output_rows, output_cols, 2);
+			matrix3d_init(&layer->indexes[i], output_rows, output_cols, 2);
 		}
 	}
 
@@ -70,14 +62,14 @@ void init_conv_layer(
 	layer->activation_type = activation_type;
 
 	// allocate input and d_input
-	create_matrix3d(&layer->input, input_height, input_width, input_depth);
-	create_matrix3d(&layer->d_input, input_height, input_width, input_depth);
+	matrix3d_init(&layer->input, input_height, input_width, input_depth);
+	matrix3d_init(&layer->d_input, input_height, input_width, input_depth);
 
 	// allocate kernels
 	layer->kernels = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
 
 	for(int i=0;i<layer->kernels_n;i++){
-		create_matrix3d(&layer->kernels[i], kernel_size, kernel_size, input_depth);
+		matrix3d_init(&layer->kernels[i], kernel_size, kernel_size, input_depth);
 		matrix3d_randomize(&layer->kernels[i]);
 	}
 
@@ -89,24 +81,24 @@ void init_conv_layer(
 	// allocate biases
 	layer->biases = (matrix2d_t*)malloc(layer->kernels_n * sizeof(matrix2d_t));
 	for(int i=0;i<kernels_n;i++){
-		create_matrix2d(&layer->biases[i], output_height, output_width);
+		matrix2d_init(&layer->biases[i], output_height, output_width);
 		matrix2d_randomize(&layer->biases[i]);
 	}
 
 	// allocate output and d_output
-	create_matrix3d(&layer->output, output_height, output_width, kernels_n);
-	create_matrix3d(&layer->output_activated, output_height, output_width, kernels_n);
+	matrix3d_init(&layer->output, output_height, output_width, kernels_n);
+	matrix3d_init(&layer->output_activated, output_height, output_width, kernels_n);
 }
 
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
-	create_matrix2d(&layer->inputs, 1, input_n);
-	create_matrix2d(&layer->d_inputs, 1, input_n);
-	create_matrix2d(&layer->weights, input_n, output_n);
+	matrix2d_init(&layer->inputs, 1, input_n);
+	matrix2d_init(&layer->d_inputs, 1, input_n);
+	matrix2d_init(&layer->weights, input_n, output_n);
 	matrix2d_randomize(&layer->weights);
-	create_matrix2d(&layer->biases, 1, output_n);
+	matrix2d_init(&layer->biases, 1, output_n);
 	matrix2d_randomize(&layer->biases);
-	create_matrix2d(&layer->output, 1, output_n);
-	create_matrix2d(&layer->output_activated, 1, output_n);
+	matrix2d_init(&layer->output, 1, output_n);
+	matrix2d_init(&layer->output_activated, 1, output_n);
 	layer->activation_type = activation_type;
 }
 
@@ -162,7 +154,7 @@ void process_pool_layer(pool_layer_t* layer){
 // TODO check if depth of each kernel is equal to the number of channels of the input
 void process_conv_layer(conv_layer_t* layer){
 	matrix2d_t result = {0};
-	create_matrix2d(&result, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
+	matrix2d_init(&result, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			// compute the cross correlation between a channel of the input and its corresponding kernel
@@ -186,7 +178,7 @@ void process_conv_layer(conv_layer_t* layer){
 				break;
 		}
 	}
-	destroy_matrix2d(&result);
+	matrix2d_destroy(&result);
 }
 
 // ------------------------------ BACK-PROPAGATE ------------------------------
@@ -265,18 +257,18 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 	// matrix used to store the product (element x element) between the input and the derivative of the activation function of each
 	// output of the layer
 	matrix2d_t d_output = {0};
-	create_matrix2d(&d_output, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
+	matrix2d_init(&d_output, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
 
 	// allocate memory for d_kernel, that is the matrix that contains the correction that has to be applied to the weights of the kernels
 	// after the whole computation
 	matrix3d_t* d_kernel = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
 	for(int i=0;i<layer->kernels_n;i++){
-		create_matrix3d(&d_kernel[i], layer->kernels[i].layers[0].rows_n, layer->kernels[i].layers[0].cols_n, layer->kernels[i].depth);
+		matrix3d_init(&d_kernel[i], layer->kernels[i].layers[0].rows_n, layer->kernels[i].layers[0].cols_n, layer->kernels[i].depth);
 	}
 
 	// matrix used to store the result of each convolution between the input (from the next layer) and the kernel
 	matrix2d_t d_input_aux = {0};
-	create_matrix2d(&d_input_aux, layer->d_input.layers[0].rows_n, layer->d_input.layers[0].cols_n);
+	matrix2d_init(&d_input_aux, layer->d_input.layers[0].rows_n, layer->d_input.layers[0].cols_n);
 
 	// for each kernel of the layer
 	for(int i=0;i<layer->kernels_n;i++){
@@ -319,52 +311,45 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 	}
 
 	for(int i=0;i<layer->kernels_n;i++){
-		destroy_matrix3d(&d_kernel[i]);
+		matrix3d_destroy(&d_kernel[i]);
 	}
 	free(d_kernel);
 
-	destroy_matrix2d(&d_output);
-	destroy_matrix2d(&d_input_aux);
+	matrix2d_destroy(&d_output);
+	matrix2d_destroy(&d_input_aux);
 }
 
 // ------------------------------ DESTROY ------------------------------
 
 void destroy_dense_layer(dense_layer_t* layer){
-	destroy_matrix2d(&layer->inputs);
-	destroy_matrix2d(&layer->d_inputs);
-	destroy_matrix2d(&layer->weights);
-	destroy_matrix2d(&layer->biases);
-	destroy_matrix2d(&layer->output);
-	destroy_matrix2d(&layer->output_activated);
+	matrix2d_destroy(&layer->inputs);
+	matrix2d_destroy(&layer->d_inputs);
+	matrix2d_destroy(&layer->weights);
+	matrix2d_destroy(&layer->biases);
+	matrix2d_destroy(&layer->output);
+	matrix2d_destroy(&layer->output_activated);
 }
 
 void destroy_conv_layer(conv_layer_t* layer){
-	destroy_matrix3d(&layer->input);
-	destroy_matrix3d(&layer->d_input);
+	matrix3d_destroy(&layer->input);
+	matrix3d_destroy(&layer->d_input);
 	for(int i=0;i<layer->kernels_n;i++){
-		destroy_matrix3d(&layer->kernels[i]);
-		destroy_matrix2d(&layer->biases[i]);
+		matrix3d_destroy(&layer->kernels[i]);
+		matrix2d_destroy(&layer->biases[i]);
 	}
 	free(layer->kernels);
 	free(layer->biases);
-	destroy_matrix3d(&layer->output);
-	destroy_matrix3d(&layer->output_activated);
+	matrix3d_destroy(&layer->output);
+	matrix3d_destroy(&layer->output_activated);
 }
 
 void destroy_pool_layer(pool_layer_t* layer){
-	destroy_matrix3d(&layer->output);
-	destroy_matrix3d(&layer->input);
-	destroy_matrix3d(&layer->d_input);
+	matrix3d_destroy(&layer->output);
+	matrix3d_destroy(&layer->input);
+	matrix3d_destroy(&layer->d_input);
 	if(layer->type == POOLING_TYPE_MAX){
 		for(int i=0;i<layer->input.depth;i++){
-			destroy_matrix3d(&layer->indexes[i]);
+			matrix3d_destroy(&layer->indexes[i]);
 		}
 	}
-}
-
-void destroy_layer(layer_t_old* layer){
-	for(int i=0;i<layer->neurons_num;i++){
-		destroy_neuron(&layer->neurons[i]);
-	}
-	free(layer->neurons);
 }
