@@ -58,10 +58,6 @@ float d_activate(float x, activation_type type){
     return result;
 }
 
-float update_output(float input, float weight, float bias){
-    return input * weight + bias;
-}
-
 float gradient_descent(float x, float rate, float dx){
     return x - (rate * dx);
 }

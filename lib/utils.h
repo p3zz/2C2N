@@ -17,8 +17,6 @@ float sigmoid_derivative(float x);
 float relu(float x);
 float relu_derivative(float x);
 
-float update_output(float input, float weight, float bias);
-
 float gradient_descent(float x, float rate, float dx);
 float generate_random(void);
 float activate(float x, activation_type type);
