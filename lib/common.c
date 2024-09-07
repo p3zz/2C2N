@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "utils.h"
 #include "stdio.h"
+#include "math.h"
 
 void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride){
     for(int i=0;i<result->rows_n;i++){
@@ -267,6 +268,14 @@ void matrix2d_sigmoid_inplace(const matrix2d_t* const m){
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->rows_n;j++){
             m->values[i][j] = sigmoid(m->values[i][j]);
+        }
+    }
+}
+
+void matrix2d_tanh_inplace(const matrix2d_t* const m){
+    for(int i=0;i<m->rows_n;i++){
+        for(int j=0;j<m->rows_n;j++){
+            m->values[i][j] = tanhf(m->values[i][j]);
         }
     }
 }

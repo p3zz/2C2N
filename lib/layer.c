@@ -133,6 +133,8 @@ void dense_layer_forwarding(dense_layer_t* layer){
 		case ACTIVATION_TYPE_SIGMOID:
 			matrix2d_sigmoid_inplace(&layer->output_activated);
 			break;
+		case ACTIVATION_TYPE_TANH:
+			matrix2d_tanh_inplace(&layer->output_activated);
 		default:
 			break;
 	}
@@ -173,6 +175,9 @@ void conv_layer_forwarding(conv_layer_t* layer){
 				break;
 			case ACTIVATION_TYPE_SIGMOID:
 				matrix2d_sigmoid_inplace(&layer->output_activated.layers[i]);
+				break;
+			case ACTIVATION_TYPE_TANH:
+				matrix2d_tanh_inplace(&layer->output_activated.layers[i]);
 				break;
 			default:
 				break;

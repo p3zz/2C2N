@@ -28,6 +28,11 @@ float relu_derivative(float x){
     }
 }
 
+float tanh_derivative(float x){
+    float res = tanh(x);
+    return 1.0 - res * res;
+}
+
 float activate(float x, activation_type type){
     float result = x;
     switch(type){
@@ -37,6 +42,8 @@ float activate(float x, activation_type type){
 		case ACTIVATION_TYPE_SIGMOID:
 			result = sigmoid(x);
 			break;
+        case ACTIVATION_TYPE_TANH:
+            result = tanhf(x);
 		default:
 			break;
 	}
@@ -52,6 +59,8 @@ float d_activate(float x, activation_type type){
 		case ACTIVATION_TYPE_SIGMOID:
 			result = sigmoid_derivative(x);
 			break;
+        case ACTIVATION_TYPE_TANH:
+			result = tanh_derivative(x);
 		default:
 			break;
 	}

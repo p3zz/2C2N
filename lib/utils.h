@@ -6,7 +6,8 @@
 
 typedef enum{
 	ACTIVATION_TYPE_RELU,
-	ACTIVATION_TYPE_SIGMOID
+	ACTIVATION_TYPE_SIGMOID,
+	ACTIVATION_TYPE_TANH
 }activation_type;
 
 typedef float(*activation_function)(float);
