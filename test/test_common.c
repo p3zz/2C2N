@@ -3,6 +3,7 @@
 #include "common.h"
 #include "string.h"
 #include "stdlib.h"
+#include "utils.h"
 
 void setUp()
 {
@@ -43,8 +44,15 @@ void test_common_cross_correlation_nopadding(void){
             m2.values[i][j] = m2_values[i][j];
         }
     }
+
+    int padding = 0;
+    int stride = 1;
     matrix2d_t result = {};
-    full_cross_correlation(&m1, &m2, &result, 0, 1);
+    int result_height;
+    int result_width;
+    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    create_matrix2d(&result, result_height, result_width);
+    full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
@@ -82,8 +90,15 @@ void test_common_cross_correlation_padding(void){
             m2.values[i][j] = m2_values[i][j];
         }
     }
+
+    int padding = 1;
+    int stride = 1;
     matrix2d_t result = {};
-    full_cross_correlation(&m1, &m2, &result, 1, 1);
+    int result_height;
+    int result_width;
+    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    create_matrix2d(&result, result_height, result_width);
+    full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(4, result.rows_n);
     TEST_ASSERT_EQUAL_INT(4, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][0]);
@@ -136,8 +151,15 @@ void test_common_cross_correlation_nopadding_stride(void){
             m2.values[i][j] = m2_values[i][j];
         }
     }
+    
+    int padding = 0;
+    int stride = 2;
     matrix2d_t result = {};
-    full_cross_correlation(&m1, &m2, &result, 0, 2);
+    int result_height;
+    int result_width;
+    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    create_matrix2d(&result, result_height, result_width);
+    full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(1, result.rows_n);
     TEST_ASSERT_EQUAL_INT(1, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(54.f, result.values[0][0]);
@@ -172,8 +194,15 @@ void test_common_cross_correlation_padding_stride(void){
             m2.values[i][j] = m2_values[i][j];
         }
     }
+
+    int padding = 1;
+    int stride = 2;
     matrix2d_t result = {};
-    full_cross_correlation(&m1, &m2, &result, 1, 2);
+    int result_height;
+    int result_width;
+    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    create_matrix2d(&result, result_height, result_width);
+    full_cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(8.f, result.values[0][0]);
@@ -205,12 +234,13 @@ void test_common_max_pooling(void){
     int stride = 1;
 
     matrix2d_t result = {};
-    int output_rows = (m.rows_n - kernel_size + 2 * padding) / stride + 1;
-    int output_cols = (m.cols_n - kernel_size + 2 * padding) / stride + 1;
-    create_matrix2d(&result, output_rows, output_cols);
+    int result_height;
+    int result_width;
+    compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
+    create_matrix2d(&result, result_height, result_width);
 
     matrix3d_t indexes = {0};
-    create_matrix3d(&indexes, output_rows, output_cols, 2);
+    create_matrix3d(&indexes, result_height, result_width, 2);
 
     max_pooling(&m, &result, &indexes, kernel_size, padding, stride);
 
@@ -261,10 +291,11 @@ void test_common_avg_pooling(void){
     int padding = 0;
     int stride = 1;
 
+    int result_height;
+    int result_width;
+    compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
     matrix2d_t result = {};
-    int output_rows = (m.rows_n - kernel_size + 2 * padding) / stride + 1;
-    int output_cols = (m.cols_n - kernel_size + 2 * padding) / stride + 1;
-    create_matrix2d(&result, output_rows, output_cols);
+    create_matrix2d(&result, result_height, result_width);
 
     avg_pooling(&m, &result, kernel_size, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);

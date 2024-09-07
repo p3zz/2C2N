@@ -23,6 +23,6 @@ float gradient_descent(float x, float rate, float dx);
 float generate_random(void);
 float activate(float x, activation_type type);
 float d_activate(float x, activation_type type);
-int none(int i);
+void compute_output_size(int input_height, int input_width, int kernel_size, int padding, int stride, int* output_width, int* output_height);
 
 #endif

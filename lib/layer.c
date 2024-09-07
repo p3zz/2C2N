@@ -27,8 +27,10 @@ void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int
 	create_matrix3d(&layer->d_input, input_width, input_height, input_depth);
 	
 	matrix2d_t* sample = &layer->input.layers[0];
-	int output_rows = (sample->rows_n - kernel_size + 2 * padding) / stride + 1;
-    int output_cols = (sample->cols_n - kernel_size + 2 * padding) / stride + 1;
+	
+	int output_rows = 0;
+    int output_cols = 0;
+	compute_output_size(sample->rows_n, sample->cols_n, kernel_size, padding, stride, &output_rows, &output_cols);
 
 	create_matrix3d(&layer->output, output_rows, output_cols, input_depth);
 
@@ -72,7 +74,6 @@ void init_conv_layer(
 	layer->activation_type = activation_type;
 }
 
-// TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
 	create_matrix2d(&layer->inputs, 1, input_n);
 	create_matrix2d(&layer->d_inputs, 1, input_n);

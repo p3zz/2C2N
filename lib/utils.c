@@ -69,3 +69,8 @@ float gradient_descent(float x, float rate, float dx){
 float generate_random(void){
     return ((float)rand())/((float)RAND_MAX);
 }
+
+void compute_output_size(int input_height, int input_width, int kernel_size, int padding, int stride, int* output_width, int* output_height){
+    *output_height = (input_height - kernel_size + 2 * padding) / stride + 1;
+    *output_width = (input_width - kernel_size + 2 * padding) / stride + 1;
+}
