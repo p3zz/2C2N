@@ -86,7 +86,7 @@ void matrix2d_randomize(matrix2d_t* input){
 
 void matrix3d_randomize(matrix3d_t* input){
     for(int i=0;i<input->depth;i++){
-        matrix2d_randomize(&input->layers[0]);
+        matrix2d_randomize(&input->layers[i]);
     }
 }
 
@@ -309,7 +309,6 @@ void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n,
 }
 
 void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
-    create_matrix2d(result, output->rows_n, output->cols_n);
 	for(int i=0;i<output->rows_n;i++){
 		for(int j=0;j<output->cols_n;j++){
      	   result->values[i][j] = 2*(output->values[i][j] - target_output->values[i][j]);
