@@ -25,7 +25,7 @@ void test_common_cross_correlation_nopadding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3, true);
+    create_matrix2d(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -37,7 +37,7 @@ void test_common_cross_correlation_nopadding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2, true);
+    create_matrix2d(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -64,7 +64,7 @@ void test_common_cross_correlation_padding(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3, true);
+    create_matrix2d(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -76,7 +76,7 @@ void test_common_cross_correlation_padding(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2, true);
+    create_matrix2d(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -118,7 +118,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3, true);
+    create_matrix2d(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -130,7 +130,7 @@ void test_common_cross_correlation_nopadding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2, true);
+    create_matrix2d(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -154,7 +154,7 @@ void test_common_cross_correlation_padding_stride(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m1 = {0};
-    create_matrix2d(&m1, 3, 3, true);
+    create_matrix2d(&m1, 3, 3);
     for(int i=0;i<m1.rows_n;i++){
         for(int j=0;j<m1.cols_n;j++){
             m1.values[i][j] = m1_values[i][j];
@@ -166,7 +166,7 @@ void test_common_cross_correlation_padding_stride(void){
         {3, 2}
     };
     matrix2d_t m2 = {0};
-    create_matrix2d(&m2, 2, 2, true);
+    create_matrix2d(&m2, 2, 2);
     for(int i=0;i<m2.rows_n;i++){
         for(int j=0;j<m2.cols_n;j++){
             m2.values[i][j] = m2_values[i][j];
@@ -193,15 +193,27 @@ void test_common_max_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, true);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
         }
     }
+
+    int kernel_size = 2;
+    int padding = 0;
+    int stride = 1;
+
     matrix2d_t result = {};
+    int output_rows = (m.rows_n - kernel_size + 2 * padding) / stride + 1;
+    int output_cols = (m.cols_n - kernel_size + 2 * padding) / stride + 1;
+    create_matrix2d(&result, output_rows, output_cols);
+
     matrix3d_t indexes = {0};
-    max_pooling(&m, &result, &indexes, 2, 0, 1);
+    create_matrix3d(&indexes, output_rows, output_cols, 2);
+
+    max_pooling(&m, &result, &indexes, kernel_size, padding, stride);
+
     TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(2, indexes.layers[0].cols_n);
 
@@ -238,14 +250,23 @@ void test_common_avg_pooling(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, true);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
         }
     }
+
+    int kernel_size = 2;
+    int padding = 0;
+    int stride = 1;
+
     matrix2d_t result = {};
-    avg_pooling(&m, &result, 2, 0, 1);
+    int output_rows = (m.rows_n - kernel_size + 2 * padding) / stride + 1;
+    int output_cols = (m.cols_n - kernel_size + 2 * padding) / stride + 1;
+    create_matrix2d(&result, output_rows, output_cols);
+
+    avg_pooling(&m, &result, kernel_size, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.rows_n);
     TEST_ASSERT_EQUAL_INT(2, result.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(4.25f, result.values[0][0]);
@@ -264,7 +285,7 @@ void test_common_matrix2d_rotate180(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, false);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -295,7 +316,7 @@ void test_common_matrix3d_submatrix(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, false);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -319,7 +340,7 @@ void test_common_matrix3d_submatrix_2(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, false);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -339,7 +360,7 @@ void test_common_matrix2d_reshape(void){
         {9.f, 1.f, 2.f},
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 2, 3, false);
+    create_matrix2d(&m, 2, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];
@@ -364,7 +385,7 @@ void test_common_matrix2d_reshape_2(void){
         {7.f, 7.f, 6.f}
     };
     matrix2d_t m = {0};
-    create_matrix2d(&m, 3, 3, true);
+    create_matrix2d(&m, 3, 3);
     for(int i=0;i<m.rows_n;i++){
         for(int j=0;j<m.cols_n;j++){
             m.values[i][j] = m_values[i][j];

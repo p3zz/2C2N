@@ -6,7 +6,7 @@
 void zero_pad(const matrix2d_t* const m, matrix2d_t* result, int padding){
     int output_rows = m->rows_n + 2 * padding;
     int output_cols = m->cols_n + 2 * padding;
-    create_matrix2d(result, output_rows, output_cols, false);
+    create_matrix2d(result, output_rows, output_cols);
 
     for (int i = 0; i < m->rows_n; i++) {
         for (int j = 0; j < m->cols_n; j++) {
@@ -24,7 +24,7 @@ void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const 
     int output_rows = (m1_pad.rows_n - m2->rows_n) / stride + 1;
     int output_cols = (m1_pad.cols_n - m2->cols_n) / stride + 1;
 
-    create_matrix2d(result, output_rows, output_cols, true);
+    create_matrix2d(result, output_rows, output_cols);
 
     for(int i=0;i<result->rows_n;i++){
         for(int j=0;j<result->cols_n;j++){
@@ -61,7 +61,7 @@ float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, 
 }
 
 void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result){
-    create_matrix2d(result, m1->rows_n, m1->cols_n, false);
+    create_matrix2d(result, m1->rows_n, m1->cols_n);
     for(int i=0;i<m1->rows_n;i++){
         for(int j=0;j<m1->cols_n;j++){
             result->values[i][j] = (m1->values[i][j] * m2->values[i][j]);
@@ -77,25 +77,45 @@ void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2
     }
 }
 
-void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n, bool random){
+void create_matrix2d(matrix2d_t* m, int rows_n, int cols_n){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
     m->values = (float**)malloc(m->rows_n * sizeof(float*));
     for(int i=0;i<m->rows_n;i++){
         m->values[i] = (float*)malloc(m->cols_n * sizeof(float));
         for(int j=0;j<m->cols_n;j++){
-            if(random){
-                m->values[i][j] = generate_random();
-            }
-            else{
-                m->values[i][j] = 0.f;
-            }
+            m->values[i][j] = 0.f;
 		}
     }
 }
 
 void matrix2d_copy(const matrix2d_t* const input, matrix2d_t* output){
-	create_matrix2d(output, input->rows_n, input->cols_n, true);
+	create_matrix2d(output, input->rows_n, input->cols_n);
+    for(int i=0;i<input->rows_n;i++){
+        for(int j=0;j<input->cols_n;j++){
+            output->values[i][j] = input->values[i][j];
+        }
+    }
+}
+
+void matrix2d_randomize(matrix2d_t* input){
+    for(int i=0;i<input->rows_n;i++){
+        for(int j=0;j<input->cols_n;j++){
+            input->values[i][j] = generate_random();
+        }
+    }
+}
+
+void matrix3d_randomize(matrix3d_t* input){
+    for(int i=0;i<input->depth;i++){
+        matrix2d_randomize(&input->layers[0]);
+    }
+}
+
+void matrix2d_copy_inplace(const matrix2d_t* const input, const matrix2d_t* output){
+    if(input->rows_n != output->rows_n || input->cols_n != output->cols_n){
+        return;
+    }
     for(int i=0;i<input->rows_n;i++){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[i][j];
@@ -125,8 +145,14 @@ void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output){
     }
 }
 
+void matrix3d_copy_inplace(const matrix3d_t* const input, const matrix3d_t* output){
+    for(int i=0;i<output->depth;i++){
+        matrix2d_copy_inplace(&input->layers[i], &output->layers[i]);
+    }
+}
+
 void matrix2d_rotate180(const matrix2d_t* const input, matrix2d_t* output){
-    create_matrix2d(output, input->rows_n, input->cols_n, false);
+    create_matrix2d(output, input->rows_n, input->cols_n);
     for(int i=0;i<input->rows_n;i++){
         for(int j=0;j<input->cols_n;j++){
             output->values[i][j] = input->values[input->rows_n - i - 1][input->cols_n - j - 1];
@@ -152,7 +178,7 @@ void matrix2d_rotate180_inplace(const matrix2d_t* const input){
 void matrix2d_submatrix(const matrix2d_t* const input, matrix2d_t* output, int row_start, int row_end, int col_start, int col_end){
     int output_rows = row_end - row_start + 1;
     int output_cols = col_end - col_start + 1;
-    create_matrix2d(output, output_rows, output_cols, false);
+    create_matrix2d(output, output_rows, output_cols);
 
     for(int i=0;i<output_rows;i++){
         for(int j=0;j<output_cols;j++){
@@ -172,7 +198,7 @@ void create_matrix3d(matrix3d_t* m, int rows_n, int cols_n, int depth){
     m->depth = depth;
     m->layers = (matrix2d_t*)malloc(m->depth * sizeof(matrix2d_t));
     for(int i=0;i<m->depth;i++){
-        create_matrix2d(&m->layers[i], rows_n, cols_n, true);
+        create_matrix2d(&m->layers[i], rows_n, cols_n);
     }
 }
 
@@ -186,10 +212,6 @@ void destroy_matrix3d(matrix3d_t* m){
 void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, matrix3d_t* indexes, int kernel_size, int padding, int stride){
     int output_rows = (mat->rows_n - kernel_size + 2 * padding) / stride + 1;
     int output_cols = (mat->cols_n - kernel_size + 2 * padding) / stride + 1;
-
-    create_matrix2d(result, output_rows, output_cols, true);
-
-    create_matrix3d(indexes, result->rows_n, result->cols_n, 2);
 
     for(int i=0;i<result->rows_n;i++){
         for(int j=0;j<result->cols_n;j++){
@@ -217,11 +239,6 @@ void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, matrix3d_t* in
 }
 
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride){
-    int output_rows = (mat->rows_n - kernel_size + 2 * padding) / stride + 1;
-    int output_cols = (mat->cols_n - kernel_size + 2 * padding) / stride + 1;
-
-    create_matrix2d(result, output_rows, output_cols, true);
-
     for(int i=0;i<result->rows_n;i++){
         for(int j=0;j<result->cols_n;j++){
             float sum = 0;
@@ -242,7 +259,7 @@ void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_siz
 }
 
 void matrix2d_relu(const matrix2d_t* const m, matrix2d_t* result){
-    create_matrix2d(result, m->rows_n, m->cols_n, true);
+    create_matrix2d(result, m->rows_n, m->cols_n);
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->rows_n;j++){
             result->values[i][j] = relu(m->values[i][j]);
@@ -259,7 +276,7 @@ void matrix2d_relu_inplace(const matrix2d_t* const m){
 }
 
 void matrix2d_sigmoid(const matrix2d_t* const m, matrix2d_t* result){
-    create_matrix2d(result, m->rows_n, m->cols_n, true);
+    create_matrix2d(result, m->rows_n, m->cols_n);
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->rows_n;j++){
             result->values[i][j] = sigmoid(m->values[i][j]);
@@ -306,14 +323,14 @@ void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n,
     if(m_elems_n != result_elems_n){
         return;
     }
-    create_matrix2d(result, rows_n, cols_n, false);
+    create_matrix2d(result, rows_n, cols_n);
     for (int i = 0; i < result_elems_n; i++) {
         result->values[i / result->cols_n][i % result->cols_n] = m->values[i / m->cols_n][i % m->cols_n];
     }
 }
 
 void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
-    create_matrix2d(result, output->rows_n, output->cols_n, true);
+    create_matrix2d(result, output->rows_n, output->cols_n);
 	for(int i=0;i<output->rows_n;i++){
 		for(int j=0;j<output->cols_n;j++){
      	   result->values[i][j] = 2*(output->values[i][j] - target_output->values[i][j]);

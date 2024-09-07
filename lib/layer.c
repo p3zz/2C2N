@@ -13,12 +13,36 @@ layer_t_old create_layer(int neurons_num)
 }
 
 // ------------------------------ INIT ------------------------------
-// TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
-void init_pool_layer(pool_layer_t* layer, int kernel_size, int padding, int stride, pooling_type type){
+void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
+	if(input_width == 0 || input_height == 0 || input_depth == 0 || kernel_size == 0 || stride == 0){
+		return;
+	}
+
 	layer->kernel_size = kernel_size;
 	layer->padding = padding;
 	layer->stride = stride;
 	layer->type = type;
+	
+	create_matrix3d(&layer->input, input_width, input_height, input_depth);
+	create_matrix3d(&layer->d_input, input_width, input_height, input_depth);
+	
+	matrix2d_t* sample = &layer->input.layers[0];
+	int output_rows = (sample->rows_n - kernel_size + 2 * padding) / stride + 1;
+    int output_cols = (sample->cols_n - kernel_size + 2 * padding) / stride + 1;
+
+	create_matrix3d(&layer->output, output_rows, output_cols, input_depth);
+
+	// if it's a max pooling layer, we need to keep track of the index of each element of the output matrix w.r.t. the input matrix
+	// for instance, if the first slice of the input has the max element of the kernel at (1,0), the first element of indexes
+	// will be a matrix3d with depth 2 (one for i, one for j)
+	// TODO finish the explaination
+	if(layer->type == POOLING_TYPE_MAX){
+		layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
+		for(int i=0;i<layer->output.depth;i++){
+			create_matrix3d(&layer->indexes[i], output_rows, output_cols, 2);
+		}
+	}
+
 }
 
 // TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
@@ -50,26 +74,25 @@ void init_conv_layer(
 
 // TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
-	create_matrix2d(&layer->inputs, 1, input_n, true);
-	create_matrix2d(&layer->d_inputs, 1, input_n, true);
-	create_matrix2d(&layer->weights, input_n, output_n, true);
-	create_matrix2d(&layer->biases, 1, output_n, true);
-	create_matrix2d(&layer->output, 1, output_n, true);
-	create_matrix2d(&layer->output_activated, 1, output_n, true);
+	create_matrix2d(&layer->inputs, 1, input_n);
+	create_matrix2d(&layer->d_inputs, 1, input_n);
+	create_matrix2d(&layer->weights, input_n, output_n);
+	matrix2d_randomize(&layer->weights);
+	create_matrix2d(&layer->biases, 1, output_n);
+	matrix2d_randomize(&layer->biases);
+	create_matrix2d(&layer->output, 1, output_n);
+	create_matrix2d(&layer->output_activated, 1, output_n);
 	layer->activation_type = activation_type;
 }
 
 // ------------------------------ FEED ------------------------------
 
 void feed_dense_layer(dense_layer_t* layer, const matrix2d_t* const input){
-	matrix2d_copy(input, &layer->inputs);
+	matrix2d_copy_inplace(input, &layer->inputs);
 }
 
 void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy(input, &layer->input);
-	layer->output.depth = layer->input.depth;
-	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
-	layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
+	matrix3d_copy_inplace(input, &layer->input);
 }
 
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
@@ -87,7 +110,7 @@ void process_dense_layer(dense_layer_t* layer){
 			layer->output.values[0][i] += (layer->inputs.values[0][j] * layer->weights.values[j][i]);
 		}
 	}
-	matrix2d_copy(&layer->output, &layer->output_activated);
+	matrix2d_copy_inplace(&layer->output, &layer->output_activated);
 	switch(layer->activation_type){
 		case ACTIVATION_TYPE_RELU:
 			matrix2d_relu_inplace(&layer->output_activated);
@@ -130,8 +153,8 @@ void process_conv_layer(conv_layer_t* layer){
 			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
 			// we need to allocate the memory for the result
 			if(j == 0){
-				create_matrix2d(&layer->output.layers[i], result.rows_n, result.cols_n, true);
-				create_matrix2d(&layer->biases[i], result.rows_n, result.cols_n, true);
+				create_matrix2d(&layer->output.layers[i], result.rows_n, result.cols_n);
+				create_matrix2d(&layer->biases[i], result.rows_n, result.cols_n);
 				// perform an early sum of the biases to the final output layer
 				matrix2d_sum_inplace(&layer->biases[i], &layer->output.layers[i]);
 			}
@@ -140,7 +163,7 @@ void process_conv_layer(conv_layer_t* layer){
 			// and we free the result matrix
 			destroy_matrix2d(&result);
 		}
-		create_matrix2d(&layer->output_activated.layers[i], layer->output.layers[i].rows_n, layer->output.layers[i].cols_n, false);
+		create_matrix2d(&layer->output_activated.layers[i], layer->output.layers[i].rows_n, layer->output.layers[i].cols_n);
 		switch(layer->activation_type){
 			case ACTIVATION_TYPE_RELU:
 				matrix2d_relu(&layer->output.layers[i], &layer->output_activated.layers[i]);
@@ -184,8 +207,6 @@ void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const i
 // https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/
 // TODO add avg_pooling handling, this is correct just for max_pooling
 void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy(&layer->input, &layer->d_input);
-	matrix3d_erase(&layer->d_input);
 	switch(layer->type){
 		case POOLING_TYPE_MAX: {
 			for(int i=0;i<layer->d_input.depth;i++){
@@ -259,7 +280,7 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			// compute the derivative for the correction of the input
 			convolution(&d_output, &kernel->layers[j], &d_input_aux, kernel->layers[j].rows_n - input->layers[j].rows_n + 1);
 			if(i == 0){
-				create_matrix2d(&layer->d_input.layers[j], d_input_aux.rows_n, d_input_aux.cols_n, false);
+				create_matrix2d(&layer->d_input.layers[j], d_input_aux.rows_n, d_input_aux.cols_n);
 			}
 			matrix2d_sum_inplace(&d_input_aux, &layer->d_input.layers[j]);
 			destroy_matrix2d(&d_input_aux);
