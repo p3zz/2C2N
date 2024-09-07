@@ -13,7 +13,7 @@ layer_t_old create_layer(int neurons_num)
 }
 
 // ------------------------------ INIT ------------------------------
-void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
+void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
 	if(input_width == 0 || input_height == 0 || input_depth == 0 || kernel_size == 0 || stride == 0){
 		return;
 	}
@@ -23,8 +23,8 @@ void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int
 	layer->stride = stride;
 	layer->type = type;
 	
-	create_matrix3d(&layer->input, input_width, input_height, input_depth);
-	create_matrix3d(&layer->d_input, input_width, input_height, input_depth);
+	create_matrix3d(&layer->input, input_height, input_width , input_depth);
+	create_matrix3d(&layer->d_input, input_height, input_width, input_depth);
 	
 	matrix2d_t* sample = &layer->input.layers[0];
 	
@@ -50,28 +50,52 @@ void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int
 // TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
 void init_conv_layer(
 	conv_layer_t* layer,
+	int input_height,
+	int input_width,
+	int input_depth,
 	int kernel_size,
-	int kernel_depth,
 	int kernels_n,
 	int stride,
 	int padding,
 	activation_type activation_type
 )
 {
-	layer->kernels_n = kernels_n;
-	layer->kernels = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
-
-	for(int i=0;i<layer->kernels_n;i++){
-		create_matrix3d(&layer->kernels[i], kernel_size, kernel_size, kernel_depth);
+	if(input_width == 0 || input_height == 0 || input_depth == 0 || kernel_size == 0 || stride == 0){
+		return;
 	}
-	
-	// we can only allocate the memory to keep a pointer to the biases, but their real size
-	// will be available once we have the size of the input channels
-	layer->biases = (matrix2d_t*)malloc(layer->kernels_n * sizeof(matrix2d_t));
 
+	layer->kernels_n = kernels_n;
 	layer->padding = padding;
 	layer->stride = stride;
 	layer->activation_type = activation_type;
+
+	// allocate input and d_input
+	create_matrix3d(&layer->input, input_height, input_width, input_depth);
+	create_matrix3d(&layer->d_input, input_height, input_width, input_depth);
+
+	// allocate kernels
+	layer->kernels = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
+
+	for(int i=0;i<layer->kernels_n;i++){
+		create_matrix3d(&layer->kernels[i], kernel_size, kernel_size, input_depth);
+		matrix3d_randomize(&layer->kernels[i]);
+	}
+
+	int output_height = 0;
+	int output_width = 0;
+	matrix2d_t* sample = &layer->input.layers[0];
+	compute_output_size(sample->rows_n, sample->cols_n, kernel_size, padding, stride, &output_height, &output_width);
+
+	// allocate biases
+	layer->biases = (matrix2d_t*)malloc(layer->kernels_n * sizeof(matrix2d_t));
+	for(int i=0;i<kernels_n;i++){
+		create_matrix2d(&layer->biases[i], output_height, output_width);
+		matrix2d_randomize(&layer->biases[i]);
+	}
+
+	// allocate output and d_output
+	create_matrix3d(&layer->output, output_height, output_width, kernels_n);
+	create_matrix3d(&layer->output_activated, output_height, output_width, kernels_n);
 }
 
 void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
@@ -97,9 +121,7 @@ void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
 }
 
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy(input, &layer->input);
-	matrix3d_copy(input, &layer->d_input);
-	matrix3d_erase(&layer->d_input);
+	matrix3d_copy_inplace(input, &layer->input);
 }
 
 // ------------------------------ PROCESS ------------------------------
@@ -140,42 +162,31 @@ void process_pool_layer(pool_layer_t* layer){
 // TODO check if depth of each kernel is equal to the number of channels of the input
 void process_conv_layer(conv_layer_t* layer){
 	matrix2d_t result = {0};
-	layer->output.depth = layer->kernels_n;
-	layer->output.layers = (matrix2d_t*)malloc(layer->output.depth * sizeof(matrix2d_t));
-
-	layer->output_activated.depth = layer->kernels_n;
-	layer->output_activated.layers = (matrix2d_t*)malloc(layer->output_activated.depth * sizeof(matrix2d_t));
-
+	create_matrix2d(&result, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			// compute the cross correlation between a channel of the input and its corresponding kernel
 			full_cross_correlation(&layer->input.layers[j], &layer->kernels[i].layers[j], &result, layer->padding, layer->stride);
-			//we only know here how big the result will be
-			// if we're computing the first cross_correlation (between the first channel of the input and the kernel),
-			// we need to allocate the memory for the result
 			if(j == 0){
-				create_matrix2d(&layer->output.layers[i], result.rows_n, result.cols_n);
-				create_matrix2d(&layer->biases[i], result.rows_n, result.cols_n);
 				// perform an early sum of the biases to the final output layer
 				matrix2d_sum_inplace(&layer->biases[i], &layer->output.layers[i]);
 			}
 			// then we sum the resulting matrix to the output
 			matrix2d_sum_inplace(&result, &layer->output.layers[i]);
-			// and we free the result matrix
-			destroy_matrix2d(&result);
 		}
-		create_matrix2d(&layer->output_activated.layers[i], layer->output.layers[i].rows_n, layer->output.layers[i].cols_n);
+		matrix2d_copy_inplace(&layer->output.layers[i], &layer->output_activated.layers[i]);
 		switch(layer->activation_type){
 			case ACTIVATION_TYPE_RELU:
-				matrix2d_relu(&layer->output.layers[i], &layer->output_activated.layers[i]);
+				matrix2d_relu_inplace(&layer->output_activated.layers[i]);
 				break;
 			case ACTIVATION_TYPE_SIGMOID:
-				matrix2d_sigmoid(&layer->output.layers[i], &layer->output_activated.layers[i]);
+				matrix2d_sigmoid_inplace(&layer->output_activated.layers[i]);
 				break;
 			default:
 				break;
 		}
 	}
+	destroy_matrix2d(&result);
 }
 
 // ------------------------------ BACK-PROPAGATE ------------------------------
@@ -254,19 +265,24 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 	// matrix used to store the product (element x element) between the input and the derivative of the activation function of each
 	// output of the layer
 	matrix2d_t d_output = {0};
+	create_matrix2d(&d_output, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
+
+	// allocate memory for d_kernel, that is the matrix that contains the correction that has to be applied to the weights of the kernels
+	// after the whole computation
 	matrix3d_t* d_kernel = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
+	for(int i=0;i<layer->kernels_n;i++){
+		create_matrix3d(&d_kernel[i], layer->kernels[i].layers[0].rows_n, layer->kernels[i].layers[0].cols_n, layer->kernels[i].depth);
+	}
+
 	// matrix used to store the result of each convolution between the input (from the next layer) and the kernel
 	matrix2d_t d_input_aux = {0};
+	create_matrix2d(&d_input_aux, layer->d_input.layers[0].rows_n, layer->d_input.layers[0].cols_n);
+
 	// for each kernel of the layer
 	for(int i=0;i<layer->kernels_n;i++){
-		// allocate layers of d_kernel[i]
-		d_kernel[i].depth = layer->kernels[i].depth;
-		d_kernel[i].layers = (matrix2d_t*)malloc(d_kernel[i].depth*sizeof(matrix2d_t));
-
-		matrix2d_copy(&layer->output.layers[i], &d_output);
 		for(int m=0;m<d_output.rows_n;m++){
 			for(int n=0;n<d_output.cols_n;n++){
-				d_output.values[m][n] = d_activate(d_output.values[m][n], layer->activation_type);
+				d_output.values[m][n] = d_activate(layer->output.layers[i].values[m][n], layer->activation_type);
 			}
 		}
 		matrix2d_mul_inplace(&d_output, &input->layers[i]);
@@ -280,11 +296,7 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			full_cross_correlation(&layer->input.layers[j], &d_output, &d_kernel[i].layers[j], layer->padding, 1);
 			// compute the derivative for the correction of the input
 			convolution(&d_output, &kernel->layers[j], &d_input_aux, kernel->layers[j].rows_n - input->layers[j].rows_n + 1);
-			if(i == 0){
-				create_matrix2d(&layer->d_input.layers[j], d_input_aux.rows_n, d_input_aux.cols_n);
-			}
 			matrix2d_sum_inplace(&d_input_aux, &layer->d_input.layers[j]);
-			destroy_matrix2d(&d_input_aux);
 		}
 
 		// update biases
@@ -293,7 +305,6 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 				layer->biases[i].values[m][n] = gradient_descent(layer->biases[i].values[m][n], d_output.values[m][n], learning_rate);
 			}
 		}
-		destroy_matrix2d(&d_output);
 	}
 
 	// update weights
@@ -306,10 +317,14 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 			}
 		}
 	}
+
 	for(int i=0;i<layer->kernels_n;i++){
 		destroy_matrix3d(&d_kernel[i]);
 	}
 	free(d_kernel);
+
+	destroy_matrix2d(&d_output);
+	destroy_matrix2d(&d_input_aux);
 }
 
 // ------------------------------ DESTROY ------------------------------

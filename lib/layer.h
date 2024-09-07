@@ -63,19 +63,22 @@ void destroy_layer(layer_t_old* layer);
 
 void init_conv_layer(
 	conv_layer_t* layer,
+	int input_height,
+	int input_width,
+	int input_depth,
 	int kernel_size,
-	int kernel_depth,
 	int kernels_n,
 	int stride,
 	int padding,
 	activation_type activation_type
 );
+
 void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input);
 void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate);
 void destroy_conv_layer(conv_layer_t* layer);
 void process_conv_layer(conv_layer_t* layer);
 
-void init_pool_layer(pool_layer_t* layer, int input_width, int input_height, int input_depth, int kernel_size, int padding, int stride, pooling_type type);
+void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type);
 void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
 void process_pool_layer(pool_layer_t* layer);
 void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);

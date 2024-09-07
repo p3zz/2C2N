@@ -19,22 +19,62 @@ void test_always_true(void){
 }
 
 void test_init_conv_layer(void){
+    const int input_height = 10;
+    const int input_width = 10;
+    const int input_depth = 2;
+    const int kernel_size = 3;
+    const int kernels_n = 1;
+    const int stride = 1;
+    const int padding = 0;
+
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, 3, 2, 1, 1, 0, ACTIVATION_TYPE_RELU);
+    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     TEST_ASSERT_EQUAL_INT(0, layer.padding);
     TEST_ASSERT_EQUAL_INT(1, layer.stride);
+    // check kernels
     TEST_ASSERT_EQUAL_INT(1, layer.kernels_n);
     TEST_ASSERT_EQUAL_INT(2, layer.kernels[0].depth);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].cols_n);
     TEST_ASSERT_EQUAL_INT(3 ,layer.kernels[0].layers[1].rows_n);
     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
+    TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
+    TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
+    // check input
+    TEST_ASSERT_EQUAL_INT(2, layer.input.depth);
+    TEST_ASSERT_EQUAL_INT(10, layer.input.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.input.layers[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.input.layers[1].rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.input.layers[1].cols_n);
+    // check d_input
+    TEST_ASSERT_EQUAL_INT(2, layer.d_input.depth);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[1].rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[1].cols_n);
+    // check biases
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
+    // check output
+    TEST_ASSERT_EQUAL_INT(1, layer.output.depth);
+    TEST_ASSERT_EQUAL_INT(8, layer.output.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output.layers[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(1, layer.output_activated.depth);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].cols_n);
     destroy_conv_layer(&layer);
 }
 
 void test_process_conv_layer(void){
+    const int input_height = 3;
+    const int input_width = 3;
+    const int input_depth = 2;
+    const int kernel_size = 3;
+    const int kernels_n = 2;
+    const int stride = 1;
+    const int padding = 0;
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, 2, 2, 2, 1, 0, ACTIVATION_TYPE_RELU);
+    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -48,7 +88,7 @@ void test_process_conv_layer(void){
         }
     };
     matrix3d_t input = {0};
-    create_matrix3d(&input, 3, 3, 2);
+    create_matrix3d(&input, input_height, input_width, input_depth);
     for(int i=0;i<input.depth;i++){
         for(int j=0;j<input.layers[i].rows_n;j++){
             for(int k=0;k<input.layers[i].cols_n;k++){
@@ -327,9 +367,16 @@ void test_backpropagation_dense_layer(void){
 }
 
 void test_backpropagation_conv_layer(void){
+    const int input_height = 3;
+    const int input_width = 3;
+    const int input_depth = 2;
+    const int kernel_size = 2;
+    const int kernels_n = 2;
+    const int stride = 1;
+    const int padding = 0;
     const float learning_rate = 0.05f;
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, 2, 2, 2, 1, 0, ACTIVATION_TYPE_RELU);
+    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},

@@ -22,10 +22,10 @@ void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const 
 }
 
 void convolution(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding){
-    matrix2d_t m2_rot = {0};
-    matrix2d_rotate180(m2, &m2_rot);
-    full_cross_correlation(m1, &m2_rot, result, padding, 1);
-    destroy_matrix2d(&m2_rot);
+    matrix2d_rotate180_inplace(m2);
+    full_cross_correlation(m1, m2, result, padding, 1);
+    // restore the rotated matrix
+    matrix2d_rotate180_inplace(m2);
 }
 
 float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result){
@@ -234,7 +234,9 @@ void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_siz
 }
 
 void matrix2d_relu(const matrix2d_t* const m, matrix2d_t* result){
-    create_matrix2d(result, m->rows_n, m->cols_n);
+    if(m->rows_n != result->rows_n || m->cols_n != result->cols_n){
+        return;
+    }
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->rows_n;j++){
             result->values[i][j] = relu(m->values[i][j]);
@@ -251,7 +253,9 @@ void matrix2d_relu_inplace(const matrix2d_t* const m){
 }
 
 void matrix2d_sigmoid(const matrix2d_t* const m, matrix2d_t* result){
-    create_matrix2d(result, m->rows_n, m->cols_n);
+    if(m->rows_n != result->rows_n || m->cols_n != result->cols_n){
+        return;
+    }
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->rows_n;j++){
             result->values[i][j] = sigmoid(m->values[i][j]);
