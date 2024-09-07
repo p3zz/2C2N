@@ -5,7 +5,7 @@
 #include "stdbool.h"
 
 // ------------------------------ INIT ------------------------------
-void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
+void pool_layer_init(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type){
 	if(input_width == 0 || input_height == 0 || input_depth == 0 || kernel_size == 0 || stride == 0){
 		return;
 	}
@@ -40,7 +40,7 @@ void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int
 }
 
 // TODO move all the memory allocation here, except for the auxiliary structures used in the process/backpropagation
-void init_conv_layer(
+void conv_layer_init(
 	conv_layer_t* layer,
 	int input_height,
 	int input_width,
@@ -90,7 +90,7 @@ void init_conv_layer(
 	matrix3d_init(&layer->output_activated, output_height, output_width, kernels_n);
 }
 
-void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
+void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
 	matrix2d_init(&layer->inputs, 1, input_n);
 	matrix2d_init(&layer->d_inputs, 1, input_n);
 	matrix2d_init(&layer->weights, input_n, output_n);
@@ -104,21 +104,21 @@ void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activatio
 
 // ------------------------------ FEED ------------------------------
 
-void feed_dense_layer(dense_layer_t* layer, const matrix2d_t* const input){
+void dense_layer_feed(dense_layer_t* layer, const matrix2d_t* const input){
 	matrix2d_copy_inplace(input, &layer->inputs);
 }
 
-void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
+void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy_inplace(input, &layer->input);
 }
 
-void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input){
+void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy_inplace(input, &layer->input);
 }
 
 // ------------------------------ PROCESS ------------------------------
 
-void process_dense_layer(dense_layer_t* layer){
+void dense_layer_forwarding(dense_layer_t* layer){
 	for(int i=0;i<layer->output.cols_n;i++){
 		layer->output.values[0][i] = layer->biases.values[0][i];
 		for(int j=0;j<layer->weights.rows_n;j++){
@@ -138,7 +138,7 @@ void process_dense_layer(dense_layer_t* layer){
 	}
 }
 
-void process_pool_layer(pool_layer_t* layer){
+void pool_layer_forwarding(pool_layer_t* layer){
 	for(int i=0;i<layer->input.depth;i++){
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:
@@ -152,7 +152,7 @@ void process_pool_layer(pool_layer_t* layer){
 }
 
 // TODO check if depth of each kernel is equal to the number of channels of the input
-void process_conv_layer(conv_layer_t* layer){
+void conv_layer_forwarding(conv_layer_t* layer){
 	matrix2d_t result = {0};
 	matrix2d_init(&result, layer->output.layers[0].rows_n, layer->output.layers[0].cols_n);
 	for(int i=0;i<layer->kernels_n;i++){
@@ -186,7 +186,7 @@ void process_conv_layer(conv_layer_t* layer){
 
 // the input is the derivative of the cost w.r.t the output, coming from the next layer
 // the output if the derivative of the input, that has to be passed to the previous layer
-void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate)
+void dense_layer_backpropagation(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate)
 {
 	for(int i=0;i<layer->weights.rows_n;i++){
 		float d_input = 0.f;
@@ -210,7 +210,7 @@ void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const i
 
 // https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/
 // TODO add avg_pooling handling, this is correct just for max_pooling
-void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input){
+void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const input){
 	switch(layer->type){
 		case POOLING_TYPE_MAX: {
 			for(int i=0;i<layer->d_input.depth;i++){
@@ -253,7 +253,7 @@ void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const inp
 	}
 }
 
-void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate){
+void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate){
 	// matrix used to store the product (element x element) between the input and the derivative of the activation function of each
 	// output of the layer
 	matrix2d_t d_output = {0};
@@ -321,7 +321,7 @@ void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const inp
 
 // ------------------------------ DESTROY ------------------------------
 
-void destroy_dense_layer(dense_layer_t* layer){
+void dense_layer_destroy(dense_layer_t* layer){
 	matrix2d_destroy(&layer->inputs);
 	matrix2d_destroy(&layer->d_inputs);
 	matrix2d_destroy(&layer->weights);
@@ -330,7 +330,7 @@ void destroy_dense_layer(dense_layer_t* layer){
 	matrix2d_destroy(&layer->output_activated);
 }
 
-void destroy_conv_layer(conv_layer_t* layer){
+void conv_layer_destroy(conv_layer_t* layer){
 	matrix3d_destroy(&layer->input);
 	matrix3d_destroy(&layer->d_input);
 	for(int i=0;i<layer->kernels_n;i++){
@@ -343,7 +343,7 @@ void destroy_conv_layer(conv_layer_t* layer){
 	matrix3d_destroy(&layer->output_activated);
 }
 
-void destroy_pool_layer(pool_layer_t* layer){
+void pool_layer_destroy(pool_layer_t* layer){
 	matrix3d_destroy(&layer->output);
 	matrix3d_destroy(&layer->input);
 	matrix3d_destroy(&layer->d_input);

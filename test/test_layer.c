@@ -28,7 +28,7 @@ void test_init_conv_layer(void){
     const int padding = 0;
 
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
+    conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     TEST_ASSERT_EQUAL_INT(0, layer.padding);
     TEST_ASSERT_EQUAL_INT(1, layer.stride);
     // check kernels
@@ -62,7 +62,7 @@ void test_init_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(1, layer.output_activated.depth);
     TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].rows_n);
     TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].cols_n);
-    destroy_conv_layer(&layer);
+    conv_layer_destroy(&layer);
 }
 
 void test_process_conv_layer(void){
@@ -74,7 +74,7 @@ void test_process_conv_layer(void){
     const int stride = 1;
     const int padding = 0;
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
+    conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -127,8 +127,8 @@ void test_process_conv_layer(void){
     layer.biases[1].values[1][0] = 0.170;
     layer.biases[1].values[1][1] = 0.613;
 
-    feed_conv_layer(&layer, &input);
-    process_conv_layer(&layer);
+    conv_layer_feed(&layer, &input);
+    conv_layer_forwarding(&layer);
     printf("Kernels\n");
     matrix3d_print(&layer.kernels[0]);
     matrix3d_print(&layer.kernels[1]);
@@ -153,13 +153,13 @@ void test_process_conv_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(19.676, layer.output.layers[1].values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(19.314, layer.output.layers[1].values[1][1]);
 
-    destroy_conv_layer(&layer);
+    conv_layer_destroy(&layer);
     matrix3d_destroy(&input);
 }
 
 void test_process_pool_layer_average(void){
     pool_layer_t layer = {0};
-    init_pool_layer(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -182,8 +182,8 @@ void test_process_pool_layer_average(void){
         }
     }
 
-    feed_pool_layer(&layer, &input);
-    process_pool_layer(&layer);
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Output\n");
@@ -203,12 +203,12 @@ void test_process_pool_layer_average(void){
     TEST_ASSERT_EQUAL_FLOAT(3, layer.output.layers[1].values[1][1]);
     
     matrix3d_destroy(&input);
-    destroy_pool_layer(&layer);
+    pool_layer_destroy(&layer);
 }
 
 void test_process_pool_layer_max(void){
     pool_layer_t layer = {0};
-    init_pool_layer(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -231,8 +231,8 @@ void test_process_pool_layer_max(void){
         }
     }
 
-    feed_pool_layer(&layer, &input);
-    process_pool_layer(&layer);
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
     // printf("Input\n");
     // matrix3d_print(&input);
     // printf("Output\n");
@@ -250,13 +250,13 @@ void test_process_pool_layer_max(void){
     TEST_ASSERT_EQUAL_FLOAT(8, layer.output.layers[1].values[0][1]);
     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[1].values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(5, layer.output.layers[1].values[1][1]);
-    destroy_pool_layer(&layer);
+    pool_layer_destroy(&layer);
     matrix3d_destroy(&input);
 }
 
 void test_process_dense_layer(void){
     dense_layer_t layer = {0};
-    init_dense_layer(&layer, 4, 2, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&layer, 4, 2, ACTIVATION_TYPE_RELU);
 
     const float input_vals[4] = {3.f, 4.f, 2.f, 1.f};
     matrix2d_t input = {0};
@@ -276,20 +276,20 @@ void test_process_dense_layer(void){
     layer.biases.values[0][0] = 0.164;
     layer.biases.values[0][1] = 0.745;
 
-    feed_dense_layer(&layer, &input);
+    dense_layer_feed(&layer, &input);
     
-    process_dense_layer(&layer);
+    dense_layer_forwarding(&layer);
     TEST_ASSERT_EQUAL_INT(1, layer.output.rows_n);
     TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
     TEST_ASSERT_EQUAL_FLOAT(3.811, layer.output.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(4.674, layer.output.values[0][1]);
-    destroy_dense_layer(&layer);
+    dense_layer_destroy(&layer);
     matrix2d_destroy(&input);
 }
 
 void test_backpropagation_dense_layer(void){
     dense_layer_t layer = {0};
-    init_dense_layer(&layer, 3, 2, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&layer, 3, 2, ACTIVATION_TYPE_RELU);
 
     const float input_vals[3] = {1.71f, 1.79f, 2.04f};
     const float output_targets[2] = {1.f, 0.f};
@@ -318,8 +318,8 @@ void test_backpropagation_dense_layer(void){
     layer.biases.values[0][0] = 0.3;
     layer.biases.values[0][1] = 0.4;
 
-    feed_dense_layer(&layer, &input);
-    process_dense_layer(&layer);
+    dense_layer_feed(&layer, &input);
+    dense_layer_forwarding(&layer);
 
     TEST_ASSERT_EQUAL_FLOAT(2.262f, layer.output.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
@@ -332,7 +332,7 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(2.524f, d_input.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(6.858f, d_input.values[0][1]);
 
-    backpropagation_dense_layer(&layer, &d_input, 0.15f);
+    dense_layer_backpropagation(&layer, &d_input, 0.15f);
 
     TEST_ASSERT_EQUAL_FLOAT(6.496, layer.d_inputs.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(6.315, layer.d_inputs.values[0][1]);
@@ -343,7 +343,7 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(-0.077694, layer.weights.values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(-1.141373, layer.weights.values[1][1]);
 
-    destroy_dense_layer(&layer);
+    dense_layer_destroy(&layer);
     matrix2d_destroy(&input);
     matrix2d_destroy(&output_target);
     matrix2d_destroy(&d_input);
@@ -359,7 +359,7 @@ void test_backpropagation_conv_layer(void){
     const int padding = 0;
     const float learning_rate = 0.05f;
     conv_layer_t layer = {0};
-    init_conv_layer(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
+    conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -412,8 +412,8 @@ void test_backpropagation_conv_layer(void){
     layer.biases[1].values[1][0] = 0.798;
     layer.biases[1].values[1][1] = 0.733;
 
-    feed_conv_layer(&layer, &input);
-    process_conv_layer(&layer);
+    conv_layer_feed(&layer, &input);
+    conv_layer_forwarding(&layer);
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
@@ -441,7 +441,7 @@ void test_backpropagation_conv_layer(void){
     printf("[before] bias\n");
     matrix2d_print(&layer.biases[0]);
     matrix2d_print(&layer.biases[1]);
-    backpropagation_conv_layer(&layer, &d_input, learning_rate);
+    conv_layer_backpropagation(&layer, &d_input, learning_rate);
     printf("[after] Kernel\n");
     matrix3d_print(&layer.kernels[0]);
     matrix3d_print(&layer.kernels[1]);
@@ -454,13 +454,13 @@ void test_backpropagation_conv_layer(void){
     matrix3d_destroy(&input);
     matrix3d_destroy(&output_targets);
     matrix3d_destroy(&d_input);
-    destroy_conv_layer(&layer);
+    conv_layer_destroy(&layer);
     // TEST_ASSERT_TRUE(false);
 }
 
 void test_backpropagation_max_pool_layer(void){
     pool_layer_t layer = {0};
-    init_pool_layer(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -483,8 +483,8 @@ void test_backpropagation_max_pool_layer(void){
         }
     }
 
-    feed_pool_layer(&layer, &input);
-    process_pool_layer(&layer);
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
@@ -504,7 +504,7 @@ void test_backpropagation_max_pool_layer(void){
         compute_cost_derivative(&layer.output.layers[i], &output_targets.layers[i], &d_input.layers[i]);
     }
 
-    backpropagation_pool_layer(&layer, &d_input);
+    pool_layer_backpropagation(&layer, &d_input);
 
     TEST_ASSERT_EQUAL_INT(2, layer.d_input.depth);
     TEST_ASSERT_EQUAL_INT(3, layer.d_input.layers[0].rows_n);
@@ -522,7 +522,7 @@ void test_backpropagation_max_pool_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(14.0, layer.d_input.layers[0].values[2][1]);
     TEST_ASSERT_EQUAL_FLOAT(16.0, layer.d_input.layers[0].values[2][2]);
 
-    destroy_pool_layer(&layer);
+    pool_layer_destroy(&layer);
     matrix3d_destroy(&d_input);
     matrix3d_destroy(&input);
     matrix3d_destroy(&output_targets);
@@ -530,7 +530,7 @@ void test_backpropagation_max_pool_layer(void){
 
 void test_backpropagation_avg_pool_layer(void){
     pool_layer_t layer = {0};
-    init_pool_layer(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
     const float input_vals[2][3][3] = {
         {
             {1, 2, 3},
@@ -553,8 +553,8 @@ void test_backpropagation_avg_pool_layer(void){
         }
     }
 
-    feed_pool_layer(&layer, &input);
-    process_pool_layer(&layer);
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
 
     matrix3d_t output_targets = {0};
     // the layer produces an output of 2x2x2
@@ -579,7 +579,7 @@ void test_backpropagation_avg_pool_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(10.0, d_input.layers[0].values[1][0]);
     TEST_ASSERT_EQUAL_FLOAT(12.0, d_input.layers[0].values[1][1]);
 
-    backpropagation_pool_layer(&layer, &d_input);
+    pool_layer_backpropagation(&layer, &d_input);
 
     TEST_ASSERT_EQUAL_INT(2, layer.d_input.depth);
     TEST_ASSERT_EQUAL_INT(3, layer.d_input.layers[0].rows_n);
@@ -597,7 +597,7 @@ void test_backpropagation_avg_pool_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(5.5, layer.d_input.layers[0].values[2][1]);
     TEST_ASSERT_EQUAL_FLOAT(3.0, layer.d_input.layers[0].values[2][2]);
 
-    destroy_pool_layer(&layer);
+    pool_layer_destroy(&layer);
     matrix3d_destroy(&d_input);
     matrix3d_destroy(&input);
     matrix3d_destroy(&output_targets);
@@ -635,22 +635,22 @@ void test_perceptron_or(void){
 
     output_targets.layers[3].values[0][0] = 1;
     
-    init_dense_layer(&input_layer, 2, 4, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&input_layer, 2, 4, ACTIVATION_TYPE_RELU);
     
-    init_dense_layer(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
     matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
 
     for(int i=0;i<iterations_n;i++){
         for(int j=0;j<inputs.depth;j++){
-            feed_dense_layer(&input_layer, &inputs.layers[j]);
-            process_dense_layer(&input_layer);
-            feed_dense_layer(&hidden_layer, &input_layer.output_activated);
-            process_dense_layer(&hidden_layer);
+            dense_layer_feed(&input_layer, &inputs.layers[j]);
+            dense_layer_forwarding(&input_layer);
+            dense_layer_feed(&hidden_layer, &input_layer.output_activated);
+            dense_layer_forwarding(&hidden_layer);
             compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
             matrix2d_print(&d_input);
-            backpropagation_dense_layer(&hidden_layer, &d_input, learning_rate);
-            backpropagation_dense_layer(&input_layer, &hidden_layer.d_inputs, learning_rate);
+            dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
+            dense_layer_backpropagation(&input_layer, &hidden_layer.d_inputs, learning_rate);
         }
     }
 
@@ -658,10 +658,10 @@ void test_perceptron_or(void){
     TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.cols_n);
 
     for(int i=0;i<inputs.depth;i++){
-        feed_dense_layer(&input_layer, &inputs.layers[i]);
-        process_dense_layer(&input_layer);
-        feed_dense_layer(&hidden_layer, &input_layer.output_activated);
-        process_dense_layer(&hidden_layer);
+        dense_layer_feed(&input_layer, &inputs.layers[i]);
+        dense_layer_forwarding(&input_layer);
+        dense_layer_feed(&hidden_layer, &input_layer.output_activated);
+        dense_layer_forwarding(&hidden_layer);
         printf("i: %d\tEstimated: %f\tExpected: %f\n", i, hidden_layer.output_activated.values[0][0], output_targets.layers[i].values[0][0]);
         TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
     }
@@ -669,8 +669,8 @@ void test_perceptron_or(void){
     matrix3d_destroy(&inputs);
     matrix2d_destroy(&d_input);
     matrix3d_destroy(&output_targets);
-    destroy_dense_layer(&input_layer);
-    destroy_dense_layer(&hidden_layer);
+    dense_layer_destroy(&input_layer);
+    dense_layer_destroy(&hidden_layer);
 }
 
 void test_perceptron_and(void){
@@ -705,22 +705,22 @@ void test_perceptron_and(void){
 
     output_targets.layers[3].values[0][0] = 1;
     
-    init_dense_layer(&input_layer, 2, 4, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&input_layer, 2, 4, ACTIVATION_TYPE_RELU);
     
-    init_dense_layer(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
+    dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
     matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
 
     for(int i=0;i<iterations_n;i++){
         for(int j=0;j<inputs.depth;j++){
-            feed_dense_layer(&input_layer, &inputs.layers[j]);
-            process_dense_layer(&input_layer);
-            feed_dense_layer(&hidden_layer, &input_layer.output_activated);
-            process_dense_layer(&hidden_layer);
+            dense_layer_feed(&input_layer, &inputs.layers[j]);
+            dense_layer_forwarding(&input_layer);
+            dense_layer_feed(&hidden_layer, &input_layer.output_activated);
+            dense_layer_forwarding(&hidden_layer);
             compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
             matrix2d_print(&d_input);
-            backpropagation_dense_layer(&hidden_layer, &d_input, learning_rate);
-            backpropagation_dense_layer(&input_layer, &hidden_layer.d_inputs, learning_rate);
+            dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
+            dense_layer_backpropagation(&input_layer, &hidden_layer.d_inputs, learning_rate);
         }
     }
 
@@ -728,10 +728,10 @@ void test_perceptron_and(void){
     TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.cols_n);
 
     for(int i=0;i<inputs.depth;i++){
-        feed_dense_layer(&input_layer, &inputs.layers[i]);
-        process_dense_layer(&input_layer);
-        feed_dense_layer(&hidden_layer, &input_layer.output_activated);
-        process_dense_layer(&hidden_layer);
+        dense_layer_feed(&input_layer, &inputs.layers[i]);
+        dense_layer_forwarding(&input_layer);
+        dense_layer_feed(&hidden_layer, &input_layer.output_activated);
+        dense_layer_forwarding(&hidden_layer);
         printf("i: %d\tEstimated: %f\tExpected: %f\n", i, hidden_layer.output_activated.values[0][0], output_targets.layers[i].values[0][0]);
         TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
     }
@@ -739,8 +739,8 @@ void test_perceptron_and(void){
     matrix3d_destroy(&inputs);
     matrix2d_destroy(&d_input);
     matrix3d_destroy(&output_targets);
-    destroy_dense_layer(&input_layer);
-    destroy_dense_layer(&hidden_layer);
+    dense_layer_destroy(&input_layer);
+    dense_layer_destroy(&hidden_layer);
 }
 
 int main(void)

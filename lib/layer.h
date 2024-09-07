@@ -52,7 +52,7 @@ typedef union{
 	dense_layer_t dense_layer;
 }layer_t;
 
-void init_conv_layer(
+void conv_layer_init(
 	conv_layer_t* layer,
 	int input_height,
 	int input_width,
@@ -64,22 +64,22 @@ void init_conv_layer(
 	activation_type activation_type
 );
 
-void feed_conv_layer(conv_layer_t* layer, const matrix3d_t* const input);
-void backpropagation_conv_layer(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate);
-void destroy_conv_layer(conv_layer_t* layer);
-void process_conv_layer(conv_layer_t* layer);
+void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input);
+void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate);
+void conv_layer_destroy(conv_layer_t* layer);
+void conv_layer_forwarding(conv_layer_t* layer);
 
-void init_pool_layer(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type);
-void feed_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
-void process_pool_layer(pool_layer_t* layer);
-void backpropagation_pool_layer(pool_layer_t* layer, const matrix3d_t* const input);
-void destroy_pool_layer(pool_layer_t* layer);
+void pool_layer_init(pool_layer_t* layer, int input_height, int input_width, int input_depth, int kernel_size, int padding, int stride, pooling_type type);
+void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input);
+void pool_layer_forwarding(pool_layer_t* layer);
+void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const input);
+void pool_layer_destroy(pool_layer_t* layer);
 
-void init_dense_layer(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type);
-void feed_dense_layer(dense_layer_t* layer, const matrix2d_t* const input);
-void process_dense_layer(dense_layer_t* layer);
-void backpropagation_dense_layer(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate);
-void destroy_dense_layer(dense_layer_t* layer);
+void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type);
+void dense_layer_feed(dense_layer_t* layer, const matrix2d_t* const input);
+void dense_layer_forwarding(dense_layer_t* layer);
+void dense_layer_backpropagation(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate);
+void dense_layer_destroy(dense_layer_t* layer);
 
 void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result);
 
