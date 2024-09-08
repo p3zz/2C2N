@@ -135,6 +135,10 @@ void dense_layer_forwarding(dense_layer_t* layer){
 			break;
 		case ACTIVATION_TYPE_TANH:
 			matrix2d_tanh_inplace(&layer->output_activated);
+			break;
+		case ACTIVATION_TYPE_SOFTMAX:
+			matrix2d_softmax_inplace(&layer->output_activated);
+			break;
 		default:
 			break;
 	}

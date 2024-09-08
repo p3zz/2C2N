@@ -35,6 +35,7 @@ void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2
 void matrix2d_erase(matrix2d_t* input);
 void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n, int cols_n);
 void matrix2d_tanh_inplace(const matrix2d_t* const m);
+void matrix2d_softmax_inplace(matrix2d_t* m);
 
 // matrix3d
 void matrix3d_init(matrix3d_t* m, int rows_n, int cols_n, int depth);

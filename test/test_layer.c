@@ -743,6 +743,7 @@ void test_perceptron_and(void){
     dense_layer_destroy(&hidden_layer);
 }
 
+// https://medium.com/@siddheshb008/lenet-5-architecture-explained-3b559cb2d52b
 // LeNet-5 CNN
 // layer 0: convolutional layer / input (32x32x1) output(28x28x6) kernel(5, 5, 6) padding 0 stride 1
 // layer 1: average pooling layer / input (28x28x6) output(14x14x6) kernel(2, 2, 6) padding 0 stride 2
@@ -751,7 +752,23 @@ void test_perceptron_and(void){
 // reshape: input (5x5x16) output(400x1x1)
 // layer 4: fully connected layer / input (400) output(120)
 // layer 5: fully connected layer / input (120) output(84)
-// layer 5: fully connected layer / input (84) output(10)
+// layer 6: fully connected layer / input (84) output(10)
+void test_lenet5_cnn(void){
+    conv_layer_t layer0 = {0};
+    pool_layer_t layer1 = {0};
+    conv_layer_t layer2 = {0};
+    pool_layer_t layer3 = {0};
+    dense_layer_t layer4 = {0};
+    dense_layer_t layer5 = {0};
+    dense_layer_t layer6 = {0};
+
+    conv_layer_init(&layer0, 32, 32, 1, 5, 6, 1, 0, ACTIVATION_TYPE_TANH);
+    pool_layer_init(&layer1, 28, 28, 6, 2, 0, 2, POOLING_TYPE_AVERAGE);
+    conv_layer_init(&layer2, 28, 28, 6, 5, 16, 1, 0, ACTIVATION_TYPE_TANH);
+    pool_layer_init(&layer3, 10, 10, 16, 2, 0, 2, POOLING_TYPE_AVERAGE);
+    dense_layer_init(&layer4, 120, 84, ACTIVATION_TYPE_TANH);
+    dense_layer_init(&layer5, 84, 10, ACTIVATION_TYPE_TANH);
+}
 
 int main(void)
 {

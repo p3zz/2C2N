@@ -280,6 +280,29 @@ void matrix2d_tanh_inplace(const matrix2d_t* const m){
     }
 }
 
+void matrix2d_softmax_inplace(matrix2d_t* m){
+    float sum = 0.0;
+    float maxInput = m->values[0][0];
+
+    // Find the maximum value in the input array for numerical stability
+    for (int i = 1; i < m->cols_n; i++) {
+        if (m->values[0][i] > maxInput) {
+            maxInput = m->values[0][i];
+        }
+    }
+
+    // Calculate the exponentials of each input element and the sum of exponentials
+    for (int i = 0; i < m->cols_n; i++) {
+        m->values[0][i] = exp(m->values[0][i] - maxInput);
+        sum += m->values[0][i];
+    }
+
+    // Normalize the values to make the sum equal to 1 (probabilities)
+    for (int i = 0; i < m->cols_n; i++) {
+        m->values[0][i] /= sum;
+    }
+}
+
 void matrix2d_sum_inplace(const matrix2d_t* const m, matrix2d_t* result){
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->cols_n;j++){
