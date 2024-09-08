@@ -91,21 +91,21 @@ void conv_layer_init(
 }
 
 void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
-	matrix2d_init(&layer->inputs, 1, input_n);
-	matrix2d_init(&layer->d_inputs, 1, input_n);
+	matrix3d_init(&layer->inputs, 1, input_n, 1);
+	matrix3d_init(&layer->d_inputs, 1, input_n, 1);
 	matrix2d_init(&layer->weights, input_n, output_n);
 	matrix2d_randomize(&layer->weights);
 	matrix2d_init(&layer->biases, 1, output_n);
 	matrix2d_randomize(&layer->biases);
-	matrix2d_init(&layer->output, 1, output_n);
-	matrix2d_init(&layer->output_activated, 1, output_n);
+	matrix3d_init(&layer->output, 1, output_n, 1);
+	matrix3d_init(&layer->output_activated, 1, output_n, 1);
 	layer->activation_type = activation_type;
 }
 
 // ------------------------------ FEED ------------------------------
 
-void dense_layer_feed(dense_layer_t* layer, const matrix2d_t* const input){
-	matrix2d_copy_inplace(input, &layer->inputs);
+void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input){
+	matrix3d_copy_inplace(input, &layer->inputs);
 }
 
 void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
@@ -119,25 +119,29 @@ void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input){
 // ------------------------------ PROCESS ------------------------------
 
 void dense_layer_forwarding(dense_layer_t* layer){
-	for(int i=0;i<layer->output.cols_n;i++){
-		layer->output.values[0][i] = layer->biases.values[0][i];
+	matrix2d_t* output = &layer->output.layers[0];
+	matrix2d_t* output_activated = &layer->output_activated.layers[0];
+	matrix2d_t* input = &layer->inputs.layers[0];
+
+	for(int i=0;i<output->cols_n;i++){
+		output->values[0][i] = layer->biases.values[0][i];
 		for(int j=0;j<layer->weights.rows_n;j++){
-			layer->output.values[0][i] += (layer->inputs.values[0][j] * layer->weights.values[j][i]);
+			output->values[0][i] += (input->values[0][j] * layer->weights.values[j][i]);
 		}
 	}
-	matrix2d_copy_inplace(&layer->output, &layer->output_activated);
+	matrix2d_copy_inplace(output, output_activated);
 	switch(layer->activation_type){
 		case ACTIVATION_TYPE_RELU:
-			matrix2d_relu_inplace(&layer->output_activated);
+			matrix2d_relu_inplace(output_activated);
 			break;
 		case ACTIVATION_TYPE_SIGMOID:
-			matrix2d_sigmoid_inplace(&layer->output_activated);
+			matrix2d_sigmoid_inplace(output_activated);
 			break;
 		case ACTIVATION_TYPE_TANH:
-			matrix2d_tanh_inplace(&layer->output_activated);
+			matrix2d_tanh_inplace(output_activated);
 			break;
 		case ACTIVATION_TYPE_SOFTMAX:
-			matrix2d_softmax_inplace(&layer->output_activated);
+			matrix2d_softmax_inplace(output_activated);
 			break;
 		default:
 			break;
@@ -195,16 +199,16 @@ void conv_layer_forwarding(conv_layer_t* layer){
 
 // the input is the derivative of the cost w.r.t the output, coming from the next layer
 // the output if the derivative of the input, that has to be passed to the previous layer
-void dense_layer_backpropagation(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate)
+void dense_layer_backpropagation(dense_layer_t* layer, const matrix3d_t* const input, float learning_rate)
 {
 	for(int i=0;i<layer->weights.rows_n;i++){
 		float d_input = 0.f;
 		for(int j=0;j<layer->weights.cols_n;j++){
 			// d_actf(z_j) * d_act
-			float common = d_activate(layer->output.values[0][j], layer->activation_type) * input->values[0][j];
+			float common = d_activate(layer->output.layers[0].values[0][j], layer->activation_type) * input->layers[0].values[0][j];
 			// compute d_weight
 			// dC/dw_ij = x_i * d_actf(z_j) * d_act
-			float d_weight = layer->inputs.values[0][i] * common;
+			float d_weight = layer->inputs.layers[0].values[0][i] * common;
 
 			// compute d_input
 			d_input += (layer->weights.values[i][j] * common);
@@ -213,7 +217,7 @@ void dense_layer_backpropagation(dense_layer_t* layer, const matrix2d_t* const i
 			// TODO we don't need to update the bias
 			layer->biases.values[0][j] = gradient_descent(layer->biases.values[0][j], learning_rate, common);
 		}
-		layer->d_inputs.values[0][i] = d_input;
+		layer->d_inputs.layers[0].values[0][i] = d_input;
 	}
 }
 
@@ -331,12 +335,12 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 // ------------------------------ DESTROY ------------------------------
 
 void dense_layer_destroy(dense_layer_t* layer){
-	matrix2d_destroy(&layer->inputs);
-	matrix2d_destroy(&layer->d_inputs);
+	matrix3d_destroy(&layer->inputs);
+	matrix3d_destroy(&layer->d_inputs);
 	matrix2d_destroy(&layer->weights);
 	matrix2d_destroy(&layer->biases);
-	matrix2d_destroy(&layer->output);
-	matrix2d_destroy(&layer->output_activated);
+	matrix3d_destroy(&layer->output);
+	matrix3d_destroy(&layer->output_activated);
 }
 
 void conv_layer_destroy(conv_layer_t* layer){

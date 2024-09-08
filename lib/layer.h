@@ -37,13 +37,13 @@ typedef struct{
 }pool_layer_t;
 
 typedef struct{
-	matrix2d_t inputs;
+	matrix3d_t inputs;
 	matrix2d_t weights;
 	matrix2d_t biases;
 	activation_type activation_type;
-	matrix2d_t output;
-	matrix2d_t output_activated;
-	matrix2d_t d_inputs;
+	matrix3d_t output;
+	matrix3d_t output_activated;
+	matrix3d_t d_inputs;
 }dense_layer_t;
 
 typedef union{
@@ -76,9 +76,9 @@ void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const inp
 void pool_layer_destroy(pool_layer_t* layer);
 
 void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type);
-void dense_layer_feed(dense_layer_t* layer, const matrix2d_t* const input);
+void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input);
 void dense_layer_forwarding(dense_layer_t* layer);
-void dense_layer_backpropagation(dense_layer_t* layer, const matrix2d_t* const input, float learning_rate);
+void dense_layer_backpropagation(dense_layer_t* layer, const matrix3d_t* const input, float learning_rate);
 void dense_layer_destroy(dense_layer_t* layer);
 
 void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result);

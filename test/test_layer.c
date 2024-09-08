@@ -259,10 +259,10 @@ void test_process_dense_layer(void){
     dense_layer_init(&layer, 4, 2, ACTIVATION_TYPE_RELU);
 
     const float input_vals[4] = {3.f, 4.f, 2.f, 1.f};
-    matrix2d_t input = {0};
-    matrix2d_init(&input, 1, 4);
-    for(int j=0;j<input.cols_n;j++){
-        input.values[0][j] = input_vals[j];
+    matrix3d_t input = {0};
+    matrix3d_init(&input, 1, 4, 1);
+    for(int j=0;j<input.layers[0].cols_n;j++){
+        input.layers[0].values[0][j] = input_vals[j];
     }
     layer.weights.values[0][0] = 0.294;
     layer.weights.values[0][1] = 0.232;
@@ -279,12 +279,12 @@ void test_process_dense_layer(void){
     dense_layer_feed(&layer, &input);
     
     dense_layer_forwarding(&layer);
-    TEST_ASSERT_EQUAL_INT(1, layer.output.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
-    TEST_ASSERT_EQUAL_FLOAT(3.811, layer.output.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(4.674, layer.output.values[0][1]);
+    TEST_ASSERT_EQUAL_INT(1, layer.output.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(3.811, layer.output.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(4.674, layer.output.layers[0].values[0][1]);
     dense_layer_destroy(&layer);
-    matrix2d_destroy(&input);
+    matrix3d_destroy(&input);
 }
 
 void test_backpropagation_dense_layer(void){
@@ -294,16 +294,16 @@ void test_backpropagation_dense_layer(void){
     const float input_vals[3] = {1.71f, 1.79f, 2.04f};
     const float output_targets[2] = {1.f, 0.f};
 
-    matrix2d_t input = {0};
-    matrix2d_init(&input, 1, 3);
-    for(int j=0;j<input.cols_n;j++){
-        input.values[0][j] = input_vals[j];
+    matrix3d_t input = {0};
+    matrix3d_init(&input, 1, 3, 1);
+    for(int j=0;j<input.layers[0].cols_n;j++){
+        input.layers[0].values[0][j] = input_vals[j];
     }
 
-    matrix2d_t output_target = {0};
-    matrix2d_init(&output_target, 1, 2);
-    for(int j=0;j<output_target.cols_n;j++){
-        output_target.values[0][j] = output_targets[j];
+    matrix3d_t output_target = {0};
+    matrix3d_init(&output_target, 1, 2, 1);
+    for(int j=0;j<output_target.layers[0].cols_n;j++){
+        output_target.layers[0].values[0][j] = output_targets[j];
     }
 
     layer.weights.values[0][0] = 0.4;
@@ -321,22 +321,22 @@ void test_backpropagation_dense_layer(void){
     dense_layer_feed(&layer, &input);
     dense_layer_forwarding(&layer);
 
-    TEST_ASSERT_EQUAL_FLOAT(2.262f, layer.output.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(2.262f, layer.output.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(3.429f, layer.output.layers[0].values[0][1]);
 
-    matrix2d_t d_input = {0};
-    matrix2d_init(&d_input, output_target.rows_n, output_target.cols_n);
+    matrix3d_t d_input = {0};
+    matrix3d_init(&d_input, output_target.layers[0].rows_n, output_target.layers[0].cols_n, 1);
 
-    compute_cost_derivative(&layer.output_activated, &output_target, &d_input);
+    compute_cost_derivative(&layer.output_activated.layers[0], &output_target.layers[0], &d_input.layers[0]);
 
-    TEST_ASSERT_EQUAL_FLOAT(2.524f, d_input.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(6.858f, d_input.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(2.524f, d_input.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.858f, d_input.layers[0].values[0][1]);
 
     dense_layer_backpropagation(&layer, &d_input, 0.15f);
 
-    TEST_ASSERT_EQUAL_FLOAT(6.496, layer.d_inputs.values[0][0]);
-    TEST_ASSERT_EQUAL_FLOAT(6.315, layer.d_inputs.values[0][1]);
-    TEST_ASSERT_EQUAL_FLOAT(1.624, layer.d_inputs.values[0][2]);
+    TEST_ASSERT_EQUAL_FLOAT(6.496, layer.d_inputs.layers[0].values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(6.315, layer.d_inputs.layers[0].values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(1.624, layer.d_inputs.layers[0].values[0][2]);
 
     TEST_ASSERT_EQUAL_FLOAT(-0.2474061, layer.weights.values[0][0]);
     TEST_ASSERT_EQUAL_FLOAT(-0.9590769, layer.weights.values[0][1]);
@@ -344,9 +344,9 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(-1.141373, layer.weights.values[1][1]);
 
     dense_layer_destroy(&layer);
-    matrix2d_destroy(&input);
-    matrix2d_destroy(&output_target);
-    matrix2d_destroy(&d_input);
+    matrix3d_destroy(&input);
+    matrix3d_destroy(&output_target);
+    matrix3d_destroy(&d_input);
 }
 
 void test_backpropagation_conv_layer(void){
@@ -607,24 +607,28 @@ void test_perceptron_or(void){
     const float learning_rate = 0.02f;
     const int iterations_n = 10000;
 
-    matrix3d_t inputs = {0};
+    int inputs_n = 4;
+    matrix3d_t* inputs = (matrix3d_t*)malloc(inputs_n * sizeof(matrix3d_t));
     matrix3d_t output_targets = {0};
     dense_layer_t input_layer = {0};
     dense_layer_t hidden_layer = {0};
-    matrix2d_t d_input = {0};
+    matrix3d_t d_input = {0};
 
-    matrix3d_init(&inputs, 1, 2, 4);
-    inputs.layers[0].values[0][0] = 0;
-    inputs.layers[0].values[0][1] = 0;
+    for(int i=0;i<inputs_n;i++){
+        matrix3d_init(&inputs[i], 1, 2, 1);
+    }
 
-    inputs.layers[1].values[0][0] = 0;
-    inputs.layers[1].values[0][1] = 1;
+    inputs[0].layers[0].values[0][0] = 0;
+    inputs[0].layers[0].values[0][1] = 0;
 
-    inputs.layers[2].values[0][0] = 1;
-    inputs.layers[2].values[0][1] = 0;
+    inputs[1].layers[0].values[0][0] = 0;
+    inputs[1].layers[0].values[0][1] = 1;
 
-    inputs.layers[3].values[0][0] = 1;
-    inputs.layers[3].values[0][1] = 1;
+    inputs[2].layers[0].values[0][0] = 1;
+    inputs[2].layers[0].values[0][1] = 0;
+
+    inputs[3].layers[0].values[0][0] = 1;
+    inputs[3].layers[0].values[0][1] = 1;
 
     matrix3d_init(&output_targets, 1, 1, 4);
     output_targets.layers[0].values[0][0] = 0;
@@ -639,35 +643,36 @@ void test_perceptron_or(void){
     
     dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
+    matrix3d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, 1);
 
     for(int i=0;i<iterations_n;i++){
-        for(int j=0;j<inputs.depth;j++){
-            dense_layer_feed(&input_layer, &inputs.layers[j]);
+        for(int j=0;j<inputs_n;j++){
+            dense_layer_feed(&input_layer, &inputs[j]);
             dense_layer_forwarding(&input_layer);
             dense_layer_feed(&hidden_layer, &input_layer.output_activated);
             dense_layer_forwarding(&hidden_layer);
-            compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
-            matrix2d_print(&d_input);
+            compute_cost_derivative(&hidden_layer.output_activated.layers[0], &output_targets.layers[j], &d_input.layers[0]);
             dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
             dense_layer_backpropagation(&input_layer, &hidden_layer.d_inputs, learning_rate);
         }
     }
 
-    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.rows_n);
-    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.cols_n);
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.layers[0].cols_n);
 
-    for(int i=0;i<inputs.depth;i++){
-        dense_layer_feed(&input_layer, &inputs.layers[i]);
+    for(int i=0;i<inputs_n;i++){
+        dense_layer_feed(&input_layer, &inputs[i]);
         dense_layer_forwarding(&input_layer);
         dense_layer_feed(&hidden_layer, &input_layer.output_activated);
         dense_layer_forwarding(&hidden_layer);
-        printf("i: %d\tEstimated: %f\tExpected: %f\n", i, hidden_layer.output_activated.values[0][0], output_targets.layers[i].values[0][0]);
-        TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
+        TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.layers[0].values[0][0]);
     }
 
-    matrix3d_destroy(&inputs);
-    matrix2d_destroy(&d_input);
+    for(int i=0;i<inputs_n;i++){
+        matrix3d_destroy(&inputs[i]);        
+    }
+    free(inputs);
+    matrix3d_destroy(&d_input);
     matrix3d_destroy(&output_targets);
     dense_layer_destroy(&input_layer);
     dense_layer_destroy(&hidden_layer);
@@ -677,24 +682,28 @@ void test_perceptron_and(void){
     const float learning_rate = 0.02f;
     const int iterations_n = 10000;
 
-    matrix3d_t inputs = {0};
+    int inputs_n = 4;
+    matrix3d_t* inputs = (matrix3d_t*)malloc(inputs_n * sizeof(matrix3d_t));
     matrix3d_t output_targets = {0};
     dense_layer_t input_layer = {0};
     dense_layer_t hidden_layer = {0};
-    matrix2d_t d_input = {0};
+    matrix3d_t d_input = {0};
 
-    matrix3d_init(&inputs, 1, 2, 4);
-    inputs.layers[0].values[0][0] = 0;
-    inputs.layers[0].values[0][1] = 0;
+    for(int i=0;i<inputs_n;i++){
+        matrix3d_init(&inputs[i], 1, 2, 1);
+    }
 
-    inputs.layers[1].values[0][0] = 0;
-    inputs.layers[1].values[0][1] = 1;
+    inputs[0].layers[0].values[0][0] = 0;
+    inputs[0].layers[0].values[0][1] = 0;
 
-    inputs.layers[2].values[0][0] = 1;
-    inputs.layers[2].values[0][1] = 0;
+    inputs[1].layers[0].values[0][0] = 0;
+    inputs[1].layers[0].values[0][1] = 1;
 
-    inputs.layers[3].values[0][0] = 1;
-    inputs.layers[3].values[0][1] = 1;
+    inputs[2].layers[0].values[0][0] = 1;
+    inputs[2].layers[0].values[0][1] = 0;
+
+    inputs[3].layers[0].values[0][0] = 1;
+    inputs[3].layers[0].values[0][1] = 1;
 
     matrix3d_init(&output_targets, 1, 1, 4);
     output_targets.layers[0].values[0][0] = 0;
@@ -709,35 +718,36 @@ void test_perceptron_and(void){
     
     dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    matrix2d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n);
+    matrix3d_init(&d_input, output_targets.layers[0].rows_n, output_targets.layers[0].cols_n, 1);
 
     for(int i=0;i<iterations_n;i++){
-        for(int j=0;j<inputs.depth;j++){
-            dense_layer_feed(&input_layer, &inputs.layers[j]);
+        for(int j=0;j<inputs_n;j++){
+            dense_layer_feed(&input_layer, &inputs[j]);
             dense_layer_forwarding(&input_layer);
             dense_layer_feed(&hidden_layer, &input_layer.output_activated);
             dense_layer_forwarding(&hidden_layer);
-            compute_cost_derivative(&hidden_layer.output_activated, &output_targets.layers[j], &d_input);
-            matrix2d_print(&d_input);
+            compute_cost_derivative(&hidden_layer.output_activated.layers[0], &output_targets.layers[j], &d_input.layers[0]);
             dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
             dense_layer_backpropagation(&input_layer, &hidden_layer.d_inputs, learning_rate);
         }
     }
 
-    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.rows_n);
-    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.cols_n);
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.layers[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(1, hidden_layer.output_activated.layers[0].cols_n);
 
-    for(int i=0;i<inputs.depth;i++){
-        dense_layer_feed(&input_layer, &inputs.layers[i]);
+    for(int i=0;i<inputs_n;i++){
+        dense_layer_feed(&input_layer, &inputs[i]);
         dense_layer_forwarding(&input_layer);
         dense_layer_feed(&hidden_layer, &input_layer.output_activated);
         dense_layer_forwarding(&hidden_layer);
-        printf("i: %d\tEstimated: %f\tExpected: %f\n", i, hidden_layer.output_activated.values[0][0], output_targets.layers[i].values[0][0]);
-        TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.values[0][0]);
+        TEST_ASSERT_FLOAT_WITHIN(0.00001, output_targets.layers[i].values[0][0], hidden_layer.output_activated.layers[0].values[0][0]);
     }
 
-    matrix3d_destroy(&inputs);
-    matrix2d_destroy(&d_input);
+    for(int i=0;i<inputs_n;i++){
+        matrix3d_destroy(&inputs[i]);        
+    }
+    free(inputs);
+    matrix3d_destroy(&d_input);
     matrix3d_destroy(&output_targets);
     dense_layer_destroy(&input_layer);
     dense_layer_destroy(&hidden_layer);
@@ -761,13 +771,53 @@ void test_lenet5_cnn(void){
     dense_layer_t layer4 = {0};
     dense_layer_t layer5 = {0};
     dense_layer_t layer6 = {0};
+    matrix3d_t input = {0};
+    matrix3d_init(&input, 32, 32, 1);
 
     conv_layer_init(&layer0, 32, 32, 1, 5, 6, 1, 0, ACTIVATION_TYPE_TANH);
     pool_layer_init(&layer1, 28, 28, 6, 2, 0, 2, POOLING_TYPE_AVERAGE);
     conv_layer_init(&layer2, 28, 28, 6, 5, 16, 1, 0, ACTIVATION_TYPE_TANH);
     pool_layer_init(&layer3, 10, 10, 16, 2, 0, 2, POOLING_TYPE_AVERAGE);
-    dense_layer_init(&layer4, 120, 84, ACTIVATION_TYPE_TANH);
-    dense_layer_init(&layer5, 84, 10, ACTIVATION_TYPE_TANH);
+    dense_layer_init(&layer4, 400, 120, ACTIVATION_TYPE_TANH);
+    dense_layer_init(&layer5, 120, 84, ACTIVATION_TYPE_TANH);
+    dense_layer_init(&layer6, 84, 10, ACTIVATION_TYPE_SOFTMAX);
+
+    // draw the digit 1
+    for(int i=0;i<input.layers[0].rows_n;i++){
+        for(int j=0;j<input.layers[0].cols_n;j++){
+            if(j == input.layers[0].cols_n / 2){
+                input.layers[0].values[i][j] = 255;
+            }
+        }
+    }
+
+    conv_layer_feed(&layer0, &input);
+    conv_layer_forwarding(&layer0);
+    pool_layer_feed(&layer1, &layer0.output_activated);
+    pool_layer_forwarding(&layer1);
+    conv_layer_feed(&layer2, &layer1.output);
+    conv_layer_forwarding(&layer2);
+    pool_layer_feed(&layer3, &layer2.output_activated);
+    pool_layer_forwarding(&layer3);
+    matrix3d_reshape(&layer3.output, &layer4.inputs);
+    dense_layer_forwarding(&layer4);
+    dense_layer_feed(&layer5, &layer4.output_activated);
+    dense_layer_forwarding(&layer5);
+    dense_layer_feed(&layer6, &layer5.output_activated);
+    dense_layer_forwarding(&layer6);
+    matrix3d_print(&layer6.output);
+    matrix3d_print(&layer6.output_activated);
+
+    conv_layer_destroy(&layer0);
+    pool_layer_destroy(&layer1);
+    conv_layer_destroy(&layer2);
+    pool_layer_destroy(&layer3);
+    dense_layer_destroy(&layer4);
+    dense_layer_destroy(&layer5);
+    dense_layer_destroy(&layer6);
+    matrix3d_destroy(&input);
+
+    TEST_ASSERT_TRUE(false);
 }
 
 int main(void)
@@ -787,6 +837,7 @@ int main(void)
     RUN_TEST(test_backpropagation_avg_pool_layer);
     RUN_TEST(test_perceptron_or);
     RUN_TEST(test_perceptron_and);
+    RUN_TEST(test_lenet5_cnn);
     int result = UNITY_END();
 
     return result;

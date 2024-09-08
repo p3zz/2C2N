@@ -526,7 +526,7 @@ void test_common_matrix3d_reshape_2(void){
     matrix3d_destroy(&result);
 }
 
-void test_matrix2d_softmax_inplace(void){
+void test_common_matrix2d_softmax_inplace(void){
     matrix2d_t m = {0};
 
     const float m_values[3] = {2.f, 1.f, 0.1f};
@@ -561,7 +561,7 @@ int main(void)
     RUN_TEST(test_common_matrix2d_reshape_2);
     RUN_TEST(test_common_matrix3d_reshape);
     RUN_TEST(test_common_matrix3d_reshape_2);
-    RUN_TEST(test_matrix2d_softmax_inplace);
+    RUN_TEST(test_common_matrix2d_softmax_inplace);
     int result = UNITY_END();
 
     return result;
