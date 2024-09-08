@@ -44,6 +44,7 @@ void matrix3d_erase(matrix3d_t* input);
 void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output);
 void matrix3d_copy_inplace(const matrix3d_t* const input, const matrix3d_t* output);
 void matrix3d_randomize(matrix3d_t* input);
+void matrix3d_reshape(const matrix3d_t* const m, matrix3d_t* result);
 
 // math
 void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);

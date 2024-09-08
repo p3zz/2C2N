@@ -743,6 +743,16 @@ void test_perceptron_and(void){
     dense_layer_destroy(&hidden_layer);
 }
 
+// LeNet-5 CNN
+// layer 0: convolutional layer / input (32x32x1) output(28x28x6) kernel(5, 5, 6) padding 0 stride 1
+// layer 1: average pooling layer / input (28x28x6) output(14x14x6) kernel(2, 2, 6) padding 0 stride 2
+// layer 2: convolutional layer / input (14x14x6) output(10x10x16) kernel(5, 5, 16) padding 0 stride 1
+// layer 3: average pooling layer / input (10x10x16) output(5x5x16) kernel(2, 2, 16) padding 0 stride 2
+// reshape: input (5x5x16) output(400x1x1)
+// layer 4: fully connected layer / input (400) output(120)
+// layer 5: fully connected layer / input (120) output(84)
+// layer 5: fully connected layer / input (84) output(10)
+
 int main(void)
 {
     srand(0);
