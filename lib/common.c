@@ -48,7 +48,7 @@ void matrix2d_mul(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix
     }
 }
 
-void matrix2d_mul_inplace(const matrix2d_t* const m1, const matrix2d_t* const m2){
+void matrix2d_element_wise_product(const matrix2d_t* const m1, const matrix2d_t* const m2){
     for(int i=0;i<m1->rows_n;i++){
         for(int j=0;j<m1->cols_n;j++){
             m1->values[i][j] *= m2->values[i][j];
@@ -173,6 +173,26 @@ void matrix2d_destroy(matrix2d_t* m){
     free(m->values);
 }
 
+// Function to perform matrix multiplication when B is transposed (dot product)
+// C = A * B^T where A is of size MxN, B is of size PxN (so B^T is NxP) and C is MxP
+void matrix_dot_product_transposed(int M, int N, int P, float A[M][N], float B[P][N], float C[M][P]) {
+    // Initialize the result matrix C to 0
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < P; j++) {
+            C[i][j] = 0.0;
+        }
+    }
+
+    // Perform the matrix multiplication A * B^T
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < P; j++) {
+            for (int k = 0; k < N; k++) {
+                C[i][j] += A[i][k] * B[j][k];  // Notice B[j][k] instead of B[k][j]
+            }
+        }
+    }
+}
+
 void matrix3d_init(matrix3d_t* m, int rows_n, int cols_n, int depth){
     m->depth = depth;
     m->layers = (matrix2d_t*)malloc(m->depth * sizeof(matrix2d_t));
@@ -282,18 +302,20 @@ void matrix2d_tanh_inplace(const matrix2d_t* const m){
 
 void matrix2d_softmax_inplace(matrix2d_t* m){
     float sum = 0.0;
-    float maxInput = m->values[0][0];
+    // float maxInput = m->values[0][0];
 
-    // Find the maximum value in the input array for numerical stability
-    for (int i = 1; i < m->cols_n; i++) {
-        if (m->values[0][i] > maxInput) {
-            maxInput = m->values[0][i];
-        }
-    }
+    // TODO this part performs the input normalization
+    // we could write a specific function that performs it
+    // // Find the maximum value in the input array for numerical stability
+    // for (int i = 1; i < m->cols_n; i++) {
+    //     if (m->values[0][i] > maxInput) {
+    //         maxInput = m->values[0][i];
+    //     }
+    // }
 
     // Calculate the exponentials of each input element and the sum of exponentials
     for (int i = 0; i < m->cols_n; i++) {
-        m->values[0][i] = exp(m->values[0][i] - maxInput);
+        m->values[0][i] = exp(m->values[0][i]);
         sum += m->values[0][i];
     }
 

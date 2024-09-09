@@ -8,7 +8,7 @@ typedef enum{
 	ACTIVATION_TYPE_RELU,
 	ACTIVATION_TYPE_SIGMOID,
 	ACTIVATION_TYPE_TANH,
-	ACTIVATION_TYPE_SOFTMAX,
+	ACTIVATION_TYPE_IDENTITY,
 }activation_type;
 
 typedef float(*activation_function)(float);

@@ -102,6 +102,12 @@ void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activatio
 	layer->activation_type = activation_type;
 }
 
+void softmax_layer_init(softmax_layer_t* layer, int input_n){
+	matrix3d_init(&layer->input, 1, input_n, 1);
+	matrix3d_init(&layer->output, 1, input_n, 1);
+	matrix3d_init(&layer->d_input, 1, input_n, 1);
+}
+
 // ------------------------------ FEED ------------------------------
 
 void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input){
@@ -113,6 +119,10 @@ void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
 }
 
 void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input){
+	matrix3d_copy_inplace(input, &layer->input);
+}
+
+void softmax_layer_feed(softmax_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy_inplace(input, &layer->input);
 }
 
@@ -140,12 +150,16 @@ void dense_layer_forwarding(dense_layer_t* layer){
 		case ACTIVATION_TYPE_TANH:
 			matrix2d_tanh_inplace(output_activated);
 			break;
-		case ACTIVATION_TYPE_SOFTMAX:
-			matrix2d_softmax_inplace(output_activated);
+		case ACTIVATION_TYPE_IDENTITY:
 			break;
 		default:
 			break;
 	}
+}
+
+void softmax_layer_forwarding(softmax_layer_t* layer){
+	matrix2d_copy_inplace(&layer->input.layers[0], &layer->output.layers[0]);
+	matrix2d_softmax_inplace(&layer->output.layers[0]);
 }
 
 void pool_layer_forwarding(pool_layer_t* layer){
@@ -199,6 +213,7 @@ void conv_layer_forwarding(conv_layer_t* layer){
 
 // the input is the derivative of the cost w.r.t the output, coming from the next layer
 // the output if the derivative of the input, that has to be passed to the previous layer
+// https://www.youtube.com/watch?v=AbLvJVwySEo
 void dense_layer_backpropagation(dense_layer_t* layer, const matrix3d_t* const input, float learning_rate)
 {
 	for(int i=0;i<layer->weights.rows_n;i++){
@@ -219,6 +234,30 @@ void dense_layer_backpropagation(dense_layer_t* layer, const matrix3d_t* const i
 		}
 		layer->d_inputs.layers[0].values[0][i] = d_input;
 	}
+}
+
+void softmax_layer_backpropagation(softmax_layer_t* layer, const matrix3d_t* const input){
+	matrix2d_t aux = {0};
+	matrix2d_t* sample = &layer->output.layers[0];
+	matrix2d_init(&aux, sample->cols_n, sample->cols_n);
+	for(int i=0;i<sample->cols_n;i++){
+		for(int j=0;j<sample->cols_n;j++){
+			if(i == j){
+				aux.values[i][j] = sample->values[0][i] * (1 - sample->values[0][i]);
+			}
+			else{
+				aux.values[i][j] = -sample->values[0][i] * sample->values[0][j];
+			}
+		}
+	}
+
+	for (int i = 0; i < aux.rows_n; i++) {
+		for (int j = 0; j < aux.cols_n; j++) {
+			layer->d_input.layers[0].values[0][i] += aux.values[i][j] * input->layers[0].values[0][j];
+		}
+    }
+
+	matrix2d_destroy(&aux);
 }
 
 // https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/
@@ -290,7 +329,7 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 				d_output.values[m][n] = d_activate(layer->output.layers[i].values[m][n], layer->activation_type);
 			}
 		}
-		matrix2d_mul_inplace(&d_output, &input->layers[i]);
+		matrix2d_element_wise_product(&d_output, &input->layers[i]);
 		
 		// for each layer of the current kernel compute the derivative
 		// using the cross correlation between the j-th input and the i-th output (rotated)

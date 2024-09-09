@@ -772,6 +772,8 @@ void test_lenet5_cnn(void){
     dense_layer_t layer4 = {0};
     dense_layer_t layer5 = {0};
     dense_layer_t layer6 = {0};
+    softmax_layer_t layer7 = {0};
+    
     matrix3d_t input = {0};
     matrix3d_t d_input = {0};
     matrix3d_t output_target = {0};
@@ -785,7 +787,8 @@ void test_lenet5_cnn(void){
     pool_layer_init(&layer3, 10, 10, 16, 2, 0, 2, POOLING_TYPE_AVERAGE);
     dense_layer_init(&layer4, 400, 120, ACTIVATION_TYPE_TANH);
     dense_layer_init(&layer5, 120, 84, ACTIVATION_TYPE_TANH);
-    dense_layer_init(&layer6, 84, 10, ACTIVATION_TYPE_SOFTMAX);
+    dense_layer_init(&layer6, 84, 10, ACTIVATION_TYPE_IDENTITY);
+    softmax_layer_init(&layer7, 10);
 
     // draw the digit 1
     for(int i=0;i<input.layers[0].rows_n;i++){
@@ -841,23 +844,44 @@ void test_lenet5_cnn(void){
     matrix3d_print(&layer6.output);
     matrix3d_print(&layer6.output_activated);
 
-    output_target.layers[0].values[0][1] = 1.0;
-    compute_cost_derivative(&layer6.output_activated.layers[0], &output_target.layers[0], &d_input.layers[0]);
+    printf("Softmax layer 7-----------------------------\n");
+    softmax_layer_feed(&layer7, &layer6.output_activated);
+    softmax_layer_forwarding(&layer7);
+    matrix3d_print(&layer7.output);
 
+    output_target.layers[0].values[0][1] = 1.0;
+    compute_cost_derivative(&layer7.output.layers[0], &output_target.layers[0], &d_input.layers[0]);
     matrix3d_print(&d_input);
 
-    // dense_layer_backpropagation(&layer6, &d_input, learning_rate);
-    // matrix3d_print(&layer6.d_inputs);
-    // dense_layer_backpropagation(&layer5, &layer6.d_inputs, learning_rate);
-    // matrix3d_print(&layer5.d_inputs);
-    // dense_layer_backpropagation(&layer4, &layer5.d_inputs, learning_rate);
-    // matrix3d_t aux = {0};
-    // matrix3d_init(&aux, 5, 5, 16);
-    // matrix3d_reshape(&layer4.d_inputs, &aux);
-    // pool_layer_backpropagation(&layer3, &aux);
-    // conv_layer_backpropagation(&layer2, &layer3.d_input, learning_rate);
-    // pool_layer_backpropagation(&layer1, &layer2.d_input);
-    // conv_layer_backpropagation(&layer0, &layer1.d_input, learning_rate);
+    printf("[BACKPROP] Softmax layer 7-----------------------------\n");
+    softmax_layer_backpropagation(&layer7, &d_input);
+    matrix3d_print(&layer7.d_input);
+
+    printf("[BACKPROP] Dense layer 6-----------------------------\n");
+    dense_layer_backpropagation(&layer6, &layer7.d_input, learning_rate);
+    matrix3d_print(&layer6.d_inputs);
+
+    printf("[BACKPROP] Dense layer 5-----------------------------\n");
+    dense_layer_backpropagation(&layer5, &layer6.d_inputs, learning_rate);
+    matrix3d_print(&layer5.d_inputs);
+    
+    printf("[BACKPROP] Dense layer 4-----------------------------\n");
+    dense_layer_backpropagation(&layer4, &layer5.d_inputs, learning_rate);
+    matrix3d_print(&layer4.d_inputs);
+
+    matrix3d_t aux = {0};
+    matrix3d_init(&aux, 5, 5, 16);
+    matrix3d_reshape(&layer4.d_inputs, &aux);
+    
+    pool_layer_backpropagation(&layer3, &aux);
+    matrix3d_print(&layer3.d_input);
+    matrix3d_destroy(&aux);
+    
+    conv_layer_backpropagation(&layer2, &layer3.d_input, learning_rate);
+    matrix3d_print(&layer2.d_input);
+    pool_layer_backpropagation(&layer1, &layer2.d_input);
+    matrix3d_print(&layer1.d_input);
+    conv_layer_backpropagation(&layer0, &layer1.d_input, learning_rate);
 
     conv_layer_destroy(&layer0);
     pool_layer_destroy(&layer1);
