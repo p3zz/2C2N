@@ -404,4 +404,11 @@ void pool_layer_destroy(pool_layer_t* layer){
 			matrix3d_destroy(&layer->indexes[i]);
 		}
 	}
+	free(layer->indexes);
+}
+
+void softmax_layer_destroy(softmax_layer_t* layer){
+	matrix3d_destroy(&layer->input);
+	matrix3d_destroy(&layer->output);
+	matrix3d_destroy(&layer->d_input);
 }
