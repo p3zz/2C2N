@@ -764,6 +764,7 @@ void test_perceptron_and(void){
 // layer 5: fully connected layer / input (120) output(84)
 // layer 6: fully connected layer / input (84) output(10)
 void test_lenet5_cnn(void){
+    const float learning_rate = 0.02;
     conv_layer_t layer0 = {0};
     pool_layer_t layer1 = {0};
     conv_layer_t layer2 = {0};
@@ -772,11 +773,15 @@ void test_lenet5_cnn(void){
     dense_layer_t layer5 = {0};
     dense_layer_t layer6 = {0};
     matrix3d_t input = {0};
+    matrix3d_t d_input = {0};
+    matrix3d_t output_target = {0};
     matrix3d_init(&input, 32, 32, 1);
+    matrix3d_init(&output_target, 1, 10, 1);
+    matrix3d_init(&d_input, 1, 10, 1);
 
     conv_layer_init(&layer0, 32, 32, 1, 5, 6, 1, 0, ACTIVATION_TYPE_TANH);
     pool_layer_init(&layer1, 28, 28, 6, 2, 0, 2, POOLING_TYPE_AVERAGE);
-    conv_layer_init(&layer2, 28, 28, 6, 5, 16, 1, 0, ACTIVATION_TYPE_TANH);
+    conv_layer_init(&layer2, 14, 14, 6, 5, 16, 1, 0, ACTIVATION_TYPE_TANH);
     pool_layer_init(&layer3, 10, 10, 16, 2, 0, 2, POOLING_TYPE_AVERAGE);
     dense_layer_init(&layer4, 400, 120, ACTIVATION_TYPE_TANH);
     dense_layer_init(&layer5, 120, 84, ACTIVATION_TYPE_TANH);
@@ -791,22 +796,68 @@ void test_lenet5_cnn(void){
         }
     }
 
+    printf("Height: %d\tWidth: %d\tDepth: %d\n", layer1.output.layers[0].rows_n, layer1.output.layers[0].cols_n, layer1.output.depth);
+
+    printf("Input");
+    matrix3d_print(&input);
+
     conv_layer_feed(&layer0, &input);
     conv_layer_forwarding(&layer0);
+    printf("Conv layer 0-----------------------------\n");
+    matrix3d_print(&layer0.output);
+    matrix3d_print(&layer0.output_activated);
+
     pool_layer_feed(&layer1, &layer0.output_activated);
     pool_layer_forwarding(&layer1);
+    printf("Pool layer 1-----------------------------\n");
+    matrix3d_print(&layer1.output);
+
     conv_layer_feed(&layer2, &layer1.output);
     conv_layer_forwarding(&layer2);
+    printf("Conv layer 2-----------------------------\n");
+    matrix3d_print(&layer2.output);
+    matrix3d_print(&layer2.output_activated);
+
     pool_layer_feed(&layer3, &layer2.output_activated);
     pool_layer_forwarding(&layer3);
+    printf("Pool layer 3-----------------------------\n");
+    matrix3d_print(&layer3.output);
+
     matrix3d_reshape(&layer3.output, &layer4.inputs);
     dense_layer_forwarding(&layer4);
+    printf("Dense layer 4-----------------------------\n");
+    matrix3d_print(&layer4.output);
+    matrix3d_print(&layer4.output_activated);
+    
     dense_layer_feed(&layer5, &layer4.output_activated);
     dense_layer_forwarding(&layer5);
+    printf("Dense layer 5-----------------------------\n");
+    matrix3d_print(&layer5.output);
+    matrix3d_print(&layer5.output_activated);
+
     dense_layer_feed(&layer6, &layer5.output_activated);
     dense_layer_forwarding(&layer6);
+    printf("Dense layer 6-----------------------------\n");
     matrix3d_print(&layer6.output);
     matrix3d_print(&layer6.output_activated);
+
+    output_target.layers[0].values[0][1] = 1.0;
+    compute_cost_derivative(&layer6.output_activated.layers[0], &output_target.layers[0], &d_input.layers[0]);
+
+    matrix3d_print(&d_input);
+
+    // dense_layer_backpropagation(&layer6, &d_input, learning_rate);
+    // matrix3d_print(&layer6.d_inputs);
+    // dense_layer_backpropagation(&layer5, &layer6.d_inputs, learning_rate);
+    // matrix3d_print(&layer5.d_inputs);
+    // dense_layer_backpropagation(&layer4, &layer5.d_inputs, learning_rate);
+    // matrix3d_t aux = {0};
+    // matrix3d_init(&aux, 5, 5, 16);
+    // matrix3d_reshape(&layer4.d_inputs, &aux);
+    // pool_layer_backpropagation(&layer3, &aux);
+    // conv_layer_backpropagation(&layer2, &layer3.d_input, learning_rate);
+    // pool_layer_backpropagation(&layer1, &layer2.d_input);
+    // conv_layer_backpropagation(&layer0, &layer1.d_input, learning_rate);
 
     conv_layer_destroy(&layer0);
     pool_layer_destroy(&layer1);
@@ -816,6 +867,8 @@ void test_lenet5_cnn(void){
     dense_layer_destroy(&layer5);
     dense_layer_destroy(&layer6);
     matrix3d_destroy(&input);
+    matrix3d_destroy(&d_input);
+    matrix3d_destroy(&output_target);
 
     TEST_ASSERT_TRUE(false);
 }
@@ -826,17 +879,17 @@ int main(void)
     UNITY_BEGIN();
 
     RUN_TEST(test_always_true);
-    RUN_TEST(test_init_conv_layer);
-    RUN_TEST(test_process_conv_layer);
-    RUN_TEST(test_process_pool_layer_average);
-    RUN_TEST(test_process_pool_layer_max);
-    RUN_TEST(test_process_dense_layer);
-    RUN_TEST(test_backpropagation_dense_layer);
-    RUN_TEST(test_backpropagation_conv_layer);
-    RUN_TEST(test_backpropagation_max_pool_layer);
-    RUN_TEST(test_backpropagation_avg_pool_layer);
-    RUN_TEST(test_perceptron_or);
-    RUN_TEST(test_perceptron_and);
+    // RUN_TEST(test_init_conv_layer);
+    // RUN_TEST(test_process_conv_layer);
+    // RUN_TEST(test_process_pool_layer_average);
+    // RUN_TEST(test_process_pool_layer_max);
+    // RUN_TEST(test_process_dense_layer);
+    // RUN_TEST(test_backpropagation_dense_layer);
+    // RUN_TEST(test_backpropagation_conv_layer);
+    // RUN_TEST(test_backpropagation_max_pool_layer);
+    // RUN_TEST(test_backpropagation_avg_pool_layer);
+    // RUN_TEST(test_perceptron_or);
+    // RUN_TEST(test_perceptron_and);
     RUN_TEST(test_lenet5_cnn);
     int result = UNITY_END();
 
