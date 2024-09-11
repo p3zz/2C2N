@@ -542,6 +542,41 @@ void test_common_matrix2d_softmax_inplace(void){
     matrix2d_destroy(&m);
 }
 
+void test_parse_line(void){
+    char str[] = "1,255,12,123,2";
+    int length = sizeof(str)/sizeof(char);
+    
+    matrix2d_t res = {0};
+    float label = 0.f;
+
+    matrix2d_init(&res, 2, 2);
+    parse_line(str, length, &res, &label);
+    TEST_ASSERT_EQUAL_FLOAT(1.f, label);
+    TEST_ASSERT_EQUAL_FLOAT(255.f, res.values[0][0]);
+    TEST_ASSERT_EQUAL_FLOAT(12.f, res.values[0][1]);
+    TEST_ASSERT_EQUAL_FLOAT(123.f, res.values[1][0]);
+    TEST_ASSERT_EQUAL_FLOAT(2.f, res.values[1][1]);
+}
+
+void test_zero_pad(void){
+    matrix2d_t m = {0};
+    matrix2d_t res = {0};
+
+    matrix2d_init(&m, 3, 3);
+    matrix2d_init(&res, 7, 7);
+
+    m.values[0][0] = 1.f;
+    m.values[0][2] = 3.f;
+    m.values[1][1] = 4.f;
+    m.values[1][2] = 4.f;
+    m.values[2][0] = 9.f;
+
+    zero_pad(&m, &res, 2);
+    
+    matrix2d_print(&m);
+    matrix2d_print(&res);
+}
+
 int main(void)
 {
     srand(0);
@@ -562,6 +597,8 @@ int main(void)
     RUN_TEST(test_common_matrix3d_reshape);
     RUN_TEST(test_common_matrix3d_reshape_2);
     RUN_TEST(test_common_matrix2d_softmax_inplace);
+    RUN_TEST(test_parse_line);
+    RUN_TEST(test_zero_pad);
     int result = UNITY_END();
 
     return result;

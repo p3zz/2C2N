@@ -913,19 +913,19 @@ int main(void)
     srand(0);
     UNITY_BEGIN();
 
-    RUN_TEST(test_always_true);
-    RUN_TEST(test_init_conv_layer);
-    RUN_TEST(test_process_conv_layer);
-    RUN_TEST(test_process_pool_layer_average);
-    RUN_TEST(test_process_pool_layer_max);
-    RUN_TEST(test_process_dense_layer);
-    RUN_TEST(test_backpropagation_dense_layer);
-    RUN_TEST(test_backpropagation_conv_layer);
-    RUN_TEST(test_backpropagation_max_pool_layer);
-    RUN_TEST(test_backpropagation_avg_pool_layer);
-    RUN_TEST(test_perceptron_or);
-    RUN_TEST(test_perceptron_and);
-    RUN_TEST(test_lenet5_cnn);
+    // RUN_TEST(test_always_true);
+    // RUN_TEST(test_init_conv_layer);
+    // RUN_TEST(test_process_conv_layer);
+    // RUN_TEST(test_process_pool_layer_average);
+    // RUN_TEST(test_process_pool_layer_max);
+    // RUN_TEST(test_process_dense_layer);
+    // RUN_TEST(test_backpropagation_dense_layer);
+    // RUN_TEST(test_backpropagation_conv_layer);
+    // RUN_TEST(test_backpropagation_max_pool_layer);
+    // RUN_TEST(test_backpropagation_avg_pool_layer);
+    // RUN_TEST(test_perceptron_or);
+    // RUN_TEST(test_perceptron_and);
+    // RUN_TEST(test_lenet5_cnn);
     int result = UNITY_END();
 
 

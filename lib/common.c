@@ -3,6 +3,17 @@
 #include "utils.h"
 #include "stdio.h"
 #include "math.h"
+#include "string.h"
+
+void zero_pad(const matrix2d_t* const m, matrix2d_t* result, int padding){
+    for (int i = 0; i < m->rows_n; i++) {
+        for (int j = 0; j < m->cols_n; j++) {
+            int row = i + padding;
+            int col = j + padding;
+            result->values[row][col] = m->values[i][j];
+        }
+    }
+}
 
 void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride){
     for(int i=0;i<result->rows_n;i++){
@@ -302,20 +313,18 @@ void matrix2d_tanh_inplace(const matrix2d_t* const m){
 
 void matrix2d_softmax_inplace(matrix2d_t* m){
     float sum = 0.0;
-    // float maxInput = m->values[0][0];
+    float maxInput = m->values[0][0];
 
-    // TODO this part performs the input normalization
-    // we could write a specific function that performs it
-    // // Find the maximum value in the input array for numerical stability
-    // for (int i = 1; i < m->cols_n; i++) {
-    //     if (m->values[0][i] > maxInput) {
-    //         maxInput = m->values[0][i];
-    //     }
-    // }
+    // normalize to avoid overflow on exp
+    for (int i = 1; i < m->cols_n; i++) {
+        if (m->values[0][i] > maxInput) {
+            maxInput = m->values[0][i];
+        }
+    }
 
     // Calculate the exponentials of each input element and the sum of exponentials
     for (int i = 0; i < m->cols_n; i++) {
-        m->values[0][i] = exp(m->values[0][i]);
+        m->values[0][i] = exp(m->values[0][i] / maxInput);
         sum += m->values[0][i];
     }
 
@@ -337,7 +346,7 @@ void matrix2d_print(const matrix2d_t* const m){
     for(int i=0;i<m->rows_n;i++){
         printf("|");
         for(int j=0;j<m->cols_n;j++){
-            printf(" %.3f |", m->values[i][j]);
+            printf(" %.2f |", m->values[i][j]);
         }
         printf("\n");
     }
@@ -394,7 +403,7 @@ void cross_entropy_loss_derivative(const matrix2d_t* const output, const matrix2
         float d0 = 1 - output->values[0][i];
         float n1 = target_output->values[0][i];
         float d1 = output->values[0][i];
-        if(d0 == 0.f || d1 == 0.f){
+        if(d0 < 1e-4 || d1 < 1e-4){
             result->values[0][i] = 0.f;    
         }
         else{
@@ -422,4 +431,36 @@ float cross_entropy_loss(const matrix2d_t* const output, const matrix2d_t* const
         sum += d;
     }
     return -sum / output->cols_n;
+}
+
+void parse_line(char* line, int length, matrix2d_t* image, float* label){
+    char n[4] = {0};
+    int n_idx = 0;
+    int numbers_n = 0;
+    bool label_read = false;
+    for(int i=0;i<length;i++){
+        // check if numbers length exceeds the capacity of the image matrix
+        if(numbers_n == image->rows_n * image->cols_n){
+            break;
+        }
+        if(line[i] == ',' || i == length - 1){
+            n[n_idx] = '\0';
+            float val = atof(n);
+            if(!label_read){
+                *label = val;
+                label_read = true;
+            }
+            else{
+                int row = numbers_n / image->cols_n;
+                int col = numbers_n % image->cols_n;
+                image->values[row][col] = val;
+                numbers_n++;
+            }
+            n_idx = 0;
+        }
+        else{
+            n[n_idx] = line[i];
+            n_idx++;
+        }
+    }   
 }

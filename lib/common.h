@@ -58,4 +58,7 @@ void mean_squared_error_derivative(const matrix2d_t* const output, const matrix2
 float cross_entropy_loss(const matrix2d_t* const output, const matrix2d_t* const target_output);
 float mean_squared_error(const matrix2d_t* const output, const matrix2d_t* const target_output);
 
+void parse_line(char* line, int length, matrix2d_t* image, float* label);
+void zero_pad(const matrix2d_t* const m, matrix2d_t* result, int padding);
+
 #endif
