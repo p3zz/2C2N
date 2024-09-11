@@ -7,7 +7,8 @@ float sigmoid(float x){
 }
 
 float sigmoid_derivative(float x){
-    return x * (1-x);
+    float res = sigmoid(x);   
+    return res * (1-res);
 }
 
 float relu(float x){

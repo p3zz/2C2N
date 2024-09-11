@@ -93,6 +93,4 @@ void softmax_layer_forwarding(softmax_layer_t* layer);
 void softmax_layer_backpropagation(softmax_layer_t* layer, const matrix3d_t* const input);
 void softmax_layer_destroy(softmax_layer_t* layer);
 
-void compute_cost_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result);
-
 #endif

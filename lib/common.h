@@ -53,5 +53,9 @@ void max_pooling(const matrix2d_t* const mat, matrix2d_t* result, matrix3d_t* in
 void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_size, int padding, int stride);
 float cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, float result);
 void convolution(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding);
+void cross_entropy_loss_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result);
+void mean_squared_error_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result);
+float cross_entropy_loss(const matrix2d_t* const output, const matrix2d_t* const target_output);
+float mean_squared_error(const matrix2d_t* const output, const matrix2d_t* const target_output);
 
 #endif
