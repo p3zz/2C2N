@@ -16,7 +16,7 @@ int main(void){
 
     srand(time(NULL));
     const float learning_rate = 0.005;
-    const int iterations = 10000;
+    const int iterations = 10;
     conv_layer_t layer0 = {0};
     pool_layer_t layer1 = {0};
     conv_layer_t layer2 = {0};
@@ -54,7 +54,7 @@ int main(void){
     size_t len = sizeof(line) / sizeof(char);
     int read;
 
-    const int images_to_read = 2;
+    const int images_to_read = 100;
     int images_read = 0;
 
     float total_cost = 0.f;
@@ -145,13 +145,15 @@ int main(void){
             float cost = cross_entropy_loss(&layer7.output.layers[0], &output_target.layers[0]);
             total_cost += cost;
 
-            // printf("Layer5 output activated");
+            // printf("Layer5 output activated\n");
+            // matrix2d_print(&layer5.output.layers[0]);
             // matrix2d_print(&layer5.output_activated.layers[0]);
-            // printf("Layer6 output activated");
+            // printf("Layer6 output activated\n");
+            // matrix2d_print(&layer6.output.layers[0]);
             // matrix2d_print(&layer6.output_activated.layers[0]);
-            printf("Layer7 output activated\n");
-            matrix2d_print(&layer7.output.layers[0]);
-            matrix2d_print(&output_target.layers[0]);
+            // printf("Layer7 output activated\n");
+            // matrix2d_print(&layer7.output.layers[0]);
+            // matrix2d_print(&output_target.layers[0]);
             // matrix2d_print(&d_input.layers[0]);
             // matrix2d_print(&d_input.layers[0]);
 
@@ -159,15 +161,18 @@ int main(void){
 
             // printf("[BACKPROP] Softmax layer 7-----------------------------\n");
             softmax_layer_backpropagation(&layer7, &d_input);
-            // matrix3d_print(&layer7.d_input);
+            printf("Layer7 d_input\n");
+            matrix3d_print(&layer7.d_input);
 
             // printf("[BACKPROP] Dense layer 6-----------------------------\n");
             dense_layer_backpropagation(&layer6, &layer7.d_input, learning_rate);
-            // matrix3d_print(&layer6.d_inputs);
+            printf("Layer6 d_input\n");
+            matrix3d_print(&layer6.d_inputs);
 
             // printf("[BACKPROP] Dense layer 5-----------------------------\n");
             dense_layer_backpropagation(&layer5, &layer6.d_inputs, learning_rate);
-            // matrix3d_print(&layer5.d_inputs);
+            printf("Layer5 d_input\n");
+            matrix3d_print(&layer5.d_inputs);
             
             // printf("[BACKPROP] Dense layer 4-----------------------------\n");
             dense_layer_backpropagation(&layer4, &layer5.d_inputs, learning_rate);
