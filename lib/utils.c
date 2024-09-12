@@ -64,7 +64,7 @@ float d_activate(float x, activation_type type){
 			result = tanh_derivative(x);
             break;
         case ACTIVATION_TYPE_IDENTITY:
-            result = x;
+            result = 1;
             break;
 		default:
 			break;
