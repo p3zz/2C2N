@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 3.5)
 project(NeuralNetwork)
 
 set(LIB_SOURCES
+    src/utils.c
     src/common.c
     src/layer.c
-    src/utils.c
 )
 
-add_library(lib "${LIB_SOURCES}")
-target_include_directories(lib PUBLIC include)
+add_library(c_cnn_framework STATIC "${LIB_SOURCES}")
+target_include_directories(c_cnn_framework PUBLIC include)
 
 enable_testing()
 add_subdirectory(test)
