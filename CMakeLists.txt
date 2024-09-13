@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(NeuralNetwork)
 
+set(LIB_SOURCES
+    src/common.c
+    src/layer.c
+    src/utils.c
+)
 
-# add_executable(main src/main.c)
+add_library(lib "${LIB_SOURCES}")
+target_include_directories(lib PUBLIC include)
 
-add_subdirectory(lib)
-# target_link_libraries(main m lib)
-# target_include_directories(main PRIVATE lib)
-
-# enable_testing()
-# add_subdirectory(test)
+enable_testing()
+add_subdirectory(test)
