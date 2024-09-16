@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "stdint.h"
+
 #define SUCCESS 0
 #define ERR 1
 
@@ -24,5 +26,6 @@ float generate_random(void);
 float activate(float x, activation_type type);
 float d_activate(float x, activation_type type);
 void compute_output_size(int input_height, int input_width, int kernel_size, int padding, int stride, int* output_width, int* output_height);
+uint32_t quantize_f32_to_u32(float x);
 
 #endif

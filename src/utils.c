@@ -1,6 +1,7 @@
 #include "math.h"
 #include "utils.h"
 #include "stdlib.h"
+#include "float.h"
 
 float sigmoid(float x){
     return 1.f / (1.f + expf(-x));
@@ -83,4 +84,13 @@ float generate_random(void){
 void compute_output_size(int input_height, int input_width, int kernel_size, int padding, int stride, int* output_height, int* output_width){
     *output_height = (input_height - kernel_size + 2 * padding) / stride + 1;
     *output_width = (input_width - kernel_size + 2 * padding) / stride + 1;
+}
+
+uint32_t quantize_f32_to_u32(float x){
+    if(x > 0.f){
+        return (x * UINT32_MAX) / FLT_MAX;
+    }
+    else{
+        return 0u;
+    }
 }
