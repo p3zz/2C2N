@@ -329,7 +329,7 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 				d_output.values[m][n] = d_activate(layer->output.layers[i].values[m][n], layer->activation_type);
 			}
 		}
-		matrix2d_element_wise_product(&d_output, &input->layers[i]);
+		matrix2d_element_wise_product_inplace(&d_output, &input->layers[i]);
 		
 		// for each layer of the current kernel compute the derivative
 		// using the cross correlation between the j-th input and the i-th output (rotated)
