@@ -6,7 +6,7 @@
 #include "string.h"
 
 inline const float* matrix2d_get_elem_as_ref(const matrix2d_t* const m, int row_idx, int col_idx){
-    return &m->values[row_idx * m->cols_n + col_idx];
+    return matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx);
 }
 
 inline float* matrix2d_get_elem_as_mut_ref(const matrix2d_t* const m, int row_idx, int col_idx){
@@ -14,29 +14,33 @@ inline float* matrix2d_get_elem_as_mut_ref(const matrix2d_t* const m, int row_id
 }
 
 inline float matrix2d_get_elem(const matrix2d_t* const m, int row_idx, int col_idx){
-    return *matrix2d_get_elem_as_ref(&m, row_idx, col_idx);
+    return *matrix2d_get_elem_as_ref(m, row_idx, col_idx);
 }
 
-inline void matrix2d_set_elem(matrix2d_t* m, int row_idx, int col_idx, float value){
-    *matrix2d_get_elem_as_mut_ref(&m, row_idx, col_idx) = value;
-}
-
-void matrix3d_get_slice_as_mut_ref(matrix3d_t* m, matrix2d_t* result, int z_idx){
-    result->rows_n = m->rows_n;
-    result->cols_n = m->cols_n;
-    result->values = &m->values[result->rows_n * result->cols_n * z_idx];
+inline void matrix2d_set_elem(const matrix2d_t* m, int row_idx, int col_idx, float value){
+    *matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx) = value;
 }
 
 inline const float* matrix3d_get_elem_as_ref(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx){
-    return &m->values[row_idx * m->cols_n * m->depth + col_idx];
+    return matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx);
 }
 
 inline float* matrix3d_get_elem_as_mut_ref(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx){
-    return &m->values[row_idx * m->cols_n * m->depth + col_idx];
+    return &m->values[(z_idx * m->rows_n * m->cols_n) + (row_idx * m->cols_n) + col_idx];
 }
 
-inline void matrix3d_set_elem(matrix2d_t* m, int row_idx, int col_idx, int z_idx, float value){
-    *matrix3d_get_elem_as_mut_ref(&m, row_idx, col_idx, z_idx) = value;
+inline float matrix3d_get_elem(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx){
+    return *matrix3d_get_elem_as_ref(m, row_idx, col_idx, z_idx);
+}
+
+inline void matrix3d_set_elem(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx, float value){
+    *matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx) = value;
+}
+
+void matrix3d_get_slice_as_mut_ref(const matrix3d_t* m, matrix2d_t* result, int z_idx){
+    result->rows_n = m->rows_n;
+    result->cols_n = m->cols_n;
+    result->values = &m->values[result->rows_n * result->cols_n * z_idx];
 }
 
 void zero_pad(const matrix2d_t* const m, matrix2d_t* result, int padding){
@@ -144,7 +148,7 @@ void matrix2d_rotate180_inplace(const matrix2d_t* const input){
             j_opposite = input->cols_n - j - 1;
             aux = matrix2d_get_elem(input, i, j);
             *matrix2d_get_elem_as_mut_ref(input, i, j) = matrix2d_get_elem(input, i_opposite, j_opposite);
-            matrix2d_set_elem(&input, i_opposite, j_opposite, aux);
+            matrix2d_set_elem(input, i_opposite, j_opposite, aux);
         }
     }
 }
@@ -292,7 +296,7 @@ void matrix3d_print(const matrix3d_t* const m){
     matrix2d_t slice = {0};
     for(int i=0;i<m->depth;i++){
         printf("[Layer %d]\n", i);
-        matrix3d_get_slice_as_mut_ref(&m, &slice, i);
+        matrix3d_get_slice_as_mut_ref(m, &slice, i);
         matrix2d_print(&slice);
     }
 }
@@ -325,6 +329,19 @@ void matrix3d_reshape(const matrix3d_t* const m, matrix3d_t* result){
         int result_k = i % result->cols_n;
         *matrix3d_get_elem_as_mut_ref(result, result_j, result_k, result_i) = matrix3d_get_elem(m, m_j, m_k, m_i);
     }
+}
+
+void matrix2d_load(matrix2d_t* m, int rows_n, int cols_n, const float* base_address){
+    m->rows_n = rows_n;
+    m->cols_n = cols_n;
+    m->values = base_address;
+}
+
+void matrix3d_load(matrix3d_t* m, int rows_n, int cols_n, int depth, const float* base_address){
+    m->rows_n = rows_n;
+    m->cols_n = cols_n;
+    m->depth = depth;
+    m->values = base_address;
 }
 
 void mean_squared_error_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){

@@ -16,6 +16,16 @@ typedef struct {
     float* values;
 } matrix3d_t;
 
+const float* matrix2d_get_elem_as_ref(const matrix2d_t* const m, int row_idx, int col_idx);
+float* matrix2d_get_elem_as_mut_ref(const matrix2d_t* const m, int row_idx, int col_idx);
+float matrix2d_get_elem(const matrix2d_t* const m, int row_idx, int col_idx);
+void matrix2d_set_elem(const matrix2d_t* m, int row_idx, int col_idx, float value);
+const float* matrix3d_get_elem_as_ref(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx);
+float* matrix3d_get_elem_as_mut_ref(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx);
+float matrix3d_get_elem(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx);
+void matrix3d_set_elem(const matrix3d_t* const m, int row_idx, int col_idx, int z_idx, float value);
+void matrix3d_get_slice_as_mut_ref(const matrix3d_t* m, matrix2d_t* result, int z_idx);
+
 // matrix2d
 void matrix2d_init(matrix2d_t* m, int rows_n, int cols_n);
 void matrix2d_destroy(matrix2d_t* m);
@@ -36,7 +46,7 @@ void matrix2d_erase(matrix2d_t* input);
 void matrix2d_reshape(const matrix2d_t* const m, matrix2d_t* result, int rows_n, int cols_n);
 void matrix2d_tanh_inplace(const matrix2d_t* const m);
 void matrix2d_softmax_inplace(matrix2d_t* m);
-void matrix2d_load(matrix2d_t* m, int rows_n, int cols_n, float* base_address);
+void matrix2d_load(matrix2d_t* m, int rows_n, int cols_n, const float* base_address);
 
 // matrix3d
 void matrix3d_init(matrix3d_t* m, int rows_n, int cols_n, int depth);
@@ -47,6 +57,7 @@ void matrix3d_copy(const matrix3d_t* const input, matrix3d_t* output);
 void matrix3d_copy_inplace(const matrix3d_t* const input, const matrix3d_t* output);
 void matrix3d_randomize(matrix3d_t* input);
 void matrix3d_reshape(const matrix3d_t* const m, matrix3d_t* result);
+void matrix3d_load(matrix3d_t* m, int rows_n, int cols_n, int depth, const float* base_address);
 
 // math
 void full_cross_correlation(const matrix2d_t* const m1, const matrix2d_t* const m2, matrix2d_t* result, int padding, int stride);
