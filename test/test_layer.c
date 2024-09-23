@@ -15,173 +15,145 @@ void tearDown()
 }
 
 
-// void test_always_true(void){
-//     TEST_ASSERT_TRUE(true);
-// }
+void test_always_true(void){
+    TEST_ASSERT_TRUE(true);
+}
 
-// void test_init_conv_layer(void){
-//     const int input_height = 10;
-//     const int input_width = 10;
-//     const int input_depth = 2;
-//     const int kernel_size = 3;
-//     const int kernels_n = 1;
-//     const int stride = 1;
-//     const int padding = 0;
+void test_init_conv_layer(void){
+    const int input_height = 10;
+    const int input_width = 10;
+    const int input_depth = 2;
+    const int kernel_size = 3;
+    const int kernels_n = 1;
+    const int stride = 1;
+    const int padding = 0;
 
-//     conv_layer_t layer = {0};
-//     conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
-//     TEST_ASSERT_EQUAL_INT(0, layer.padding);
-//     TEST_ASSERT_EQUAL_INT(1, layer.stride);
-//     // check kernels
-//     TEST_ASSERT_EQUAL_INT(1, layer.kernels_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.kernels[0].depth);
-//     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(3 ,layer.kernels[0].layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
-//     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
-//     TEST_ASSERT_EQUAL_INT(3, layer.kernels[0].layers[1].cols_n);
-//     // check input
-//     TEST_ASSERT_EQUAL_INT(2, layer.input.depth);
-//     TEST_ASSERT_EQUAL_INT(10, layer.input.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.input.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.input.layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.input.layers[1].cols_n);
-//     // check d_input
-//     TEST_ASSERT_EQUAL_INT(2, layer.d_input.depth);
-//     TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(10, layer.d_input.layers[1].cols_n);
-//     // check biases
-//     TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
-//     // check output
-//     TEST_ASSERT_EQUAL_INT(1, layer.output.depth);
-//     TEST_ASSERT_EQUAL_INT(8, layer.output.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(8, layer.output.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(1, layer.output_activated.depth);
-//     TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(8, layer.output_activated.layers[0].cols_n);
-//     conv_layer_destroy(&layer);
-// }
+    conv_layer_t layer = {0};
+    conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
+    TEST_ASSERT_EQUAL_INT(0, layer.padding);
+    TEST_ASSERT_EQUAL_INT(1, layer.stride);
+    // check kernels
+    TEST_ASSERT_EQUAL_INT(1, layer.kernels_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.kernels[0].depth);
+    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].cols_n);
+    // check input
+    TEST_ASSERT_EQUAL_INT(2, layer.input->depth);
+    TEST_ASSERT_EQUAL_INT(10, layer.input->rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.input->cols_n);
+    // check d_input
+    TEST_ASSERT_EQUAL_INT(2, layer.d_input->depth);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input->rows_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input->cols_n);
+    // check biases
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].cols_n);
+    // check output
+    TEST_ASSERT_EQUAL_INT(1, layer.output->depth);
+    TEST_ASSERT_EQUAL_INT(8, layer.output->rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output->cols_n);
+    // check output activated
+    TEST_ASSERT_EQUAL_INT(1, layer.output_activated->depth);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->rows_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->cols_n);
+    conv_layer_destroy(&layer);
+}
 
-// void test_process_conv_layer(void){
-//     const int input_height = 3;
-//     const int input_width = 3;
-//     const int input_depth = 2;
-//     const int kernel_size = 2;
-//     const int kernels_n = 2;
-//     const int stride = 1;
-//     const int padding = 0;
-//     conv_layer_t layer = {0};
-//     conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
-//     const float input_vals[2][3][3] = {
-//         {
-//             {1, 2, 3},
-//             {4, 5, 6},
-//             {7, 8, 9},
-//         },
-//         {
-//             {9, 8, 7},
-//             {6, 5, 4},
-//             {3, 2, 1},
-//         }
-//     };
-//     matrix3d_t input = {0};
-//     matrix3d_init(&input, input_height, input_width, input_depth);
-//     for(int i=0;i<input.depth;i++){
-//         for(int j=0;j<input.layers[i].rows_n;j++){
-//             for(int k=0;k<input.layers[i].cols_n;k++){
-//                 input.layers[i].values[j][k] = input_vals[i][j][k];
-//             }
-//         }
-//     }
+void test_process_conv_layer(void){
+    const int input_height = 3;
+    const int input_width = 3;
+    const int input_depth = 2;
+    const int kernel_size = 2;
+    const int kernels_n = 2;
+    const int stride = 1;
+    const int padding = 0;
+    conv_layer_t layer = {0};
+    conv_layer_init(&layer, input_height, input_width, input_depth, kernel_size, kernels_n, stride, padding, ACTIVATION_TYPE_RELU);
+    float input_vals[] = {
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
 
-//     layer.kernels[0].layers[0].values[0][0] = 0.142;
-//     layer.kernels[0].layers[0].values[0][1] = 0.607;
-//     layer.kernels[0].layers[0].values[1][0] = 0.016;
-//     layer.kernels[0].layers[0].values[1][1] = 0.243;
+        9, 8, 7,
+        6, 5, 4,
+        3, 2, 1,
+    };
+    matrix3d_t input = {0};
+    matrix3d_load(&input, input_height, input_width, input_depth, &input_vals[0]);
+
+    matrix3d_set_elem(&layer.kernels[0], 0, 0, 0, 0.142);
+    matrix3d_set_elem(&layer.kernels[0], 0, 1, 0, 0.607);
+    matrix3d_set_elem(&layer.kernels[0], 1, 0, 0, 0.016);
+    matrix3d_set_elem(&layer.kernels[0], 1, 1, 0, 0.243);
     
-//     layer.kernels[0].layers[1].values[0][0] = 0.137;
-//     layer.kernels[0].layers[1].values[0][1] = 0.804;
-//     layer.kernels[0].layers[1].values[1][0] = 0.157;
-//     layer.kernels[0].layers[1].values[1][1] = 0.401;
+    matrix3d_set_elem(&layer.kernels[0], 0, 0, 1, 0.137);
+    matrix3d_set_elem(&layer.kernels[0], 0, 1, 1, 0.804);
+    matrix3d_set_elem(&layer.kernels[0], 1, 0, 1, 0.157);
+    matrix3d_set_elem(&layer.kernels[0], 1, 1, 1, 0.401);
 
-//     layer.kernels[1].layers[0].values[0][0] = 0.130;
-//     layer.kernels[1].layers[0].values[0][1] = 0.109;
-//     layer.kernels[1].layers[0].values[1][0] = 0.999;
-//     layer.kernels[1].layers[0].values[1][1] = 0.218;
+    matrix3d_set_elem(&layer.kernels[1], 0, 0, 0, 0.130);
+    matrix3d_set_elem(&layer.kernels[1], 0, 1, 0, 0.109);
+    matrix3d_set_elem(&layer.kernels[1], 1, 0, 0, 0.999);
+    matrix3d_set_elem(&layer.kernels[1], 1, 1, 0, 0.218);
     
-//     layer.kernels[1].layers[1].values[0][0] = 0.513;
-//     layer.kernels[1].layers[1].values[0][1] = 0.839;
-//     layer.kernels[1].layers[1].values[1][0] = 0.613;
-//     layer.kernels[1].layers[1].values[1][1] = 0.296;
+    matrix3d_set_elem(&layer.kernels[1], 0, 0, 1, 0.513);
+    matrix3d_set_elem(&layer.kernels[1], 0, 1, 1, 0.839);
+    matrix3d_set_elem(&layer.kernels[1], 1, 0, 1, 0.613);
+    matrix3d_set_elem(&layer.kernels[1], 1, 1, 1, 0.296);
+    
+    matrix2d_set_elem(&layer.biases[0], 0, 0, 0.398);
+    matrix2d_set_elem(&layer.biases[0], 0, 1, 0.815);
+    matrix2d_set_elem(&layer.biases[0], 1, 0, 0.684);
+    matrix2d_set_elem(&layer.biases[0], 1, 1, 0.911);
 
-//     layer.biases[0].values[0][0] = 0.398;
-//     layer.biases[0].values[0][1] = 0.815;
-//     layer.biases[0].values[1][0] = 0.684;
-//     layer.biases[0].values[1][1] = 0.911;
+    matrix2d_set_elem(&layer.biases[1], 0, 0, 0.556);
+    matrix2d_set_elem(&layer.biases[1], 0, 1, 0.417);
+    matrix2d_set_elem(&layer.biases[1], 1, 0, 0.170);
+    matrix2d_set_elem(&layer.biases[1], 1, 1, 0.613);
 
-//     layer.biases[1].values[0][0] = 0.556;
-//     layer.biases[1].values[0][1] = 0.417;
-//     layer.biases[1].values[1][0] = 0.170;
-//     layer.biases[1].values[1][1] = 0.613;
+    conv_layer_feed(&layer, &input);
+    conv_layer_forwarding(&layer);
+    // printf("Kernels\n");
+    // matrix3d_print(&layer.kernels[0]);
+    // matrix3d_print(&layer.kernels[1]);
+    // printf("Biases\n");
+    // matrix2d_print(&layer.biases[0]);
+    // matrix2d_print(&layer.biases[1]);
+    // printf("Output\n");
+    // matrix3d_print(&layer.output);
+    // matrix3d_print(&layer.output_activated);
 
-//     conv_layer_feed(&layer, &input);
-//     conv_layer_forwarding(&layer);
-//     // printf("Kernels\n");
-//     // matrix3d_print(&layer.kernels[0]);
-//     // matrix3d_print(&layer.kernels[1]);
-//     // printf("Biases\n");
-//     // matrix2d_print(&layer.biases[0]);
-//     // matrix2d_print(&layer.biases[1]);
-//     // printf("Output\n");
-//     // matrix3d_print(&layer.output);
-//     // matrix3d_print(&layer.output_activated);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(13.645, matrix3d_get_elem(layer.output, 0, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(13.571, matrix3d_get_elem(layer.output, 0, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(12.458, matrix3d_get_elem(layer.output, 1, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(12.194, matrix3d_get_elem(layer.output, 1, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(22.477, matrix3d_get_elem(layer.output, 0, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(21.533, matrix3d_get_elem(layer.output, 0, 1, 1));
+    TEST_ASSERT_EQUAL_FLOAT(19.676, matrix3d_get_elem(layer.output, 1, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(19.314, matrix3d_get_elem(layer.output, 1, 1, 1));
 
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.depth);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].cols_n);
-//     TEST_ASSERT_EQUAL_FLOAT(13.645, layer.output.layers[0].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(13.571, layer.output.layers[0].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(12.458, layer.output.layers[0].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(12.194, layer.output.layers[0].values[1][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(22.477, layer.output.layers[1].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(21.533, layer.output.layers[1].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(19.676, layer.output.layers[1].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(19.314, layer.output.layers[1].values[1][1]);
-
-//     conv_layer_destroy(&layer);
-//     matrix3d_destroy(&input);
-// }
+    conv_layer_destroy(&layer);
+}
 
 // void test_process_pool_layer_average(void){
 //     pool_layer_t layer = {0};
 //     pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
-//     const float input_vals[2][3][3] = {
-//         {
-//             {1, 2, 3},
-//             {4, 5, 6},
-//             {7, 8, 9},
-//         },
-//         {
-//             {9, 8, 7},
-//             {6, 5, 4},
-//             {3, 2, 1},
-//         }
+//     const float input_vals[] = {
+//         1, 2, 3,
+//         4, 5, 6,
+//         7, 8, 9,
+
+//         9, 8, 7,
+//         6, 5, 4,
+//         3, 2, 1,
 //     };
 //     matrix3d_t input = {0};
-//     matrix3d_init(&input, 3, 3, 2);
-//     for(int i=0;i<input.depth;i++){
-//         for(int j=0;j<input.layers[i].rows_n;j++){
-//             for(int k=0;k<input.layers[i].cols_n;k++){
-//                 input.layers[i].values[j][k] = input_vals[i][j][k];
-//             }
-//         }
-//     }
+//     matrix3d_load(&input, 3, 3, 2, input_vals);
 
 //     pool_layer_feed(&layer, &input);
 //     pool_layer_forwarding(&layer);
@@ -190,18 +162,16 @@ void tearDown()
 //     // printf("Output\n");
 //     // matrix3d_print(&output);
 //     TEST_ASSERT_EQUAL_INT(2, layer.output.depth);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].cols_n);
-//     TEST_ASSERT_EQUAL_FLOAT(3, layer.output.layers[0].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(4, layer.output.layers[0].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[0].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(7, layer.output.layers[0].values[1][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(7, layer.output.layers[1].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[1].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(4, layer.output.layers[1].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(3, layer.output.layers[1].values[1][1]);
+//     TEST_ASSERT_EQUAL_INT(2, layer.output.rows_n);
+//     TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
+//     TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 0, 0, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 0, 1, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 1, 0, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 1, 1, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 0, 0, 1));
+//     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 0, 1, 1));
+//     TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 1, 0, 1));
+//     TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 1, 1, 1));
     
 //     matrix3d_destroy(&input);
 //     pool_layer_destroy(&layer);
@@ -914,9 +884,9 @@ int main(void)
     srand(0);
     UNITY_BEGIN();
 
-    // RUN_TEST(test_always_true);
-    // RUN_TEST(test_init_conv_layer);
-    // RUN_TEST(test_process_conv_layer);
+    RUN_TEST(test_always_true);
+    RUN_TEST(test_init_conv_layer);
+    RUN_TEST(test_process_conv_layer);
     // RUN_TEST(test_process_pool_layer_average);
     // RUN_TEST(test_process_pool_layer_max);
     // RUN_TEST(test_process_dense_layer);

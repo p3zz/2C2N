@@ -121,21 +121,14 @@ void matrix2d_copy_inplace(const matrix2d_t* const input, const matrix2d_t* outp
     if(input->rows_n != output->rows_n || input->cols_n != output->cols_n){
         return;
     }
-    for(int i=0;i<input->rows_n;i++){
-        for(int j=0;j<input->cols_n;j++){
-            *matrix2d_get_elem_as_mut_ref(output, i, j) = matrix2d_get_elem(input, i, j);
-        }
-    }
+    memcpy((void*)output->values, (void*)input->values, output->rows_n * output->cols_n * sizeof(float));
 }
 
 void matrix3d_copy_inplace(const matrix3d_t* const input, const matrix3d_t* output){
-    matrix2d_t i_layer = {0};
-    matrix2d_t o_layer = {0};
-    for(int i=0;i<output->depth;i++){
-        matrix3d_get_slice_as_mut_ref(input, &i_layer, i);
-        matrix3d_get_slice_as_mut_ref(output, &o_layer, i);
-        matrix2d_copy_inplace(&i_layer, &o_layer);
+    if(input->rows_n != output->rows_n || input->cols_n != output->cols_n || input->depth != output->depth){
+        return;
     }
+    memcpy((void*)output->values, (void*)input->values, output->rows_n * output->cols_n * output->depth * sizeof(float));
 }
 
 void matrix2d_rotate180_inplace(const matrix2d_t* const input){

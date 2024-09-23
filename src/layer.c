@@ -60,8 +60,10 @@ void conv_layer_init(
 	layer->activation_type = activation_type;
 
 	// allocate input and d_input
-	matrix3d_init(&layer->input, input_height, input_width, input_depth);
-	matrix3d_init(&layer->d_input, input_height, input_width, input_depth);
+	layer->input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->input, input_height, input_width, input_depth);
+	layer->d_input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->d_input, input_height, input_width, input_depth);
 
 	// allocate kernels
 	layer->kernels = (matrix3d_t*)malloc(layer->kernels_n * sizeof(matrix3d_t));
@@ -74,7 +76,7 @@ void conv_layer_init(
 	int output_height = 0;
 	int output_width = 0;
 
-	compute_output_size(layer->input.rows_n, layer->input.cols_n, kernel_size, padding, stride, &output_height, &output_width);
+	compute_output_size(layer->input->rows_n, layer->input->cols_n, kernel_size, padding, stride, &output_height, &output_width);
 
 	// allocate biases
 	layer->biases = (matrix2d_t*)malloc(layer->kernels_n * sizeof(matrix2d_t));
@@ -84,8 +86,10 @@ void conv_layer_init(
 	}
 
 	// allocate output and d_output
-	matrix3d_init(&layer->output, output_height, output_width, kernels_n);
-	matrix3d_init(&layer->output_activated, output_height, output_width, kernels_n);
+	layer->output = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output, output_height, output_width, kernels_n);
+	layer->output_activated = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output_activated, output_height, output_width, kernels_n);
 }
 
 void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
@@ -106,6 +110,23 @@ void softmax_layer_init(softmax_layer_t* layer, int input_n){
 	matrix3d_init(&layer->d_input, 1, input_n, 1);
 }
 
+void conv_layer_load_params(
+	conv_layer_t* layer, 
+	matrix3d_t* kernels, 
+	int kernels_n, 
+	matrix2d_t* biases,
+	matrix3d_t* output,
+	matrix3d_t* output_activated,
+	matrix3d_t* d_input
+){
+	layer->kernels = kernels;
+	layer->kernels_n = kernels_n;
+	layer->biases = biases;
+	layer->output = output;
+	layer->output_activated = output_activated;
+	layer->d_input = d_input;
+}
+
 // ------------------------------ FEED ------------------------------
 
 void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input){
@@ -116,8 +137,8 @@ void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
 	matrix3d_copy_inplace(input, &layer->input);
 }
 
-void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy_inplace(input, &layer->input);
+void conv_layer_feed(conv_layer_t* layer, matrix3d_t* input){
+	matrix3d_copy_inplace(input, layer->input);
 }
 
 void softmax_layer_feed(softmax_layer_t* layer, const matrix3d_t* const input){
@@ -194,15 +215,15 @@ void conv_layer_forwarding(conv_layer_t* layer){
 	matrix2d_t in_slice = {0};
 	matrix2d_t kernel_slice = {0};
 
-	matrix2d_init(&result, layer->output.rows_n, layer->output.cols_n);
+	matrix2d_init(&result, layer->output->rows_n, layer->output->cols_n);
 
 	for(int i=0;i<layer->kernels_n;i++){
-		matrix3d_get_slice_as_mut_ref(&layer->output, &out_slice, i);
-		matrix3d_get_slice_as_mut_ref(&layer->output_activated, &out_act_slice, i);
+		matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
+		matrix3d_get_slice_as_mut_ref(layer->output_activated, &out_act_slice, i);
 
 		for(int j=0;j<layer->kernels[i].depth;j++){
 			matrix3d_get_slice_as_mut_ref(&layer->kernels[i], &kernel_slice, j);
-			matrix3d_get_slice_as_mut_ref(&layer->input, &in_slice, j);
+			matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, j);
 			// compute the cross correlation between a channel of the input and its corresponding kernel
 			full_cross_correlation(&in_slice, &kernel_slice, &result, layer->padding, layer->stride);
 			if(j == 0){
@@ -354,19 +375,19 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 	matrix2d_t kernel_slice = {0};
 	matrix2d_t d_input_slice = {0};
 
-	matrix2d_init(&d_output, layer->output.rows_n, layer->output.cols_n);
+	matrix2d_init(&d_output, layer->output->rows_n, layer->output->cols_n);
 
 	for(int i=0;i<layer->kernels_n;i++){
 		matrix3d_init(&d_kernel[i], layer->kernels[i].rows_n, layer->kernels[i].cols_n, layer->kernels[i].depth);
 	}
 
-	matrix2d_init(&d_input_aux, layer->d_input.rows_n, layer->d_input.cols_n);
+	matrix2d_init(&d_input_aux, layer->d_input->rows_n, layer->d_input->cols_n);
 
 	// for each kernel of the layer
 	for(int i=0;i<layer->kernels_n;i++){
 		for(int m=0;m<d_output.rows_n;m++){
 			for(int n=0;n<d_output.cols_n;n++){
-				*matrix2d_get_elem_as_mut_ref(&d_output, m, n) = d_activate(matrix3d_get_elem(&layer->output, m, n, i), layer->activation_type);
+				*matrix2d_get_elem_as_mut_ref(&d_output, m, n) = d_activate(matrix3d_get_elem(layer->output, m, n, i), layer->activation_type);
 			}
 		}
 
@@ -381,7 +402,7 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 			matrix3d_get_slice_as_mut_ref(input, &in_slice, j);
 			matrix3d_get_slice_as_mut_ref(&d_kernel[i], &d_kernel_slice, j);
 			matrix3d_get_slice_as_mut_ref(kernel, &kernel_slice, j);
-			matrix3d_get_slice_as_mut_ref(&layer->d_input, &d_input_slice, j);
+			matrix3d_get_slice_as_mut_ref(layer->d_input, &d_input_slice, j);
 
 			// compute the derivative for the correction of the kernel
 			// TODO correct also we the stride
@@ -431,16 +452,21 @@ void dense_layer_destroy(dense_layer_t* layer){
 }
 
 void conv_layer_destroy(conv_layer_t* layer){
-	matrix3d_destroy(&layer->input);
-	matrix3d_destroy(&layer->d_input);
+	matrix3d_destroy(layer->input);
+	matrix3d_destroy(layer->d_input);
+	free(layer->input);
+	free(layer->d_input);
+
 	for(int i=0;i<layer->kernels_n;i++){
 		matrix3d_destroy(&layer->kernels[i]);
 		matrix2d_destroy(&layer->biases[i]);
 	}
 	free(layer->kernels);
 	free(layer->biases);
-	matrix3d_destroy(&layer->output);
-	matrix3d_destroy(&layer->output_activated);
+	matrix3d_destroy(layer->output);
+	matrix3d_destroy(layer->output_activated);
+	free(layer->output);
+	free(layer->output_activated);
 }
 
 void pool_layer_destroy(pool_layer_t* layer){

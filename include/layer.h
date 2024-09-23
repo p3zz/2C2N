@@ -11,7 +11,7 @@ typedef enum{
 }pooling_type;
 
 typedef struct{
-	matrix3d_t input;
+	matrix3d_t* input;
 	// kernels is an array of 3d matrices, with length kernels_n
 	matrix3d_t* kernels;
 	int kernels_n;
@@ -20,9 +20,9 @@ typedef struct{
 	int stride;
 	int padding;
 	activation_type activation_type;
-	matrix3d_t output;
-	matrix3d_t output_activated;
-	matrix3d_t d_input;
+	matrix3d_t* output;
+	matrix3d_t* output_activated;
+	matrix3d_t* d_input;
 }conv_layer_t;
 
 typedef struct{
@@ -70,7 +70,7 @@ void conv_layer_init(
 	activation_type activation_type
 );
 
-void conv_layer_feed(conv_layer_t* layer, const matrix3d_t* const input);
+void conv_layer_feed(conv_layer_t* layer, matrix3d_t* input);
 void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const input, float learning_rate);
 void conv_layer_destroy(conv_layer_t* layer);
 void conv_layer_forwarding(conv_layer_t* layer);
