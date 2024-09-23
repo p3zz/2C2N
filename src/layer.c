@@ -23,7 +23,7 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
   layer->d_input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->d_input, input_height, input_width, input_depth);
 
- int output_rows = 0;
+  int output_rows = 0;
   int output_cols = 0;
   compute_output_size(layer->input->rows_n, layer->input->cols_n, kernel_size,
                       padding, stride, &output_rows, &output_cols);
