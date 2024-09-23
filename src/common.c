@@ -92,7 +92,7 @@ void matrix2d_element_wise_product_inplace(const matrix2d_t* const m1, const mat
 void matrix2d_init(matrix2d_t* m, int rows_n, int cols_n){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
-    m->values = (float*)malloc(m->rows_n * cols_n);
+    m->values = (float*)malloc(rows_n * cols_n * sizeof(float));
     for(int i=0;i<m->rows_n;i++){
         for(int j=0;j<m->cols_n;j++){
             matrix2d_set_elem(m, i, j, 0.f);
@@ -217,7 +217,7 @@ void avg_pooling(const matrix2d_t* const mat, matrix2d_t* result, int kernel_siz
                     }
                 }
             }
-            matrix2d_set_elem(mat, i, j, sum/values_len);
+            matrix2d_set_elem(result, i, j, sum/values_len);
         }
     }
 }
@@ -331,13 +331,13 @@ void matrix3d_reshape(const matrix3d_t* const m, matrix3d_t* result){
     }
 }
 
-void matrix2d_load(matrix2d_t* m, int rows_n, int cols_n, const float* base_address){
+void matrix2d_load(matrix2d_t* m, int rows_n, int cols_n, float* const base_address){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
     m->values = base_address;
 }
 
-void matrix3d_load(matrix3d_t* m, int rows_n, int cols_n, int depth, const float* base_address){
+void matrix3d_load(matrix3d_t* m, int rows_n, int cols_n, int depth, float* const base_address){
     m->rows_n = rows_n;
     m->cols_n = cols_n;
     m->depth = depth;
