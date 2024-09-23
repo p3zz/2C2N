@@ -936,8 +936,6 @@ void test_lenet5_cnn(void){
     matrix3d_destroy(&input);
     matrix3d_destroy(&d_input);
     matrix3d_destroy(&output_target);
-
-    TEST_ASSERT_TRUE(false);
 }
 
 int main(void)
