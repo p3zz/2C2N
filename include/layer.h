@@ -26,14 +26,14 @@ typedef struct{
 }conv_layer_t;
 
 typedef struct{
-	matrix3d_t input;
+	matrix3d_t* input;
+	matrix3d_t* output;
+	matrix3d_t* indexes;
+	matrix3d_t* d_input;
 	int kernel_size;
 	int stride;
 	int padding;
 	pooling_type type;
-	matrix3d_t output;
-	matrix3d_t* indexes;
-	matrix3d_t d_input;
 }pool_layer_t;
 
 typedef struct{

@@ -15,22 +15,25 @@ void pool_layer_init(pool_layer_t* layer, int input_height, int input_width, int
 	layer->stride = stride;
 	layer->type = type;
 	
-	matrix3d_init(&layer->input, input_height, input_width , input_depth);
-	matrix3d_init(&layer->d_input, input_height, input_width, input_depth);
+	layer->input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->input, input_height, input_width , input_depth);
+	layer->d_input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->d_input, input_height, input_width, input_depth);
 	
 	int output_rows = 0;
     int output_cols = 0;
-	compute_output_size(layer->input.rows_n, layer->input.cols_n, kernel_size, padding, stride, &output_rows, &output_cols);
+	compute_output_size(layer->input->rows_n, layer->input->cols_n, kernel_size, padding, stride, &output_rows, &output_cols);
 
-	matrix3d_init(&layer->output, output_rows, output_cols, input_depth);
+	layer->output = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output, output_rows, output_cols, input_depth);
 
 	// if it's a max pooling layer, we need to keep track of the index of each element of the output matrix w.r.t. the input matrix
 	// for instance, if the first slice of the input has the max element of the kernel at (1,0), the first element of indexes
 	// will be a matrix3d with depth 2 (one for i, one for j)
 	// TODO finish the explaination
 	if(layer->type == POOLING_TYPE_MAX){
-		layer->indexes = (matrix3d_t*)malloc(layer->output.depth * sizeof(matrix3d_t));
-		for(int i=0;i<layer->output.depth;i++){
+		layer->indexes = (matrix3d_t*)malloc(layer->output->depth * sizeof(matrix3d_t));
+		for(int i=0;i<layer->output->depth;i++){
 			matrix3d_init(&layer->indexes[i], output_rows, output_cols, 2);
 		}
 	}
@@ -134,7 +137,7 @@ void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input){
 }
 
 void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy_inplace(input, &layer->input);
+	matrix3d_copy_inplace(input, layer->input);
 }
 
 void conv_layer_feed(conv_layer_t* layer, matrix3d_t* input){
@@ -193,9 +196,9 @@ void softmax_layer_forwarding(softmax_layer_t* layer){
 void pool_layer_forwarding(pool_layer_t* layer){
 	matrix2d_t in_slice = {0};
 	matrix2d_t out_slice = {0};
-	for(int i=0;i<layer->input.depth;i++){
-		matrix3d_get_slice_as_mut_ref(&layer->input, &in_slice, i);
-		matrix3d_get_slice_as_mut_ref(&layer->output, &out_slice, i);
+	for(int i=0;i<layer->input->depth;i++){
+		matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, i);
+		matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
 		switch(layer->type){
 			case POOLING_TYPE_AVERAGE:
 				avg_pooling(&in_slice, &out_slice, layer->kernel_size, layer->padding, layer->stride);
@@ -318,7 +321,7 @@ void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const inp
 
 	switch(layer->type){
 		case POOLING_TYPE_MAX: {
-			for(int i=0;i<layer->d_input.depth;i++){
+			for(int i=0;i<layer->d_input->depth;i++){
 				matrix3d_get_slice_as_mut_ref(&layer->indexes[i], &i_slice, 0);
 				matrix3d_get_slice_as_mut_ref(&layer->indexes[i], &j_slice, 1);
 
@@ -326,7 +329,7 @@ void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const inp
 					for(int n=0;n<i_slice.cols_n;n++){
 						int row_i = matrix2d_get_elem(&i_slice, m, n);
 						int col_i = matrix2d_get_elem(&j_slice, m, n);
-						*matrix3d_get_elem_as_mut_ref(&layer->d_input, row_i, col_i, i) += matrix3d_get_elem(input, m, n, i);
+						*matrix3d_get_elem_as_mut_ref(layer->d_input, row_i, col_i, i) += matrix3d_get_elem(input, m, n, i);
 					}
 				}
 			}
@@ -334,9 +337,9 @@ void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const inp
 		}
 
 		case POOLING_TYPE_AVERAGE: {
-			for(int l=0;l<layer->output.depth;l++){
-				for (int h = 0; h < layer->output.rows_n; h++) {
-					for (int w = 0; w < layer->output.cols_n; w++) {
+			for(int l=0;l<layer->output->depth;l++){
+				for (int h = 0; h < layer->output->rows_n; h++) {
+					for (int w = 0; w < layer->output->cols_n; w++) {
 						// The gradient from the output for this pooled region
 						float gradient = matrix3d_get_elem(input, h, w, l);
 						
@@ -347,8 +350,8 @@ void pool_layer_backpropagation(pool_layer_t* layer, const matrix3d_t* const inp
 								int input_w = w * layer->stride + j;
 								
 								// Ensure we're within bounds (important for cases where pooling window goes out of input bounds)
-								if (input_h < layer->input.rows_n && input_w < layer->input.cols_n) {
-									*matrix3d_get_elem_as_mut_ref(&layer->d_input, input_h, input_w, l) += (gradient / (float)(layer->kernel_size * layer->kernel_size));
+								if (input_h < layer->input->rows_n && input_w < layer->input->cols_n) {
+									*matrix3d_get_elem_as_mut_ref(layer->d_input, input_h, input_w, l) += (gradient / (float)(layer->kernel_size * layer->kernel_size));
 								}
 							}
 						}
@@ -470,15 +473,21 @@ void conv_layer_destroy(conv_layer_t* layer){
 }
 
 void pool_layer_destroy(pool_layer_t* layer){
-	matrix3d_destroy(&layer->output);
-	matrix3d_destroy(&layer->input);
-	matrix3d_destroy(&layer->d_input);
 	if(layer->type == POOLING_TYPE_MAX){
-		for(int i=0;i<layer->input.depth;i++){
+		for(int i=0;i<layer->input->depth;i++){
 			matrix3d_destroy(&layer->indexes[i]);
 		}
 	}
 	free(layer->indexes);
+	
+	matrix3d_destroy(layer->output);
+	free(layer->output);
+
+	matrix3d_destroy(layer->input);
+	free(layer->input);
+	
+	matrix3d_destroy(layer->d_input);
+	free(layer->d_input);
 }
 
 void softmax_layer_destroy(softmax_layer_t* layer){

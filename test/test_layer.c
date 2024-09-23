@@ -140,90 +140,76 @@ void test_process_conv_layer(void){
     conv_layer_destroy(&layer);
 }
 
-// void test_process_pool_layer_average(void){
-//     pool_layer_t layer = {0};
-//     pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
-//     const float input_vals[] = {
-//         1, 2, 3,
-//         4, 5, 6,
-//         7, 8, 9,
+void test_process_pool_layer_average(void){
+    pool_layer_t layer = {0};
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_AVERAGE);
+    float input_vals[] = {
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
 
-//         9, 8, 7,
-//         6, 5, 4,
-//         3, 2, 1,
-//     };
-//     matrix3d_t input = {0};
-//     matrix3d_load(&input, 3, 3, 2, input_vals);
+        9, 8, 7,
+        6, 5, 4,
+        3, 2, 1,
+    };
+    matrix3d_t input = {0};
+    matrix3d_load(&input, 3, 3, 2, input_vals);
 
-//     pool_layer_feed(&layer, &input);
-//     pool_layer_forwarding(&layer);
-//     // printf("Input\n");
-//     // matrix3d_print(&input);
-//     // printf("Output\n");
-//     // matrix3d_print(&output);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.depth);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.cols_n);
-//     TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 0, 0, 0));
-//     TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 0, 1, 0));
-//     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 1, 0, 0));
-//     TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 1, 1, 0));
-//     TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 0, 0, 1));
-//     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 0, 1, 1));
-//     TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 1, 0, 1));
-//     TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 1, 1, 1));
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
+    // printf("Input\n");
+    // matrix3d_print(&input);
+    // printf("Output\n");
+    // matrix3d_print(&output);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 0, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 0, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 1, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 1, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(7, matrix3d_get_elem(layer.output, 0, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 0, 1, 1));
+    TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 1, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 1, 1, 1));
     
-//     matrix3d_destroy(&input);
-//     pool_layer_destroy(&layer);
-// }
+    pool_layer_destroy(&layer);
+}
 
-// void test_process_pool_layer_max(void){
-//     pool_layer_t layer = {0};
-//     pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
-//     const float input_vals[2][3][3] = {
-//         {
-//             {1, 2, 3},
-//             {4, 5, 6},
-//             {7, 8, 9},
-//         },
-//         {
-//             {9, 8, 7},
-//             {6, 5, 4},
-//             {3, 2, 1},
-//         }
-//     };
-//     matrix3d_t input = {0};
-//     matrix3d_init(&input, 3, 3, 2);
-//     for(int i=0;i<input.depth;i++){
-//         for(int j=0;j<input.layers[i].rows_n;j++){
-//             for(int k=0;k<input.layers[i].cols_n;k++){
-//                 input.layers[i].values[j][k] = input_vals[i][j][k];
-//             }
-//         }
-//     }
+void test_process_pool_layer_max(void){
+    pool_layer_t layer = {0};
+    pool_layer_init(&layer, 3, 3, 2, 2, 0, 1, POOLING_TYPE_MAX);
+    float input_vals[] = {
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
 
-//     pool_layer_feed(&layer, &input);
-//     pool_layer_forwarding(&layer);
-//     // printf("Input\n");
-//     // matrix3d_print(&input);
-//     // printf("Output\n");
-//     // matrix3d_print(&output);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.depth);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[0].cols_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].rows_n);
-//     TEST_ASSERT_EQUAL_INT(2, layer.output.layers[1].cols_n);
-//     TEST_ASSERT_EQUAL_FLOAT(5, layer.output.layers[0].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[0].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(8, layer.output.layers[0].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(9, layer.output.layers[0].values[1][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(9, layer.output.layers[1].values[0][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(8, layer.output.layers[1].values[0][1]);
-//     TEST_ASSERT_EQUAL_FLOAT(6, layer.output.layers[1].values[1][0]);
-//     TEST_ASSERT_EQUAL_FLOAT(5, layer.output.layers[1].values[1][1]);
-//     pool_layer_destroy(&layer);
-//     matrix3d_destroy(&input);
-// }
+        9, 8, 7,
+        6, 5, 4,
+        3, 2, 1,
+    };
+    matrix3d_t input = {0};
+    matrix3d_load(&input, 3, 3, 2, input_vals);
+
+    pool_layer_feed(&layer, &input);
+    pool_layer_forwarding(&layer);
+    // printf("Input\n");
+    // matrix3d_print(&input);
+    // printf("Output\n");
+    // matrix3d_print(&output);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_FLOAT(5, matrix3d_get_elem(layer.output, 0, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 0, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(8, matrix3d_get_elem(layer.output, 1, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(9, matrix3d_get_elem(layer.output, 1, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(9, matrix3d_get_elem(layer.output, 0, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(8, matrix3d_get_elem(layer.output, 0, 1, 1));
+    TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 1, 0, 1));
+    TEST_ASSERT_EQUAL_FLOAT(5, matrix3d_get_elem(layer.output, 1, 1, 1));
+    pool_layer_destroy(&layer);
+}
 
 // void test_process_dense_layer(void){
 //     dense_layer_t layer = {0};
@@ -887,8 +873,8 @@ int main(void)
     RUN_TEST(test_always_true);
     RUN_TEST(test_init_conv_layer);
     RUN_TEST(test_process_conv_layer);
-    // RUN_TEST(test_process_pool_layer_average);
-    // RUN_TEST(test_process_pool_layer_max);
+    RUN_TEST(test_process_pool_layer_average);
+    RUN_TEST(test_process_pool_layer_max);
     // RUN_TEST(test_process_dense_layer);
     // RUN_TEST(test_backpropagation_dense_layer);
     // RUN_TEST(test_backpropagation_conv_layer);
