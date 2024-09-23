@@ -96,21 +96,30 @@ void conv_layer_init(
 }
 
 void dense_layer_init(dense_layer_t* layer, int input_n, int output_n, activation_type activation_type){
-	matrix3d_init(&layer->inputs, 1, input_n, 1);
-	matrix3d_init(&layer->d_inputs, 1, input_n, 1);
-	matrix2d_init(&layer->weights, input_n, output_n);
-	matrix2d_randomize(&layer->weights);
-	matrix2d_init(&layer->biases, 1, output_n);
-	matrix2d_randomize(&layer->biases);
-	matrix3d_init(&layer->output, 1, output_n, 1);
-	matrix3d_init(&layer->output_activated, 1, output_n, 1);
+	layer->inputs = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->inputs, 1, input_n, 1);
+	layer->d_inputs = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->d_inputs, 1, input_n, 1);
+	layer->weights = (matrix2d_t*)malloc(sizeof(matrix2d_t));
+	matrix2d_init(layer->weights, input_n, output_n);
+	matrix2d_randomize(layer->weights);
+	layer->biases = (matrix2d_t*)malloc(sizeof(matrix2d_t));
+	matrix2d_init(layer->biases, 1, output_n);
+	matrix2d_randomize(layer->biases);
+	layer->output = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output, 1, output_n, 1);
+	layer->output_activated = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output_activated, 1, output_n, 1);
 	layer->activation_type = activation_type;
 }
 
 void softmax_layer_init(softmax_layer_t* layer, int input_n){
-	matrix3d_init(&layer->input, 1, input_n, 1);
-	matrix3d_init(&layer->output, 1, input_n, 1);
-	matrix3d_init(&layer->d_input, 1, input_n, 1);
+	layer->input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->input, 1, input_n, 1);
+	layer->output = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->output, 1, input_n, 1);
+	layer->d_input = (matrix3d_t*)malloc(sizeof(matrix3d_t));
+	matrix3d_init(layer->d_input, 1, input_n, 1);
 }
 
 void conv_layer_load_params(
@@ -133,7 +142,7 @@ void conv_layer_load_params(
 // ------------------------------ FEED ------------------------------
 
 void dense_layer_feed(dense_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy_inplace(input, &layer->inputs);
+	matrix3d_copy_inplace(input, layer->inputs);
 }
 
 void pool_layer_feed(pool_layer_t* layer, const matrix3d_t* const input){
@@ -145,7 +154,7 @@ void conv_layer_feed(conv_layer_t* layer, matrix3d_t* input){
 }
 
 void softmax_layer_feed(softmax_layer_t* layer, const matrix3d_t* const input){
-	matrix3d_copy_inplace(input, &layer->input);
+	matrix3d_copy_inplace(input, layer->input);
 }
 
 // ------------------------------ PROCESS ------------------------------
@@ -155,15 +164,15 @@ void dense_layer_forwarding(dense_layer_t* layer){
 	matrix2d_t output_activated = {0};
 	matrix2d_t input = {0};
 
-	matrix3d_get_slice_as_mut_ref(&layer->output, &output, 0);
-	matrix3d_get_slice_as_mut_ref(&layer->output_activated, &output_activated, 0);
-	matrix3d_get_slice_as_mut_ref(&layer->inputs, &input, 0);
+	matrix3d_get_slice_as_mut_ref(layer->output, &output, 0);
+	matrix3d_get_slice_as_mut_ref(layer->output_activated, &output_activated, 0);
+	matrix3d_get_slice_as_mut_ref(layer->inputs, &input, 0);
 
 	for(int i=0;i<output.cols_n;i++){
 		float* out_val = matrix2d_get_elem_as_mut_ref(&output, 0, i);
-		*out_val = matrix2d_get_elem(&layer->biases, 0, i);
-		for(int j=0;j<layer->weights.rows_n;j++){
-			*out_val += (matrix2d_get_elem(&input, 0, j) * matrix2d_get_elem(&layer->weights, j, i));
+		*out_val = matrix2d_get_elem(layer->biases, 0, i);
+		for(int j=0;j<layer->weights->rows_n;j++){
+			*out_val += (matrix2d_get_elem(&input, 0, j) * matrix2d_get_elem(layer->weights, j, i));
 		}
 	}
 	matrix2d_copy_inplace(&output, &output_activated);
@@ -187,8 +196,8 @@ void dense_layer_forwarding(dense_layer_t* layer){
 void softmax_layer_forwarding(softmax_layer_t* layer){
 	matrix2d_t in_slice = {0};
 	matrix2d_t out_slice = {0};
-	matrix3d_get_slice_as_mut_ref(&layer->input, &in_slice, 0);
-	matrix3d_get_slice_as_mut_ref(&layer->output, &out_slice, 0);
+	matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, 0);
+	matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, 0);
 	matrix2d_copy_inplace(&in_slice, &out_slice);
 	matrix2d_softmax_inplace(&out_slice);
 }
@@ -262,34 +271,34 @@ void conv_layer_forwarding(conv_layer_t* layer){
 // https://www.youtube.com/watch?v=AbLvJVwySEo
 void dense_layer_backpropagation(dense_layer_t* layer, const matrix3d_t* const input, float learning_rate)
 {
-	for(int i=0;i<layer->weights.rows_n;i++){
+	for(int i=0;i<layer->weights->rows_n;i++){
 		float d_input = 0.f;
-		for(int j=0;j<layer->weights.cols_n;j++){
+		for(int j=0;j<layer->weights->cols_n;j++){
 			// d_actf(z_j) * d_act
-			float common = d_activate(matrix3d_get_elem(&layer->output, 0, j, 0), layer->activation_type) * matrix3d_get_elem(input, 0, j, 0);
+			float common = d_activate(matrix3d_get_elem(layer->output, 0, j, 0), layer->activation_type) * matrix3d_get_elem(input, 0, j, 0);
 			// compute d_weight
 			// dC/dw_ij = x_i * d_actf(z_j) * d_act
-			float d_weight = matrix3d_get_elem(&layer->inputs, 0, i, 0) * common;
+			float d_weight = matrix3d_get_elem(layer->inputs, 0, i, 0) * common;
 
 			// compute d_input
-			d_input += (matrix2d_get_elem(&layer->weights, i, j) * common);
+			d_input += (matrix2d_get_elem(layer->weights, i, j) * common);
 
-			float weight_new = gradient_descent(matrix2d_get_elem(&layer->weights, i, j), learning_rate, d_weight);
-			matrix2d_set_elem(&layer->weights, i, j, weight_new);
+			float weight_new = gradient_descent(matrix2d_get_elem(layer->weights, i, j), learning_rate, d_weight);
+			matrix2d_set_elem(layer->weights, i, j, weight_new);
 
-			float bias_new = gradient_descent(matrix2d_get_elem(&layer->biases, 0, j), learning_rate, common);
-			matrix2d_set_elem(&layer->biases, 0, j, bias_new);
+			float bias_new = gradient_descent(matrix2d_get_elem(layer->biases, 0, j), learning_rate, common);
+			matrix2d_set_elem(layer->biases, 0, j, bias_new);
 		}
-		matrix3d_set_elem(&layer->d_inputs, 0, i, 0, d_input);
+		matrix3d_set_elem(layer->d_inputs, 0, i, 0, d_input);
 	}
 }
 
 void softmax_layer_backpropagation(softmax_layer_t* layer, const matrix3d_t* const input){
 	matrix2d_t aux = {0};
 	matrix2d_t sample = {0};
-	matrix3d_get_slice_as_mut_ref(&layer->output, &sample, 0);
+	matrix3d_get_slice_as_mut_ref(layer->output, &sample, 0);
 
-	matrix2d_init(&aux, layer->output.cols_n, layer->output.cols_n);
+	matrix2d_init(&aux, layer->output->cols_n, layer->output->cols_n);
 
 	for(int i=0;i<sample.cols_n;i++){
 		for(int j=0;j<sample.cols_n;j++){
@@ -306,7 +315,7 @@ void softmax_layer_backpropagation(softmax_layer_t* layer, const matrix3d_t* con
 
 	for (int i = 0; i < aux.rows_n; i++) {
 		for (int j = 0; j < aux.cols_n; j++) {
-			*matrix3d_get_elem_as_mut_ref(&layer->d_input, 0, i, 0) += (matrix2d_get_elem(&aux, i, j) * matrix3d_get_elem(input, 0, j, 0));
+			*matrix3d_get_elem_as_mut_ref(layer->d_input, 0, i, 0) += (matrix2d_get_elem(&aux, i, j) * matrix3d_get_elem(input, 0, j, 0));
 		}
     }
 
@@ -446,12 +455,18 @@ void conv_layer_backpropagation(conv_layer_t* layer, const matrix3d_t* const inp
 // ------------------------------ DESTROY ------------------------------
 
 void dense_layer_destroy(dense_layer_t* layer){
-	matrix3d_destroy(&layer->inputs);
-	matrix3d_destroy(&layer->d_inputs);
-	matrix2d_destroy(&layer->weights);
-	matrix2d_destroy(&layer->biases);
-	matrix3d_destroy(&layer->output);
-	matrix3d_destroy(&layer->output_activated);
+	matrix3d_destroy(layer->inputs);
+	free(layer->inputs);
+	matrix3d_destroy(layer->d_inputs);
+	free(layer->d_inputs);
+	matrix2d_destroy(layer->weights);
+	free(layer->weights);
+	matrix2d_destroy(layer->biases);
+	free(layer->biases);
+	matrix3d_destroy(layer->output);
+	free(layer->output);
+	matrix3d_destroy(layer->output_activated);
+	free(layer->output_activated);
 }
 
 void conv_layer_destroy(conv_layer_t* layer){
@@ -491,7 +506,10 @@ void pool_layer_destroy(pool_layer_t* layer){
 }
 
 void softmax_layer_destroy(softmax_layer_t* layer){
-	matrix3d_destroy(&layer->input);
-	matrix3d_destroy(&layer->output);
-	matrix3d_destroy(&layer->d_input);
+	matrix3d_destroy(layer->input);
+	free(layer->input);
+	matrix3d_destroy(layer->output);
+	free(layer->output);
+	matrix3d_destroy(layer->d_input);
+	free(layer->d_input);
 }

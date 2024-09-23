@@ -338,50 +338,58 @@ void matrix3d_load(matrix3d_t* m, int rows_n, int cols_n, int depth, float* cons
 }
 
 void mean_squared_error_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
-    for(int i=0;i<output->cols_n;i++){
-        float out_val = matrix2d_get_elem(output, 0, i);
-        float target_out_val = matrix2d_get_elem(target_output, 0, i);
-        float res = 2*(out_val - target_out_val) / output->cols_n;
-        matrix2d_set_elem(result, 0, i, res);
-	}
+    for(int i=0;i<output->rows_n;i++){
+        for(int j=0;j<output->cols_n;j++){
+            float out_val = matrix2d_get_elem(output, i, j);
+            float target_out_val = matrix2d_get_elem(target_output, i, j);
+            float res = 2*(out_val - target_out_val);
+            matrix2d_set_elem(result, i, j, res);
+	    }
+    }
 }
 
 void cross_entropy_loss_derivative(const matrix2d_t* const output, const matrix2d_t* const target_output, matrix2d_t* result){
-    for(int i=0;i<output->cols_n;i++){
-        float n0 = 1 - matrix2d_get_elem(target_output, 0, i);
-        float d0 = 1 - matrix2d_get_elem(output, 0, i);
-        float n1 = matrix2d_get_elem(target_output, 0, i);
-        float d1 = matrix2d_get_elem(output, 0, i);
-        float res;
-        if(d0 < 1e-4 || d1 < 1e-4){
-            res = 0.f;    
+    for(int i=0;i<output->rows_n;i++){
+        for(int j=0;j<output->cols_n;j++){
+            float n0 = 1 - matrix2d_get_elem(target_output, i, j);
+            float d0 = 1 - matrix2d_get_elem(output, i, j);
+            float n1 = matrix2d_get_elem(target_output, i, j);
+            float d1 = matrix2d_get_elem(output, i, j);
+            float res;
+            if(d0 < 1e-4 || d1 < 1e-4){
+                res = 0.f;    
+            }
+            else{
+                res = (n0/d0 - n1/d1);
+            }
+            matrix2d_set_elem(result, i, j, res);
         }
-        else{
-            res = (n0/d0 - n1/d1) / output->cols_n;
-        }
-        matrix2d_set_elem(result, 0, i, res);
     }
 }
 
 float mean_squared_error(const matrix2d_t* const output, const matrix2d_t* const target_output){
     float sum = 0.f;
-    for(int i=0;i<output->cols_n;i++){
-        float delta = matrix2d_get_elem(target_output, 0, i) - matrix2d_get_elem(output, 0, i);
-        sum += (delta * delta);
+    for(int i=0;i<output->rows_n;i++){
+        for(int j=0;j<output->cols_n;j++){
+            float delta = matrix2d_get_elem(target_output, i, j) - matrix2d_get_elem(output, i, j);
+            sum += (delta * delta);
+        }
     }
     return sum / output->cols_n;
 }
 
 float cross_entropy_loss(const matrix2d_t* const output, const matrix2d_t* const target_output){
     float sum = 0.f;
-    for(int i=0;i<output->cols_n;i++){
-        float target_out = matrix2d_get_elem(target_output, 0, i);
-        float out = matrix2d_get_elem(output, 0, i);
-        float d = (target_out * logf(out)) + ((1-target_out) * logf(1 - out));
-        if(isnan(d)){
-            d = 0.f;
+    for(int i=0;i<output->rows_n;i++){
+        for(int j=0;j<output->cols_n;j++){
+            float target_out = matrix2d_get_elem(target_output, i, j);
+            float out = matrix2d_get_elem(output, i, j);
+            float d = (target_out * logf(out)) + ((1-target_out) * logf(1 - out));
+            if(isnan(d)){
+                d = 0.f;
+            }
+            sum += d;
         }
-        sum += d;
     }
     return -sum / output->cols_n;
 }
