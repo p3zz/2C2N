@@ -726,6 +726,59 @@ void test_perceptron_and(void){
     dense_layer_destroy(&hidden_layer);
 }
 
+void test_conv_layer_backpropagation_freerun(void){
+    const float learning_rate = 0.02;
+    const int iterations = 100;
+    conv_layer_t in_layer = {0};
+    matrix3d_t output_target = {0};
+    matrix3d_t input = {0};
+    matrix3d_t d_input = {0};
+    matrix3d_t aux = {0};
+    matrix3d_t aux_rev = {0};
+
+    matrix2d_t out_slice = {0};
+    matrix2d_t out_tgt_slice = {0};
+    matrix2d_t d_input_slice = {0};
+
+    // it's a 2
+    float input_values[] = {
+        0.f, 0.f, 1.f, 0.f, 0.f,
+        0.f, 1.f, 1.f, 1.f, 0.f,
+        0.f, 0.f, 1.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 1.f, 1.f, 0.f,
+    };
+    matrix3d_load(&input, 5, 5, 1, input_values);
+
+    conv_layer_init(&in_layer, 5, 5, 2, 3, 2, 1, 0, ACTIVATION_TYPE_RELU);
+
+    matrix3d_init(&output_target, 1, 18, 1);
+    matrix3d_init(&d_input, 1, 18, 1);
+    matrix3d_init(&aux, 1, 18, 1);
+    matrix3d_init(&aux_rev, 3, 3, 2);
+
+    matrix3d_get_slice_as_mut_ref(&output_target, &out_tgt_slice, 0);
+    matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+
+    float error = 0.f;
+    for(int i=0;i<iterations;i++){
+        conv_layer_feed(&in_layer, &input);
+        conv_layer_forwarding(&in_layer);
+        matrix3d_reshape(in_layer.output_activated, &aux);
+        matrix3d_get_slice_as_mut_ref(&aux,  &out_slice, 0);
+        mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+        error = mean_squared_error(&out_slice, &out_tgt_slice);
+        matrix3d_reshape(&d_input, &aux_rev);
+        conv_layer_backpropagation(&in_layer, &aux_rev, learning_rate);
+    }
+
+    matrix3d_destroy(&d_input);
+    matrix3d_destroy(&output_target);
+    conv_layer_destroy(&in_layer);
+    matrix3d_destroy(&aux);
+    matrix3d_destroy(&aux_rev);
+}
+
 // https://medium.com/@siddheshb008/lenet-5-architecture-explained-3b559cb2d52b
 // LeNet-5 CNN
 // layer 0: convolutional layer / input (32x32x1) output(28x28x6) kernel(5, 5, 6) padding 0 stride 1
@@ -905,6 +958,7 @@ int main(void)
     RUN_TEST(test_perceptron_or);
     RUN_TEST(test_perceptron_and);
     RUN_TEST(test_lenet5_cnn);
+    RUN_TEST(test_conv_layer_backpropagation_freerun);
     int result = UNITY_END();
 
 
