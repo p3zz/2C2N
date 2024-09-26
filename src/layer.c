@@ -166,7 +166,7 @@ void dense_layer_forwarding(dense_layer_t *layer) {
   matrix3d_get_slice_as_mut_ref(layer->inputs, &input, 0);
 
   for (int i = 0; i < output.cols_n; i++) {
-    float *out_val = matrix2d_get_elem_as_mut_ref(&output, 0, i);
+    matrix_type *out_val = matrix2d_get_elem_as_mut_ref(&output, 0, i);
     *out_val = matrix2d_get_elem(layer->biases, 0, i);
     for (int j = 0; j < layer->weights->rows_n; j++) {
       *out_val += (matrix2d_get_elem(&input, 0, j) *

@@ -5,46 +5,46 @@
 #include "string.h"
 #include "utils.h"
 
-inline const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m,
+inline const matrix_type *matrix2d_get_elem_as_ref(const matrix2d_t *const m,
                                              int row_idx, int col_idx) {
   return matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx);
 }
 
-inline float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m,
+inline matrix_type *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m,
                                            int row_idx, int col_idx) {
   return &m->values[row_idx * m->cols_n + col_idx];
 }
 
-inline float matrix2d_get_elem(const matrix2d_t *const m, int row_idx,
+inline matrix_type matrix2d_get_elem(const matrix2d_t *const m, int row_idx,
                                int col_idx) {
   return *matrix2d_get_elem_as_ref(m, row_idx, col_idx);
 }
 
 inline void matrix2d_set_elem(const matrix2d_t *m, int row_idx, int col_idx,
-                              float value) {
+                              matrix_type value) {
   *matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx) = value;
 }
 
-inline const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m,
+inline const matrix_type *matrix3d_get_elem_as_ref(const matrix3d_t *const m,
                                              int row_idx, int col_idx,
                                              int z_idx) {
   return matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx);
 }
 
-inline float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m,
+inline matrix_type *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m,
                                            int row_idx, int col_idx,
                                            int z_idx) {
   return &m->values[(z_idx * m->rows_n * m->cols_n) + (row_idx * m->cols_n) +
                     col_idx];
 }
 
-inline float matrix3d_get_elem(const matrix3d_t *const m, int row_idx,
+inline matrix_type matrix3d_get_elem(const matrix3d_t *const m, int row_idx,
                                int col_idx, int z_idx) {
   return *matrix3d_get_elem_as_ref(m, row_idx, col_idx, z_idx);
 }
 
 inline void matrix3d_set_elem(const matrix3d_t *const m, int row_idx,
-                              int col_idx, int z_idx, float value) {
+                              int col_idx, int z_idx, matrix_type value) {
   *matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx) = value;
 }
 
@@ -108,7 +108,7 @@ void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
 void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n) {
   m->rows_n = rows_n;
   m->cols_n = cols_n;
-  m->values = (float *)malloc(rows_n * cols_n * sizeof(float));
+  m->values = (matrix_type *)malloc(rows_n * cols_n * sizeof(matrix_type));
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       matrix2d_set_elem(m, i, j, 0.f);
@@ -139,7 +139,7 @@ void matrix2d_copy_inplace(const matrix2d_t *const input,
     return;
   }
   memcpy((void *)output->values, (void *)input->values,
-         output->rows_n * output->cols_n * sizeof(float));
+         output->rows_n * output->cols_n * sizeof(matrix_type));
 }
 
 void matrix3d_copy_inplace(const matrix3d_t *const input,
@@ -149,11 +149,11 @@ void matrix3d_copy_inplace(const matrix3d_t *const input,
     return;
   }
   memcpy((void *)output->values, (void *)input->values,
-         output->rows_n * output->cols_n * output->depth * sizeof(float));
+         output->rows_n * output->cols_n * output->depth * sizeof(matrix_type));
 }
 
 void matrix2d_rotate180_inplace(const matrix2d_t *const input) {
-  float aux = 0;
+  matrix_type aux = 0;
   int i_opposite = 0;
   int j_opposite = 0;
   for (int i = 0; i < input->rows_n; i++) {
@@ -174,7 +174,7 @@ void matrix3d_init(matrix3d_t *m, int rows_n, int cols_n, int depth) {
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->depth = depth;
-  m->values = (float *)malloc(rows_n * cols_n * depth * sizeof(float));
+  m->values = (matrix_type *)malloc(rows_n * cols_n * depth * sizeof(matrix_type));
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       for (int z = 0; z < m->depth; z++) {
@@ -219,7 +219,7 @@ void avg_pooling(const matrix2d_t *const mat, matrix2d_t *result,
                  int kernel_size, int padding, int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {
-      float sum = 0;
+      matrix_type sum = 0;
       int values_len = 0;
       for (int m = 0; m < kernel_size; m++) {
         for (int n = 0; n < kernel_size; n++) {
@@ -239,7 +239,7 @@ void avg_pooling(const matrix2d_t *const mat, matrix2d_t *result,
 void matrix2d_relu_inplace(const matrix2d_t *const m) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
+      matrix_type *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
       *elem = relu(*elem);
     }
   }
@@ -248,7 +248,7 @@ void matrix2d_relu_inplace(const matrix2d_t *const m) {
 void matrix2d_sigmoid_inplace(const matrix2d_t *const m) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
+      matrix_type *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
       *elem = sigmoid(*elem);
     }
   }
@@ -257,19 +257,19 @@ void matrix2d_sigmoid_inplace(const matrix2d_t *const m) {
 void matrix2d_tanh_inplace(const matrix2d_t *const m) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
+      matrix_type *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
       *elem = tanhf(*elem);
     }
   }
 }
 
 void matrix2d_softmax_inplace(matrix2d_t *m) {
-  float sum = 0.0;
-  float maxInput = matrix2d_get_elem(m, 0, 0);
+  matrix_type sum = 0.0;
+  matrix_type maxInput = matrix2d_get_elem(m, 0, 0);
 
   // normalize to avoid overflow on exp
   for (int i = 1; i < m->cols_n; i++) {
-    float m_val = matrix2d_get_elem(m, 0, i);
+    matrix_type m_val = matrix2d_get_elem(m, 0, i);
     if (m_val > maxInput) {
       maxInput = m_val;
     }
@@ -278,7 +278,7 @@ void matrix2d_softmax_inplace(matrix2d_t *m) {
   // Calculate the exponentials of each input element and the sum of
   // exponentials
   for (int i = 0; i < m->cols_n; i++) {
-    float *m_val = matrix2d_get_elem_as_mut_ref(m, 0, i);
+    matrix_type *m_val = matrix2d_get_elem_as_mut_ref(m, 0, i);
     *m_val = exp(*m_val / maxInput);
     sum += *m_val;
   }
@@ -351,14 +351,14 @@ void matrix3d_reshape(const matrix3d_t *const m, matrix3d_t *result) {
 }
 
 void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
-                   float *const base_address) {
+                   matrix_type *const base_address) {
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->values = base_address;
 }
 
 void matrix3d_load(matrix3d_t *m, int rows_n, int cols_n, int depth,
-                   float *const base_address) {
+                   matrix_type *const base_address) {
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->depth = depth;

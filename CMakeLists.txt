@@ -9,7 +9,7 @@ set(LIB_SOURCES
 )
 
 add_library(c_cnn_framework STATIC "${LIB_SOURCES}")
-target_include_directories(c_cnn_framework PUBLIC include)
+target_include_directories(c_cnn_framework PUBLIC include env)
 
 enable_testing()
 add_subdirectory(test)
