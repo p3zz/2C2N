@@ -5,51 +5,74 @@
 #include "string.h"
 #include "utils.h"
 
-inline const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m,
+const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m,
                                              int row_idx, int col_idx) {
   return matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx);
 }
 
-inline float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m,
+float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m,
                                            int row_idx, int col_idx) {
-  return &m->values[row_idx * m->cols_n + col_idx];
+  if(row_idx < m->rows_n && col_idx < m->cols_n){
+    return &m->values[row_idx * m->cols_n + col_idx];
+  }
+  return NULL;
 }
 
-inline float matrix2d_get_elem(const matrix2d_t *const m, int row_idx,
+float matrix2d_get_elem(const matrix2d_t *const m, int row_idx,
                                int col_idx) {
-  return *matrix2d_get_elem_as_ref(m, row_idx, col_idx);
+  const float* addr = matrix2d_get_elem_as_ref(m, row_idx, col_idx);
+  if(addr != NULL){
+    return *addr;
+  }
+  return 0.f;
 }
 
-inline void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
+void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
                               float value) {
-  *matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx) = value;
+  float* addr = matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx);
+  if(addr != NULL){
+    *addr = value;
+  }
 }
 
-inline const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m,
+const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m,
                                              int row_idx, int col_idx,
                                              int z_idx) {
   return matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx);
 }
 
-inline float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m,
+float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m,
                                            int row_idx, int col_idx,
                                            int z_idx) {
-  return &m->values[(z_idx * m->rows_n * m->cols_n) + (row_idx * m->cols_n) +
+  if(row_idx < m->rows_n && col_idx < m->cols_n && z_idx < m->depth){
+    return &m->values[(z_idx * m->rows_n * m->cols_n) + (row_idx * m->cols_n) +
                     col_idx];
+  }
+  return NULL;
 }
 
-inline float matrix3d_get_elem(const matrix3d_t *const m, int row_idx,
+float matrix3d_get_elem(const matrix3d_t *const m, int row_idx,
                                int col_idx, int z_idx) {
-  return *matrix3d_get_elem_as_ref(m, row_idx, col_idx, z_idx);
+  const float* addr = matrix3d_get_elem_as_ref(m, row_idx, col_idx, z_idx);
+  if(addr != NULL){
+    return *addr;
+  }
+  return 0.f;
 }
 
-inline void matrix3d_set_elem(const matrix3d_t *const m, int row_idx,
+void matrix3d_set_elem(const matrix3d_t *const m, int row_idx,
                               int col_idx, int z_idx, float value) {
-  *matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx) = value;
+  float* addr = matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx);
+  if(addr != NULL){
+    *addr = value;
+  }
 }
 
 void matrix3d_get_slice_as_mut_ref(const matrix3d_t *const m, matrix2d_t *const result,
                                    int z_idx) {
+  if(z_idx >= m->depth){
+    return;
+  }
   result->rows_n = m->rows_n;
   result->cols_n = m->cols_n;
   result->values = &m->values[result->rows_n * result->cols_n * z_idx];
