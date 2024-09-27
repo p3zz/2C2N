@@ -2,7 +2,8 @@
 #include "math.h"
 #include "stdlib.h"
 
-void zero_pad(const matrix2d_t *const m, matrix2d_t *const result, int padding) {
+void zero_pad(const matrix2d_t *const m, matrix2d_t *const result,
+              int padding) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       int row = i + padding;
@@ -14,8 +15,8 @@ void zero_pad(const matrix2d_t *const m, matrix2d_t *const result, int padding) 
 }
 
 void full_cross_correlation(const matrix2d_t *const m1,
-                            const matrix2d_t *const m2, matrix2d_t *const result,
-                            int padding, int stride) {
+                            const matrix2d_t *const m2,
+                            matrix2d_t *const result, int padding, int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {
       float sum = 0;
@@ -43,7 +44,7 @@ void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
   matrix2d_rotate180_inplace(m2);
 }
 
-void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
+void max_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  const matrix3d_t *const indexes, int kernel_size, int padding,
                  int stride) {
   for (int i = 0; i < result->rows_n; i++) {
@@ -72,7 +73,7 @@ void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
   }
 }
 
-void avg_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
+void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  int kernel_size, int padding, int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {

@@ -139,9 +139,9 @@ void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
 }
 
 void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
-                            matrix2d_t *biases,
-                            matrix3d_t *output, matrix3d_t *output_activated,
-                            matrix3d_t *d_inputs) {
+                             matrix2d_t *biases, matrix3d_t *output,
+                             matrix3d_t *output_activated,
+                             matrix3d_t *d_inputs) {
   layer->loaded = true;
   layer->weights = weights;
   layer->biases = biases;
@@ -150,7 +150,8 @@ void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
   layer->d_inputs = d_inputs;
 }
 
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t* output, matrix3d_t* d_input, matrix3d_t* indexes) {
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output,
+                            matrix3d_t *d_input, matrix3d_t *indexes) {
   layer->loaded = true;
 
   if (layer->type == POOLING_TYPE_MAX) {
@@ -504,7 +505,7 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 // ------------------------------ DESTROY ------------------------------
 
 void dense_layer_destroy(dense_layer_t *layer) {
-  if(layer->loaded){
+  if (layer->loaded) {
     return;
   }
 
@@ -523,7 +524,7 @@ void dense_layer_destroy(dense_layer_t *layer) {
 }
 
 void conv_layer_destroy(conv_layer_t *layer) {
-  if(layer->loaded){
+  if (layer->loaded) {
     return;
   }
 
@@ -545,7 +546,7 @@ void conv_layer_destroy(conv_layer_t *layer) {
 }
 
 void pool_layer_destroy(pool_layer_t *layer) {
-  if(layer->loaded){
+  if (layer->loaded) {
     return;
   }
 
@@ -567,10 +568,10 @@ void pool_layer_destroy(pool_layer_t *layer) {
 }
 
 void softmax_layer_destroy(softmax_layer_t *layer) {
-  if(layer->loaded){
+  if (layer->loaded) {
     return;
   }
-  
+
   matrix3d_destroy(layer->input);
   free(layer->input);
   matrix3d_destroy(layer->output);

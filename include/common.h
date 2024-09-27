@@ -7,8 +7,9 @@
 void full_cross_correlation(const matrix2d_t *const m1,
                             const matrix2d_t *const m2, matrix2d_t *result,
                             int padding, int stride);
-void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
-                 const matrix3d_t *const indexes, int kernel_size, int padding, int stride);
+void max_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
+                 const matrix3d_t *const indexes, int kernel_size, int padding,
+                 int stride);
 void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  int kernel_size, int padding, int stride);
 void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,

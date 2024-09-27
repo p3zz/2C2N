@@ -1,8 +1,8 @@
 #ifndef __MATRIX_H__
 #define __MATRIX_H__
 
-#include "utils.h"
 #include "stdbool.h"
+#include "utils.h"
 
 typedef struct {
   int rows_n;
@@ -30,7 +30,8 @@ void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
 void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n);
 void matrix2d_destroy(const matrix2d_t *m);
 void matrix2d_print(const matrix2d_t *const m);
-void matrix2d_sum_inplace(const matrix2d_t *const m, const matrix2d_t * const result);
+void matrix2d_sum_inplace(const matrix2d_t *const m,
+                          const matrix2d_t *const result);
 void matrix2d_relu(const matrix2d_t *const m, matrix2d_t *result);
 void matrix2d_relu_inplace(const matrix2d_t *const m);
 void matrix2d_sigmoid(const matrix2d_t *const m, matrix2d_t *result);
@@ -49,7 +50,7 @@ void matrix2d_erase(matrix2d_t *input);
 void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int rows_n,
                       int cols_n);
 void matrix2d_tanh_inplace(const matrix2d_t *const m);
-void matrix2d_softmax_inplace(const matrix2d_t * const m);
+void matrix2d_softmax_inplace(const matrix2d_t *const m);
 void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
                    float *const base_address);
 void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type);
