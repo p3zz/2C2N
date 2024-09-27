@@ -1,5 +1,4 @@
 #include "utils.h"
-#include "float.h"
 #include "math.h"
 #include "stdlib.h"
 
@@ -83,12 +82,4 @@ void compute_output_size(int input_height, int input_width, int kernel_size,
                          int *output_width) {
   *output_height = (input_height - kernel_size + 2 * padding) / stride + 1;
   *output_width = (input_width - kernel_size + 2 * padding) / stride + 1;
-}
-
-uint32_t quantize_f32_to_u32(float x) {
-  if (x > 0.f) {
-    return (x * UINT32_MAX) / FLT_MAX;
-  } else {
-    return 0u;
-  }
 }

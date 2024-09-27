@@ -8,6 +8,7 @@ set(LIB_SOURCES
     src/utils.c
     src/common.c
     src/layer.c
+    src/matrix.c
 )
 
 add_library(c_cnn_framework STATIC "${LIB_SOURCES}")

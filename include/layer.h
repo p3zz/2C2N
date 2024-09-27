@@ -2,8 +2,6 @@
 #define __LAYER_H__
 
 #include "common.h"
-#include "stdbool.h"
-#include "utils.h"
 
 typedef enum { POOLING_TYPE_AVERAGE, POOLING_TYPE_MAX } pooling_type;
 

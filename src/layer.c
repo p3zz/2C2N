@@ -1,7 +1,4 @@
 #include "layer.h"
-#include "common.h"
-#include "stdbool.h"
-#include "utils.h"
 #include <stdlib.h>
 
 // ------------------------------ INIT ------------------------------
