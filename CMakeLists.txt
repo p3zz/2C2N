@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(NeuralNetwork)
 
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+
 set(LIB_SOURCES
     src/utils.c
     src/common.c

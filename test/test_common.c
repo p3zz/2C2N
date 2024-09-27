@@ -159,7 +159,7 @@ void test_common_cross_correlation_nopadding(void){
 void test_common_cross_correlation_padding(void){
     matrix2d_t m1 = {0};
     matrix2d_t m2 = {0};
-    matrix2d_t result = {};
+    matrix2d_t result = {0};
 
     float m1_values[] = {
         4.f, 3.f, 8.f,
@@ -209,7 +209,7 @@ void test_common_cross_correlation_padding(void){
 void test_common_cross_correlation_nopadding_stride(void){
     matrix2d_t m1 = {0};
     matrix2d_t m2 = {0};
-    matrix2d_t result = {};
+    matrix2d_t result = {0};
     
     float m1_values[] = {
         4.f, 3.f, 8.f,
@@ -241,7 +241,7 @@ void test_common_cross_correlation_nopadding_stride(void){
 void test_common_cross_correlation_padding_stride(void){
     matrix2d_t m1 = {0};
     matrix2d_t m2 = {0};
-    matrix2d_t result = {};
+    matrix2d_t result = {0};
 
     float m1_values[] = {
         4.f, 3.f, 8.f,

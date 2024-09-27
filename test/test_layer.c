@@ -726,14 +726,12 @@ void test_conv_layer_backpropagation_freerun(void){
     matrix3d_get_slice_as_mut_ref(&output_target, &out_tgt_slice, 0);
     matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
 
-    float error = 0.f;
     for(int i=0;i<iterations;i++){
         conv_layer_feed(&in_layer, &input);
         conv_layer_forwarding(&in_layer);
         matrix3d_reshape(in_layer.output_activated, &aux);
         matrix3d_get_slice_as_mut_ref(&aux,  &out_slice, 0);
         mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
-        error = mean_squared_error(&out_slice, &out_tgt_slice);
         matrix3d_reshape(&d_input, &aux_rev);
         conv_layer_backpropagation(&in_layer, &aux_rev, learning_rate);
     }
