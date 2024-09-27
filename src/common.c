@@ -20,7 +20,7 @@ inline float matrix2d_get_elem(const matrix2d_t *const m, int row_idx,
   return *matrix2d_get_elem_as_ref(m, row_idx, col_idx);
 }
 
-inline void matrix2d_set_elem(const matrix2d_t *m, int row_idx, int col_idx,
+inline void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
                               float value) {
   *matrix2d_get_elem_as_mut_ref(m, row_idx, col_idx) = value;
 }
@@ -48,14 +48,14 @@ inline void matrix3d_set_elem(const matrix3d_t *const m, int row_idx,
   *matrix3d_get_elem_as_mut_ref(m, row_idx, col_idx, z_idx) = value;
 }
 
-void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
+void matrix3d_get_slice_as_mut_ref(const matrix3d_t *const m, matrix2d_t *const result,
                                    int z_idx) {
   result->rows_n = m->rows_n;
   result->cols_n = m->cols_n;
   result->values = &m->values[result->rows_n * result->cols_n * z_idx];
 }
 
-void zero_pad(const matrix2d_t *const m, matrix2d_t *result, int padding) {
+void zero_pad(const matrix2d_t *const m, matrix2d_t *const result, int padding) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       int row = i + padding;
@@ -67,7 +67,7 @@ void zero_pad(const matrix2d_t *const m, matrix2d_t *result, int padding) {
 }
 
 void full_cross_correlation(const matrix2d_t *const m1,
-                            const matrix2d_t *const m2, matrix2d_t *result,
+                            const matrix2d_t *const m2, matrix2d_t *const result,
                             int padding, int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {
@@ -89,7 +89,7 @@ void full_cross_correlation(const matrix2d_t *const m1,
 }
 
 void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
-                 matrix2d_t *result, int padding) {
+                 matrix2d_t *const result, int padding) {
   matrix2d_rotate180_inplace(m2);
   full_cross_correlation(m1, m2, result, padding, 1);
   // restore the rotated matrix
@@ -116,7 +116,7 @@ void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n) {
   }
 }
 
-void matrix2d_randomize(matrix2d_t *input) {
+void matrix2d_randomize(matrix2d_t * const input) {
   for (int i = 0; i < input->rows_n; i++) {
     for (int j = 0; j < input->cols_n; j++) {
       float v = generate_random();
@@ -125,7 +125,7 @@ void matrix2d_randomize(matrix2d_t *input) {
   }
 }
 
-void matrix3d_randomize(matrix3d_t *input) {
+void matrix3d_randomize(matrix3d_t * const input) {
   matrix2d_t layer = {0};
   for (int i = 0; i < input->depth; i++) {
     matrix3d_get_slice_as_mut_ref(input, &layer, i);
@@ -134,7 +134,7 @@ void matrix3d_randomize(matrix3d_t *input) {
 }
 
 void matrix2d_copy_inplace(const matrix2d_t *const input,
-                           const matrix2d_t *output) {
+                           const matrix2d_t * const output) {
   if (input->rows_n != output->rows_n || input->cols_n != output->cols_n) {
     return;
   }
@@ -143,7 +143,7 @@ void matrix2d_copy_inplace(const matrix2d_t *const input,
 }
 
 void matrix3d_copy_inplace(const matrix3d_t *const input,
-                           const matrix3d_t *output) {
+                           const matrix3d_t * const output) {
   if (input->rows_n != output->rows_n || input->cols_n != output->cols_n ||
       input->depth != output->depth) {
     return;
@@ -168,9 +168,9 @@ void matrix2d_rotate180_inplace(const matrix2d_t *const input) {
   }
 }
 
-void matrix2d_destroy(matrix2d_t *m) { free(m->values); }
+void matrix2d_destroy(const matrix2d_t * m) { free(m->values); }
 
-void matrix3d_init(matrix3d_t *m, int rows_n, int cols_n, int depth) {
+void matrix3d_init(matrix3d_t *const m, int rows_n, int cols_n, int depth) {
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->depth = depth;
@@ -184,10 +184,10 @@ void matrix3d_init(matrix3d_t *m, int rows_n, int cols_n, int depth) {
   }
 }
 
-void matrix3d_destroy(matrix3d_t *m) { free(m->values); }
+void matrix3d_destroy(const matrix3d_t *m) { free(m->values); }
 
-void max_pooling(const matrix2d_t *const mat, matrix2d_t *result,
-                 matrix3d_t *indexes, int kernel_size, int padding,
+void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
+                 const matrix3d_t *const indexes, int kernel_size, int padding,
                  int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {
@@ -215,7 +215,7 @@ void max_pooling(const matrix2d_t *const mat, matrix2d_t *result,
   }
 }
 
-void avg_pooling(const matrix2d_t *const mat, matrix2d_t *result,
+void avg_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
                  int kernel_size, int padding, int stride) {
   for (int i = 0; i < result->rows_n; i++) {
     for (int j = 0; j < result->cols_n; j++) {
@@ -236,60 +236,63 @@ void avg_pooling(const matrix2d_t *const mat, matrix2d_t *result,
   }
 }
 
-void matrix2d_relu_inplace(const matrix2d_t *const m) {
+void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type){
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
-      *elem = relu(*elem);
+      switch(type){
+        case ACTIVATION_TYPE_RELU:
+          *elem = relu(*elem);
+          break;
+        case ACTIVATION_TYPE_SIGMOID:
+          *elem = sigmoid(*elem);
+          break;
+        case ACTIVATION_TYPE_TANH:
+          *elem = tanh(*elem);
+          break;
+        case ACTIVATION_TYPE_IDENTITY:
+          break;
+        default:
+          break;
+      }
     }
   }
 }
 
-void matrix2d_sigmoid_inplace(const matrix2d_t *const m) {
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
-      *elem = sigmoid(*elem);
-    }
-  }
-}
-
-void matrix2d_tanh_inplace(const matrix2d_t *const m) {
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
-      *elem = tanhf(*elem);
-    }
-  }
-}
-
-void matrix2d_softmax_inplace(matrix2d_t *m) {
+void matrix2d_softmax_inplace(const matrix2d_t *const m) {
   float sum = 0.0;
-  float maxInput = matrix2d_get_elem(m, 0, 0);
+  float max_input = matrix2d_get_elem(m, 0, 0);
 
   // normalize to avoid overflow on exp
-  for (int i = 1; i < m->cols_n; i++) {
-    float m_val = matrix2d_get_elem(m, 0, i);
-    if (m_val > maxInput) {
-      maxInput = m_val;
+  for(int i=0; i< m->rows_n; i++){
+    for (int j = 0; j < m->cols_n; j++) {
+      float m_val = matrix2d_get_elem(m, i, j);
+      if (m_val > max_input) {
+        max_input = m_val;
+      }
     }
   }
 
   // Calculate the exponentials of each input element and the sum of
   // exponentials
-  for (int i = 0; i < m->cols_n; i++) {
-    float *m_val = matrix2d_get_elem_as_mut_ref(m, 0, i);
-    *m_val = exp(*m_val / maxInput);
-    sum += *m_val;
+  for (int i = 0; i < m->rows_n; i++) {
+    for (int j = 0; j < m->cols_n; j++) {
+      float *m_val = matrix2d_get_elem_as_mut_ref(m, i, j);
+      *m_val = exp(*m_val / max_input);
+      sum += *m_val;
+    }
   }
+  
 
   // Normalize the values to make the sum equal to 1 (probabilities)
-  for (int i = 0; i < m->cols_n; i++) {
-    *matrix2d_get_elem_as_mut_ref(m, 0, i) /= sum;
+  for (int i = 0; i < m->rows_n; i++) {
+    for (int j = 0; j < m->cols_n; j++) {
+        *matrix2d_get_elem_as_mut_ref(m, i, j) /= sum;
+    }
   }
 }
 
-void matrix2d_sum_inplace(const matrix2d_t *const m, matrix2d_t *result) {
+void matrix2d_sum_inplace(const matrix2d_t *const m, const matrix2d_t * const result) {
   for (int i = 0; i < m->rows_n; i++) {
     for (int j = 0; j < m->cols_n; j++) {
       *matrix2d_get_elem_as_mut_ref(result, i, j) += matrix2d_get_elem(m, i, j);
@@ -367,7 +370,7 @@ void matrix3d_load(matrix3d_t *m, int rows_n, int cols_n, int depth,
 
 void mean_squared_error_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
-                                   matrix2d_t *result) {
+                                   const matrix2d_t *const result) {
   for (int i = 0; i < output->rows_n; i++) {
     for (int j = 0; j < output->cols_n; j++) {
       float out_val = matrix2d_get_elem(output, i, j);
@@ -380,7 +383,7 @@ void mean_squared_error_derivative(const matrix2d_t *const output,
 
 void cross_entropy_loss_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
-                                   matrix2d_t *result) {
+                                   const matrix2d_t *const result) {
   for (int i = 0; i < output->rows_n; i++) {
     for (int j = 0; j < output->cols_n; j++) {
       float n0 = 1 - matrix2d_get_elem(target_output, i, j);

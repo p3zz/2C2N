@@ -136,22 +136,58 @@ void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
   layer->d_input = d_input;
 }
 
+void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
+                            matrix2d_t *biases,
+                            matrix3d_t *output, matrix3d_t *output_activated,
+                            matrix3d_t *d_inputs) {
+  layer->weights = weights;
+  layer->biases = biases;
+  layer->output = output;
+  layer->output_activated = output_activated;
+  layer->d_inputs = d_inputs;
+}
+
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t* output, matrix3d_t* d_input, matrix3d_t* indexes) {
+  if (layer->type == POOLING_TYPE_MAX) {
+    layer->indexes = indexes;
+  }
+
+  layer->output = output;
+  layer->d_input = d_input;
+}
+
 // ------------------------------ FEED ------------------------------
 
 void dense_layer_feed(dense_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->inputs);
 }
 
+void dense_layer_feed_load(dense_layer_t *layer, matrix3d_t *const input) {
+  layer->inputs = input;
+}
+
 void pool_layer_feed(pool_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->input);
+}
+
+void pool_layer_feed_load(pool_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
 }
 
 void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input) {
   matrix3d_copy_inplace(input, layer->input);
 }
 
+void conv_layer_feed_load(conv_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
+}
+
 void softmax_layer_feed(softmax_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->input);
+}
+
+void softmax_layer_feed_load(softmax_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
 }
 
 // ------------------------------ PROCESS ------------------------------
@@ -174,21 +210,7 @@ void dense_layer_forwarding(dense_layer_t *layer) {
     }
   }
   matrix2d_copy_inplace(&output, &output_activated);
-  switch (layer->activation_type) {
-  case ACTIVATION_TYPE_RELU:
-    matrix2d_relu_inplace(&output_activated);
-    break;
-  case ACTIVATION_TYPE_SIGMOID:
-    matrix2d_sigmoid_inplace(&output_activated);
-    break;
-  case ACTIVATION_TYPE_TANH:
-    matrix2d_tanh_inplace(&output_activated);
-    break;
-  case ACTIVATION_TYPE_IDENTITY:
-    break;
-  default:
-    break;
-  }
+  matrix2d_activate_inplace(&output_activated, layer->activation_type);
 }
 
 void softmax_layer_forwarding(softmax_layer_t *layer) {
@@ -251,19 +273,7 @@ void conv_layer_forwarding(conv_layer_t *layer) {
       matrix2d_sum_inplace(&result, &out_slice);
     }
     matrix2d_copy_inplace(&out_slice, &out_act_slice);
-    switch (layer->activation_type) {
-    case ACTIVATION_TYPE_RELU:
-      matrix2d_relu_inplace(&out_act_slice);
-      break;
-    case ACTIVATION_TYPE_SIGMOID:
-      matrix2d_sigmoid_inplace(&out_act_slice);
-      break;
-    case ACTIVATION_TYPE_TANH:
-      matrix2d_tanh_inplace(&out_act_slice);
-      break;
-    default:
-      break;
-    }
+    matrix2d_activate_inplace(&out_act_slice, layer->activation_type);
   }
   matrix2d_destroy(&result);
 }

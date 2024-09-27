@@ -2,6 +2,7 @@
 #define __COMMON_H__
 
 #include "stdbool.h"
+#include "utils.h"
 
 typedef struct {
   int rows_n;
@@ -21,7 +22,7 @@ const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,
 float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m, int row_idx,
                                     int col_idx);
 float matrix2d_get_elem(const matrix2d_t *const m, int row_idx, int col_idx);
-void matrix2d_set_elem(const matrix2d_t *m, int row_idx, int col_idx,
+void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
                        float value);
 const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
                                       int col_idx, int z_idx);
@@ -36,9 +37,9 @@ void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
 
 // matrix2d
 void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n);
-void matrix2d_destroy(matrix2d_t *m);
+void matrix2d_destroy(const matrix2d_t *m);
 void matrix2d_print(const matrix2d_t *const m);
-void matrix2d_sum_inplace(const matrix2d_t *const m, matrix2d_t *result);
+void matrix2d_sum_inplace(const matrix2d_t *const m, const matrix2d_t * const result);
 void matrix2d_relu(const matrix2d_t *const m, matrix2d_t *result);
 void matrix2d_relu_inplace(const matrix2d_t *const m);
 void matrix2d_sigmoid(const matrix2d_t *const m, matrix2d_t *result);
@@ -57,13 +58,14 @@ void matrix2d_erase(matrix2d_t *input);
 void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int rows_n,
                       int cols_n);
 void matrix2d_tanh_inplace(const matrix2d_t *const m);
-void matrix2d_softmax_inplace(matrix2d_t *m);
+void matrix2d_softmax_inplace(const matrix2d_t * const m);
 void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
                    float *const base_address);
+void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type);
 
 // matrix3d
 void matrix3d_init(matrix3d_t *m, int rows_n, int cols_n, int depth);
-void matrix3d_destroy(matrix3d_t *m);
+void matrix3d_destroy(const matrix3d_t *m);
 void matrix3d_print(const matrix3d_t *const m);
 void matrix3d_erase(matrix3d_t *input);
 void matrix3d_copy(const matrix3d_t *const input, matrix3d_t *output);
@@ -78,18 +80,18 @@ void matrix3d_load(matrix3d_t *m, int rows_n, int cols_n, int depth,
 void full_cross_correlation(const matrix2d_t *const m1,
                             const matrix2d_t *const m2, matrix2d_t *result,
                             int padding, int stride);
-void max_pooling(const matrix2d_t *const mat, matrix2d_t *result,
-                 matrix3d_t *indexes, int kernel_size, int padding, int stride);
-void avg_pooling(const matrix2d_t *const mat, matrix2d_t *result,
+void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
+                 const matrix3d_t *const indexes, int kernel_size, int padding, int stride);
+void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  int kernel_size, int padding, int stride);
 void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
                  matrix2d_t *result, int padding);
 void cross_entropy_loss_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
-                                   matrix2d_t *result);
+                                   const matrix2d_t *const result);
 void mean_squared_error_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
-                                   matrix2d_t *result);
+                                   const matrix2d_t *const result);
 float cross_entropy_loss(const matrix2d_t *const output,
                          const matrix2d_t *const target_output);
 float mean_squared_error(const matrix2d_t *const output,

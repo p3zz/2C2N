@@ -42,6 +42,9 @@ float activate(float x, activation_type type) {
     break;
   case ACTIVATION_TYPE_TANH:
     result = tanhf(x);
+    break;
+  case ACTIVATION_TYPE_IDENTITY:
+    break;
   default:
     break;
   }
