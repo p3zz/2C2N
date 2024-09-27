@@ -20,6 +20,7 @@ typedef struct {
   matrix3d_t *output;
   matrix3d_t *output_activated;
   matrix3d_t *d_input;
+  bool loaded;
 } conv_layer_t;
 
 typedef struct {
@@ -31,6 +32,7 @@ typedef struct {
   int stride;
   int padding;
   pooling_type type;
+  bool loaded;
 } pool_layer_t;
 
 typedef struct {
@@ -41,19 +43,15 @@ typedef struct {
   matrix3d_t *output;
   matrix3d_t *output_activated;
   matrix3d_t *d_inputs;
+  bool loaded;
 } dense_layer_t;
 
 typedef struct {
   matrix3d_t *input;
   matrix3d_t *d_input;
   matrix3d_t *output;
+  bool loaded;
 } softmax_layer_t;
-
-typedef union {
-  conv_layer_t conv_layer;
-  pool_layer_t pool_layer;
-  dense_layer_t dense_layer;
-} layer_t;
 
 void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int kernels_n,

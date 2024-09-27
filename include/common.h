@@ -8,6 +8,7 @@ typedef struct {
   int rows_n;
   int cols_n;
   float *values;
+  bool loaded;
 } matrix2d_t;
 
 typedef struct {
@@ -15,6 +16,7 @@ typedef struct {
   int cols_n;
   int depth;
   float *values;
+  bool loaded;
 } matrix3d_t;
 
 const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,

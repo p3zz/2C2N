@@ -106,6 +106,7 @@ void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
 }
 
 void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n) {
+  m->loaded = false;
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->values = (float *)malloc(rows_n * cols_n * sizeof(float));
@@ -168,9 +169,14 @@ void matrix2d_rotate180_inplace(const matrix2d_t *const input) {
   }
 }
 
-void matrix2d_destroy(const matrix2d_t * m) { free(m->values); }
+void matrix2d_destroy(const matrix2d_t * m) {
+  if(!m->loaded){
+    free(m->values);
+  }
+}
 
 void matrix3d_init(matrix3d_t *const m, int rows_n, int cols_n, int depth) {
+  m->loaded = false;
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->depth = depth;
@@ -184,7 +190,11 @@ void matrix3d_init(matrix3d_t *const m, int rows_n, int cols_n, int depth) {
   }
 }
 
-void matrix3d_destroy(const matrix3d_t *m) { free(m->values); }
+void matrix3d_destroy(const matrix3d_t *m) { 
+  if(!m->loaded){
+    free(m->values);
+  }
+}
 
 void max_pooling(const matrix2d_t *const mat, const matrix2d_t * const result,
                  const matrix3d_t *const indexes, int kernel_size, int padding,
@@ -355,6 +365,7 @@ void matrix3d_reshape(const matrix3d_t *const m, matrix3d_t *result) {
 
 void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
                    float *const base_address) {
+  m->loaded = true;
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->values = base_address;
@@ -362,6 +373,7 @@ void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
 
 void matrix3d_load(matrix3d_t *m, int rows_n, int cols_n, int depth,
                    float *const base_address) {
+  m->loaded = true;
   m->rows_n = rows_n;
   m->cols_n = cols_n;
   m->depth = depth;
