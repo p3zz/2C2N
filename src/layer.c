@@ -194,7 +194,7 @@ void dense_layer_forwarding(dense_layer_t *layer) {
 void softmax_layer_forwarding(softmax_layer_t *layer) {
   matrix2d_t in_slice = {0};
   matrix2d_t out_slice = {0};
-  for(int i=0;i<layer->input->depth;i++){
+  for (int i = 0; i < layer->input->depth; i++) {
     matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, i);
     matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
     matrix2d_copy_inplace(&in_slice, &out_slice);
