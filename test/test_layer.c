@@ -113,15 +113,6 @@ void test_process_conv_layer(void){
 
     conv_layer_feed(&layer, &input);
     conv_layer_forwarding(&layer);
-    // printf("Kernels\n");
-    // matrix3d_print(&layer.kernels[0]);
-    // matrix3d_print(&layer.kernels[1]);
-    // printf("Biases\n");
-    // matrix2d_print(&layer.biases[0]);
-    // matrix2d_print(&layer.biases[1]);
-    // printf("Output\n");
-    // matrix3d_print(&layer.output);
-    // matrix3d_print(&layer.output_activated);
 
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
     TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
@@ -157,10 +148,6 @@ void test_process_pool_layer_average(void){
 
     pool_layer_feed(&layer, &input);
     pool_layer_forwarding(&layer);
-    // printf("Input\n");
-    // matrix3d_print(&input);
-    // printf("Output\n");
-    // matrix3d_print(&output);
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
     TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
     TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
@@ -193,10 +180,6 @@ void test_process_pool_layer_max(void){
 
     pool_layer_feed(&layer, &input);
     pool_layer_forwarding(&layer);
-    // printf("Input\n");
-    // matrix3d_print(&input);
-    // printf("Output\n");
-    // matrix3d_print(&output);
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
     TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
     TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
@@ -402,26 +385,11 @@ void test_backpropagation_conv_layer(void){
     TEST_ASSERT_EQUAL_INT(2, d_input.depth);
     TEST_ASSERT_EQUAL_INT(2, d_input.rows_n);
     TEST_ASSERT_EQUAL_INT(2, d_input.cols_n);
-    // printf("[before] Kernel\n");
-    // matrix3d_print(&layer.kernels[0]);
-    // matrix3d_print(&layer.kernels[1]);
-    // printf("[before] bias\n");
-    // matrix2d_print(&layer.biases[0]);
-    // matrix2d_print(&layer.biases[1]);
     conv_layer_backpropagation(&layer, &d_input, learning_rate);
-    // printf("[after] Kernel\n");
-    // matrix3d_print(&layer.kernels[0]);
-    // matrix3d_print(&layer.kernels[1]);
-    // printf("[after] bias\n");
-    // matrix2d_print(&layer.biases[0]);
-    // matrix2d_print(&layer.biases[1]);
-    // printf("[after] d_input\n");
-    // matrix3d_print(&layer.d_input);
 
     matrix3d_destroy(&output_targets);
     matrix3d_destroy(&d_input);
     conv_layer_destroy(&layer);
-    // TEST_ASSERT_TRUE(false);
 }
 
 void test_backpropagation_max_pool_layer(void){
@@ -630,7 +598,6 @@ void test_perceptron_or(void){
         dense_layer_forwarding(&input_layer);
         dense_layer_feed(&hidden_layer, input_layer.output_activated);
         dense_layer_forwarding(&hidden_layer);
-        printf("Target: %f\tprediction: %f\n", matrix2d_get_elem(&out_tgt_slice, 0, 0), matrix2d_get_elem(&out_slice, 0, 0));
         TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_slice, 0, 0), matrix2d_get_elem(&out_slice, 0, 0));
     }
 
@@ -712,7 +679,6 @@ void test_perceptron_and(void){
         dense_layer_forwarding(&input_layer);
         dense_layer_feed(&hidden_layer, input_layer.output_activated);
         dense_layer_forwarding(&hidden_layer);
-        printf("Target: %f\tprediction: %f\n", matrix2d_get_elem(&out_tgt_slice, 0, 0), matrix2d_get_elem(&out_slice, 0, 0));
         TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_slice, 0, 0), matrix2d_get_elem(&out_slice, 0, 0));
     }
 
@@ -826,11 +792,6 @@ void test_lenet5_cnn(void){
         }
     }
 
-    // printf("Height: %d\tWidth: %d\tDepth: %d\n", layer1.output.layers[0].rows_n, layer1.output.layers[0].cols_n, layer1.output.depth);
-
-    // printf("Input");
-    // matrix3d_print(&input);
-
     matrix3d_t aux = {0};
     matrix3d_init(&aux, 5, 5, 16);
 
@@ -847,81 +808,33 @@ void test_lenet5_cnn(void){
     for(int i=0;i<iterations;i++){
         conv_layer_feed(&layer0, &input);
         conv_layer_forwarding(&layer0);
-        // printf("Conv layer 0-----------------------------\n");
-        // matrix3d_print(&layer0.output);
-        // matrix3d_print(&layer0.output_activated);
-
         pool_layer_feed(&layer1, layer0.output_activated);
         pool_layer_forwarding(&layer1);
-        // printf("Pool layer 1-----------------------------\n");
-        // matrix3d_print(&layer1.output);
-
         conv_layer_feed(&layer2, layer1.output);
         conv_layer_forwarding(&layer2);
-        // printf("Conv layer 2-----------------------------\n");
-        // matrix3d_print(&layer2.output);
-        // matrix3d_print(&layer2.output_activated);
-
         pool_layer_feed(&layer3, layer2.output_activated);
         pool_layer_forwarding(&layer3);
-        // printf("Pool layer 3-----------------------------\n");
-        // matrix3d_print(&layer3.output);
-
         matrix3d_reshape(layer3.output, layer4.inputs);
         dense_layer_forwarding(&layer4);
-        // printf("Dense layer 4-----------------------------\n");
-        // matrix3d_print(&layer4.output);
-        // matrix3d_print(&layer4.output_activated);
-        
         dense_layer_feed(&layer5, layer4.output_activated);
         dense_layer_forwarding(&layer5);
-        // printf("Dense layer 5-----------------------------\n");
-        // matrix3d_print(&layer5.output);
-        // matrix3d_print(&layer5.output_activated);
-
         dense_layer_feed(&layer6, layer5.output_activated);
         dense_layer_forwarding(&layer6);
-        // printf("Dense layer 6-----------------------------\n");
-        // matrix3d_print(&layer6.output);
-        // matrix3d_print(&layer6.output_activated);
-
-        // printf("Softmax layer 7-----------------------------\n");
         softmax_layer_feed(&layer7, layer6.output_activated);
         softmax_layer_forwarding(&layer7);
-        // matrix3d_print(&layer7.output);
 
         mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
-        // matrix3d_print(&d_input);
 
-        // printf("[BACKPROP] Softmax layer 7-----------------------------\n");
         softmax_layer_backpropagation(&layer7, &d_input);
-        // matrix3d_print(&layer7.d_input);
-
-        // printf("[BACKPROP] Dense layer 6-----------------------------\n");
         dense_layer_backpropagation(&layer6, layer7.d_input, learning_rate);
-        // matrix3d_print(&layer6.d_inputs);
-
-        // printf("[BACKPROP] Dense layer 5-----------------------------\n");
         dense_layer_backpropagation(&layer5, layer6.d_inputs, learning_rate);
-        // matrix3d_print(&layer5.d_inputs);
-        
-        // printf("[BACKPROP] Dense layer 4-----------------------------\n");
         dense_layer_backpropagation(&layer4, layer5.d_inputs, learning_rate);
-        // matrix3d_print(&layer4.d_inputs);
-
         matrix3d_reshape(layer4.d_inputs, &aux);
-        
         pool_layer_backpropagation(&layer3, &aux);
-        // matrix3d_print(&layer3.d_input);
-        
         conv_layer_backpropagation(&layer2, layer3.d_input, learning_rate);
-        // matrix3d_print(&layer2.d_input);
         pool_layer_backpropagation(&layer1, layer2.d_input);
-        // matrix3d_print(&layer1.d_input);
         conv_layer_backpropagation(&layer0, layer1.d_input, learning_rate);
     }
-
-    matrix2d_print(&d_input_slice);
 
     matrix3d_destroy(&aux);
 
