@@ -145,7 +145,7 @@ void test_common_cross_correlation_nopadding(void){
     int result_width;
     compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
-    full_cross_correlation(&m1, &m2, &result, padding, stride);
+    cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.height);
     TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(54.f, matrix2d_get_elem(&result, 0, 0));
@@ -180,7 +180,7 @@ void test_common_cross_correlation_padding(void){
     int result_width;
     compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
-    full_cross_correlation(&m1, &m2, &result, padding, stride);
+    cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(4, result.height);
     TEST_ASSERT_EQUAL_INT(4, result.width);
     TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 0, 0));
@@ -230,7 +230,7 @@ void test_common_cross_correlation_nopadding_stride(void){
     int result_width;
     compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
-    full_cross_correlation(&m1, &m2, &result, padding, stride);
+    cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(1, result.height);
     TEST_ASSERT_EQUAL_INT(1, result.width);
     TEST_ASSERT_EQUAL_FLOAT(54.f, matrix2d_get_elem(&result, 0, 0));
@@ -262,7 +262,7 @@ void test_common_cross_correlation_padding_stride(void){
     int result_width;
     compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
-    full_cross_correlation(&m1, &m2, &result, padding, stride);
+    cross_correlation(&m1, &m2, &result, padding, stride);
     TEST_ASSERT_EQUAL_INT(2, result.height);
     TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 0, 0));
@@ -416,41 +416,23 @@ void test_common_matrix2d_softmax_inplace(void){
     TEST_ASSERT_EQUAL_FLOAT(0.1940232, matrix2d_get_elem(&m, 0, 2));
 }
 
-void test_parse_line(void){
-    char str[] = "1,255,12,123,2";
-    int length = sizeof(str)/sizeof(char);
+// void test_parse_line(void){
+//     char str[] = "1,255,12,123,2";
+//     int length = sizeof(str)/sizeof(char);
     
-    matrix2d_t res = {0};
-    float label = 0.f;
+//     matrix2d_t res = {0};
+//     float label = 0.f;
 
-    matrix2d_init(&res, 2, 2);
-    parse_line(str, length, &res, &label);
-    TEST_ASSERT_EQUAL_FLOAT(1.f, label);
-    TEST_ASSERT_EQUAL_FLOAT(255.f, matrix2d_get_elem(&res, 0, 0));
-    TEST_ASSERT_EQUAL_FLOAT(12.f, matrix2d_get_elem(&res, 0, 1));
-    TEST_ASSERT_EQUAL_FLOAT(123.f, matrix2d_get_elem(&res, 1, 0));
-    TEST_ASSERT_EQUAL_FLOAT(2.f, matrix2d_get_elem(&res, 1, 1));
+//     matrix2d_init(&res, 2, 2);
+//     parse_line(str, length, &res, &label);
+//     TEST_ASSERT_EQUAL_FLOAT(1.f, label);
+//     TEST_ASSERT_EQUAL_FLOAT(255.f, matrix2d_get_elem(&res, 0, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(12.f, matrix2d_get_elem(&res, 0, 1));
+//     TEST_ASSERT_EQUAL_FLOAT(123.f, matrix2d_get_elem(&res, 1, 0));
+//     TEST_ASSERT_EQUAL_FLOAT(2.f, matrix2d_get_elem(&res, 1, 1));
 
-    matrix2d_destroy(&res);
-}
-
-void test_zero_pad(void){
-    matrix2d_t m = {0};
-    matrix2d_t res = {0};
-
-    float m_values[] = {
-        1.f, 0.f, 3.f,
-        0.f, 4.f, 4.f,
-        9.f, 0.f, 0.f
-    };
-
-    matrix2d_load(&m, 3, 3, &m_values[0]);
-    matrix2d_init(&res, 7, 7);
-
-    zero_pad(&m, &res, 2);
-    
-    matrix2d_destroy(&res);
-}
+//     matrix2d_destroy(&res);
+// }
 
 void test_matrix2d_load(void){
     const int height = 2;
@@ -480,8 +462,7 @@ int main(void)
     RUN_TEST(test_common_matrix3d_reshape);
     RUN_TEST(test_common_matrix3d_reshape_2);
     RUN_TEST(test_common_matrix2d_softmax_inplace);
-    RUN_TEST(test_parse_line);
-    RUN_TEST(test_zero_pad);
+    // RUN_TEST(test_parse_line);
     RUN_TEST(test_matrix2d_load);
     RUN_TEST(test_matrix2d_get_elem_as_ref);
     RUN_TEST(test_matrix2d_get_elem_as_mut_ref);

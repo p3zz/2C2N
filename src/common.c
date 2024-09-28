@@ -2,19 +2,7 @@
 #include "math.h"
 #include "stdlib.h"
 
-void zero_pad(const matrix2d_t *const m, matrix2d_t *const result,
-              int padding) {
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      int row = i + padding;
-      int col = j + padding;
-      float v = matrix2d_get_elem(m, i, j);
-      matrix2d_set_elem(result, row, col, v);
-    }
-  }
-}
-
-void full_cross_correlation(const matrix2d_t *const m1,
+void cross_correlation(const matrix2d_t *const m1,
                             const matrix2d_t *const m2,
                             matrix2d_t *const result, int padding, int stride) {
   for (int i = 0; i < result->height; i++) {
@@ -37,9 +25,9 @@ void full_cross_correlation(const matrix2d_t *const m1,
 }
 
 void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
-                 matrix2d_t *const result, int padding) {
+                 matrix2d_t *const result, int padding, int stride) {
   matrix2d_rotate180_inplace(m2);
-  full_cross_correlation(m1, m2, result, padding, 1);
+  cross_correlation(m1, m2, result, padding, stride);
   // restore the rotated matrix
   matrix2d_rotate180_inplace(m2);
 }

@@ -269,7 +269,7 @@ void conv_layer_forwarding(conv_layer_t *layer) {
       matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, j);
       // compute the cross correlation between a channel of the input and its
       // corresponding kernel
-      full_cross_correlation(&in_slice, &kernel_slice, &result, layer->padding,
+      cross_correlation(&in_slice, &kernel_slice, &result, layer->padding,
                              layer->stride);
       if (j == 0) {
         // perform an early sum of the biases to the final output layer
@@ -461,11 +461,11 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 
       // compute the derivative for the correction of the kernel
       // TODO correct also we the stride
-      full_cross_correlation(&in_slice, &d_output, &d_kernel_slice,
+      cross_correlation(&in_slice, &d_output, &d_kernel_slice,
                              layer->padding, 1);
       // compute the derivative for the correction of the input
       convolution(&d_output, &kernel_slice, &d_input_aux,
-                  kernel->height - input->height + 1);
+                  kernel->height - input->height + 1, 1);
       matrix2d_sum_inplace(&d_input_aux, &d_input_slice);
     }
 
