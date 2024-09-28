@@ -272,6 +272,11 @@ void dense_layer_forwarding(dense_layer_t *layer) {
 }
 
 void softmax_layer_forwarding(softmax_layer_t *layer) {
+  if(layer->input->height != layer->output->height || layer->input->width != layer->output->width || 
+  layer->input->depth != layer->output->depth){
+    return;
+  }
+
   matrix2d_t in_slice = {0};
   matrix2d_t out_slice = {0};
   for (int i = 0; i < layer->input->depth; i++) {
@@ -283,6 +288,10 @@ void softmax_layer_forwarding(softmax_layer_t *layer) {
 }
 
 void pool_layer_forwarding(pool_layer_t *layer) {
+  if(layer->input->depth != layer->output->depth){
+    return;
+  }
+  
   matrix2d_t in_slice = {0};
   matrix2d_t out_slice = {0};
   for (int i = 0; i < layer->input->depth; i++) {

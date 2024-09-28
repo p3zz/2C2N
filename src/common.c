@@ -84,6 +84,10 @@ void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
 void mean_squared_error_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
+  if(output->height != target_output->height || output->width != target_output->width){
+    return;
+  }
+
   for (int i = 0; i < output->height; i++) {
     for (int j = 0; j < output->width; j++) {
       float out_val = matrix2d_get_elem(output, i, j);
@@ -97,6 +101,11 @@ void mean_squared_error_derivative(const matrix2d_t *const output,
 void cross_entropy_loss_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
+  
+  if(output->height != target_output->height || output->width != target_output->width){
+    return;
+  }
+
   for (int i = 0; i < output->height; i++) {
     for (int j = 0; j < output->width; j++) {
       float n0 = 1 - matrix2d_get_elem(target_output, i, j);
@@ -116,6 +125,11 @@ void cross_entropy_loss_derivative(const matrix2d_t *const output,
 
 float mean_squared_error(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
+  
+  if(output->height != target_output->height || output->width != target_output->width){
+    return 0.f;
+  }
+
   float sum = 0.f;
   for (int i = 0; i < output->height; i++) {
     for (int j = 0; j < output->width; j++) {
@@ -129,6 +143,11 @@ float mean_squared_error(const matrix2d_t *const output,
 
 float cross_entropy_loss(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
+  
+  if(output->height != target_output->height || output->width != target_output->width){
+    return 0.f;
+  }
+
   float sum = 0.f;
   for (int i = 0; i < output->height; i++) {
     for (int j = 0; j < output->width; j++) {
