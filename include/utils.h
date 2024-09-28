@@ -1,7 +1,7 @@
 /**
- * @brief This library provides useful functions used in Convolutional Neural Networks (CNNs),
- * such as activation functions and their derivative, the gradient descent computations and
- * a float number generator
+ * @brief This library provides useful functions used in Convolutional Neural
+ * Networks (CNNs), such as activation functions and their derivative, the
+ * gradient descent computations and a float number generator
  */
 
 #ifndef __UTILS_H__
@@ -32,7 +32,8 @@ typedef enum { POOLING_TYPE_AVERAGE, POOLING_TYPE_MAX } pooling_type;
 float sigmoid(float x);
 
 /**
- * @brief Compute the output of the derivative of the sigmoid function w.r.t. the input.
+ * @brief Compute the output of the derivative of the sigmoid function w.r.t.
+ * the input.
  * @param x: the input value
  * @return the result
  */
@@ -46,14 +47,16 @@ float sigmoid_derivative(float x);
 float relu(float x);
 
 /**
- * @brief Compute the output of the derivative of the ReLU function w.r.t. the input.
+ * @brief Compute the output of the derivative of the ReLU function w.r.t. the
+ * input.
  * @param x: the input value
  * @return the result
  */
 float relu_derivative(float x);
 
 /**
- * @brief Compute the gradient descent of an input value using the slope rate and the error.
+ * @brief Compute the gradient descent of an input value using the slope rate
+ * and the error.
  * @param x: the input value
  * @param rate: the slope
  * @param dx: the error
@@ -76,7 +79,8 @@ float generate_random(void);
 float activate(float x, activation_type type);
 
 /**
- * @brief Compute the activated value of the input using the derivative of a given activation type w.r.t. the input
+ * @brief Compute the activated value of the input using the derivative of a
+ * given activation type w.r.t. the input
  * @param x: the input value
  * @param type: the activation type
  * @return the result
@@ -84,7 +88,8 @@ float activate(float x, activation_type type);
 float d_activate(float x, activation_type type);
 
 /**
- * @brief Compute the height and width of a 2D matrix that represent the result of a convolution
+ * @brief Compute the height and width of a 2D matrix that represent the result
+ * of a convolution
  * @param input_height: the height of the input matrix
  * @param input_width: the width of the input matrix
  * @param kernel_size: the length of the kernel side

@@ -2,9 +2,8 @@
 #include "math.h"
 #include "stdlib.h"
 
-void cross_correlation(const matrix2d_t *const m1,
-                            const matrix2d_t *const m2,
-                            matrix2d_t *const result, int padding, int stride) {
+void cross_correlation(const matrix2d_t *const m1, const matrix2d_t *const m2,
+                       matrix2d_t *const result, int padding, int stride) {
   for (int i = 0; i < result->height; i++) {
     for (int j = 0; j < result->width; j++) {
       float sum = 0;

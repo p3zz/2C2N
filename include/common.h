@@ -1,6 +1,6 @@
 /**
- * @brief This library provides a basic implementation of the most common operations performed in Convolutional Neural Networks (CNNs),
- * such as:
+ * @brief This library provides a basic implementation of the most common
+ * operations performed in Convolutional Neural Networks (CNNs), such as:
  * - Cross-correlation
  * - Convolution
  * - Max/Average pooling
@@ -21,9 +21,8 @@
  * @param padding: padding used to perform the cross-correlation
  * @param stride: stride used to perform the cross-correlation
  */
-void cross_correlation(const matrix2d_t *const m1,
-                            const matrix2d_t *const m2, matrix2d_t *result,
-                            int padding, int stride);
+void cross_correlation(const matrix2d_t *const m1, const matrix2d_t *const m2,
+                       matrix2d_t *result, int padding, int stride);
 
 /**
  * @brief Perform the convolution between two 2D matrices,
@@ -52,8 +51,8 @@ void max_pooling(const matrix2d_t *const input, const matrix2d_t *const output,
                  int stride);
 
 /**
- * @brief Perform the average pooling of a 2D input matrix using a squared kernel,
- * and stores the result inside a 2D result matrix.
+ * @brief Perform the average pooling of a 2D input matrix using a squared
+ * kernel, and stores the result inside a 2D result matrix.
  * @param input: pointer to the input matrix
  * @param output: pointer to the output matrix
  * @param kernel_size: length of the kernel side
@@ -84,7 +83,8 @@ float mean_squared_error(const matrix2d_t *const output,
                          const matrix2d_t *const target_output);
 
 /**
- * @brief Compute the derivative of a 2D input matrix w.r.t. the cross entropy loss
+ * @brief Compute the derivative of a 2D input matrix w.r.t. the cross entropy
+ * loss
  * @param m: pointer to the input matrix
  * @param target: pointer to the target matrix
  * @param result: pointer to the derivative matrix
@@ -94,7 +94,8 @@ void cross_entropy_loss_derivative(const matrix2d_t *const m,
                                    const matrix2d_t *const target,
                                    const matrix2d_t *const result);
 /**
- * @brief Compute the derivative of a 2D input matrix w.r.t. the mean squared error
+ * @brief Compute the derivative of a 2D input matrix w.r.t. the mean squared
+ * error
  * @param m: pointer to the input matrix
  * @param target: pointer to the target matrix
  * @param result: pointer to the derivative matrix
