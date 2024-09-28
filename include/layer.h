@@ -48,9 +48,9 @@ typedef struct {
  * @brief Implementation of a pooling layer
  * @param input: pointer to the input of the layer. This is used during the feed-forward stage
  * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
- * @param indexes: pointer to multiple 3D matrices used to keep track of the indeces of the maximum values
+ * @param indexes: pointer to multiple 3D matrices used to keep track of the indexes of the maximum values
  * found during the feed-forward stage of a max pooling layer. For each slice of the output matrix, a 3D matrix
- * with depth = 2 (slice 0 to save row indeces, slice 1 to save column indeces) is used to keep track of the indeces
+ * with depth = 2 (slice 0 to save row indexes, slice 1 to save column indexes) is used to keep track of the indexes
  * of the values contained in the output matrix w.r.t. the input matrix.
  * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
  * @param kernel_size: the size of the kernel side (the pooling is performed using a squared kernel of size size*size)
@@ -139,6 +139,12 @@ void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int kernels_n,
                      int stride, int padding, activation_type activation_type);
 
+
+void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
+                            int kernels_n, matrix2d_t *biases,
+                            matrix3d_t *output, matrix3d_t *output_activated,
+                            matrix3d_t *d_input, int stride, int padding, activation_type activation_type);
+
 /**
  * @brief Feed a convolutional layer, and copy the content of a 3D matrix inside the "input"
  * member of the layer
@@ -183,6 +189,9 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type);
 
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *input, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+int kernel_size, int stride, int padding, pooling_type type);
+
 /**
  * @brief Feed a pooling layer, and copy the content of a 3D matrix inside the "input"
  * member of the layer
@@ -222,6 +231,11 @@ void pool_layer_destroy(pool_layer_t *layer);
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type);
 
+void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
+                             matrix2d_t *biases, matrix3d_t *output,
+                             matrix3d_t *output_activated,
+                             matrix3d_t *d_input, activation_type activation_type);
+
 /**
  * @brief Feed a dense layer, and copy the content of a 3D matrix inside the "input"
  * member of the layer
@@ -258,6 +272,9 @@ void dense_layer_destroy(dense_layer_t *layer);
  * @param input_n: length of the input
  */
 void softmax_layer_init(softmax_layer_t *layer, int input_n);
+
+void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *input, matrix3d_t *output,
+                            matrix3d_t *d_input);
 
 /**
  * @brief Feed a softmax layer, and copy the content of a 3D matrix inside the "input"

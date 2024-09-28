@@ -71,7 +71,7 @@ typedef struct {
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @return a non-mutable pointer to the cell if indeces belong to the matrix,
+ * @return a non-mutable pointer to the cell if indexes belong to the matrix,
  * otherwise NULL
  */
 const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,
@@ -81,7 +81,7 @@ const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @return a mutable pointer to the cell if indeces belong to the matrix,
+ * @return a mutable pointer to the cell if indexes belong to the matrix,
  * otherwise NULL
  */
 float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m, int row_idx,
@@ -91,7 +91,7 @@ float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m, int row_idx,
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @return the value of the cell if indeces belong to the matrix,
+ * @return the value of the cell if indexes belong to the matrix,
  * otherwise 0.f
  */
 float matrix2d_get_elem(const matrix2d_t *const m, int row_idx, int col_idx);
@@ -204,7 +204,7 @@ void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type);
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
  * @param z_idx: the index of the slice
- * @return a non-mutable pointer to the cell if the indeces belongs to the matrix,
+ * @return a non-mutable pointer to the cell if the indexes belongs to the matrix,
  * otherwise NULL
  */
 const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
@@ -216,7 +216,7 @@ const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
  * @param z_idx: the index of the slice
- * @return a mutable pointer to the cell if the indeces belongs to the matrix,
+ * @return a mutable pointer to the cell if the indexes belongs to the matrix,
  * otherwise NULL
  */
 float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m, int row_idx,
@@ -228,7 +228,7 @@ float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m, int row_idx,
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
  * @param z_idx: the index of the slice
- * @return the value of the cell if the indeces belongs to the matrix,
+ * @return the value of the cell if the indexes belongs to the matrix,
  * otherwise 0.f
  */
 float matrix3d_get_elem(const matrix3d_t *const m, int row_idx, int col_idx,

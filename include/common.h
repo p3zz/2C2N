@@ -42,7 +42,7 @@ void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
  * and stores the result inside a 2D result matrix.
  * @param input: pointer to the input matrix
  * @param output: pointer to the output matrix
- * @param indexes: pointer to the indeces matrix
+ * @param indexes: pointer to the indexes matrix
  * @param kernel_size: length of the kernel side
  * @param padding: padding used to perform the cross-correlation
  * @param stride: stride used to perform the cross-correlation

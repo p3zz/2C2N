@@ -5,6 +5,8 @@
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type) {
+  
+  /* check if input, kernel and stride are valid */
   if (input_width == 0 || input_height == 0 || input_depth == 0 ||
       kernel_size == 0 || stride == 0) {
     return;
@@ -16,11 +18,15 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
   layer->stride = stride;
   layer->type = type;
 
+  /* allocate input */
   layer->input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->input, input_height, input_width, input_depth);
+
+  /* allocate d_input */
   layer->d_input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->d_input, input_height, input_width, input_depth);
 
+  /* allocate output */
   int output_height = 0;
   int output_width = 0;
   compute_output_size(layer->input->height, layer->input->width, kernel_size,
@@ -29,12 +35,7 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
   layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->output, output_height, output_width, input_depth);
 
-  // if it's a max pooling layer, we need to keep track of the index of each
-  // element of the output matrix w.r.t. the input matrix for instance, if the
-  // first slice of the input has the max element of the kernel at (1,0), the
-  // first element of indexes will be a matrix3d with depth 2 (one for i, one
-  // for j)
-  // TODO finish the explaination
+  /* allocate indexes for max pooling layer */
   if (layer->type == POOLING_TYPE_MAX) {
     layer->indexes =
         (matrix3d_t *)malloc(layer->output->depth * sizeof(matrix3d_t));
@@ -44,11 +45,11 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
   }
 }
 
-// TODO move all the memory allocation here, except for the auxiliary structures
-// used in the process/backpropagation
 void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int kernels_n,
                      int stride, int padding, activation_type activation_type) {
+  
+  /* check if input, kernel and stride are valid */
   if (input_width == 0 || input_height == 0 || input_depth == 0 ||
       kernel_size == 0 || stride == 0) {
     return;
@@ -60,13 +61,15 @@ void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
   layer->stride = stride;
   layer->activation_type = activation_type;
 
-  // allocate input and d_input
+  /* allocate input */
   layer->input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->input, input_height, input_width, input_depth);
+  
+  /* allocate d_input */
   layer->d_input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->d_input, input_height, input_width, input_depth);
 
-  // allocate kernels
+  /* allocate kernels */
   layer->kernels = (matrix3d_t *)malloc(layer->kernels_n * sizeof(matrix3d_t));
 
   for (int i = 0; i < layer->kernels_n; i++) {
@@ -74,61 +77,83 @@ void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
     matrix3d_randomize(&layer->kernels[i]);
   }
 
+  /* allocate output */
   int output_height = 0;
   int output_width = 0;
 
   compute_output_size(layer->input->height, layer->input->width, kernel_size,
                       padding, stride, &output_height, &output_width);
+  
+  layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
+  matrix3d_init(layer->output, output_height, output_width, kernels_n);
 
-  // allocate biases
+  /* allocate output_activated */
+  layer->output_activated = (matrix3d_t *)malloc(sizeof(matrix3d_t));
+  matrix3d_init(layer->output_activated, output_height, output_width,
+                kernels_n);
+  
+  /* allocate biases */
   layer->biases = (matrix2d_t *)malloc(layer->kernels_n * sizeof(matrix2d_t));
   for (int i = 0; i < kernels_n; i++) {
     matrix2d_init(&layer->biases[i], output_height, output_width);
     matrix2d_randomize(&layer->biases[i]);
   }
-
-  // allocate output and d_output
-  layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
-  matrix3d_init(layer->output, output_height, output_width, kernels_n);
-  layer->output_activated = (matrix3d_t *)malloc(sizeof(matrix3d_t));
-  matrix3d_init(layer->output_activated, output_height, output_width,
-                kernels_n);
+  
 }
 
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type) {
   layer->loaded = false;
+  layer->activation_type = activation_type;
+
+  /* allocate input */
   layer->input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->input, 1, input_n, 1);
+  
+  /* allocate d_input */
   layer->d_input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->d_input, 1, input_n, 1);
+  
+  /* allocate weights */
   layer->weights = (matrix2d_t *)malloc(sizeof(matrix2d_t));
   matrix2d_init(layer->weights, input_n, output_n);
   matrix2d_randomize(layer->weights);
+  
+  /* allocate biases */
   layer->biases = (matrix2d_t *)malloc(sizeof(matrix2d_t));
   matrix2d_init(layer->biases, 1, output_n);
   matrix2d_randomize(layer->biases);
+  
+  /* allocate output */
   layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->output, 1, output_n, 1);
+  
+  /* allocate output_activated */
   layer->output_activated = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->output_activated, 1, output_n, 1);
-  layer->activation_type = activation_type;
 }
 
 void softmax_layer_init(softmax_layer_t *layer, int input_n) {
   layer->loaded = false;
+  
+  /* allocate input */
   layer->input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->input, 1, input_n, 1);
-  layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
-  matrix3d_init(layer->output, 1, input_n, 1);
+  
+  /* allocate d_input */
   layer->d_input = (matrix3d_t *)malloc(sizeof(matrix3d_t));
   matrix3d_init(layer->d_input, 1, input_n, 1);
+  
+  /* allocate output */
+  layer->output = (matrix3d_t *)malloc(sizeof(matrix3d_t));
+  matrix3d_init(layer->output, 1, input_n, 1);
+  
 }
 
 void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
                             int kernels_n, matrix2d_t *biases,
                             matrix3d_t *output, matrix3d_t *output_activated,
-                            matrix3d_t *d_input) {
+                            matrix3d_t *d_input, int stride, int padding, activation_type activation_type) {
   layer->loaded = true;
   layer->kernels = kernels;
   layer->kernels_n = kernels_n;
@@ -136,28 +161,47 @@ void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
   layer->output = output;
   layer->output_activated = output_activated;
   layer->d_input = d_input;
+  layer->stride = stride;
+  layer->padding = padding;
+  layer->activation_type = activation_type;
 }
 
 void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
                              matrix2d_t *biases, matrix3d_t *output,
                              matrix3d_t *output_activated,
-                             matrix3d_t *d_input) {
+                             matrix3d_t *d_input, activation_type activation_type) {
   layer->loaded = true;
   layer->weights = weights;
   layer->biases = biases;
   layer->output = output;
   layer->output_activated = output_activated;
   layer->d_input = d_input;
+  layer->activation_type = activation_type;
 }
 
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output,
-                            matrix3d_t *d_input, matrix3d_t *indexes) {
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *input, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+int kernel_size, int stride, int padding, pooling_type type) {
+
   layer->loaded = true;
 
   if (layer->type == POOLING_TYPE_MAX) {
     layer->indexes = indexes;
   }
+  
+  layer->input = input;
+  layer->output = output;
+  layer->d_input = d_input;
+  layer->kernel_size = kernel_size;
+  layer->stride = stride;
+  layer->padding = padding;
+  layer->type = type;
+}
 
+void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *input, matrix3d_t *output,
+                            matrix3d_t *d_input) {
+  layer->loaded = true;
+
+  layer->input = input;
   layer->output = output;
   layer->d_input = d_input;
 }

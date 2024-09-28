@@ -145,32 +145,32 @@ float cross_entropy_loss(const matrix2d_t *const output,
   return -sum / output->width;
 }
 
-void parse_line(char *line, int length, matrix2d_t *image, float *label) {
-  char n[4] = {0};
-  int n_idx = 0;
-  int numbers_n = 0;
-  bool label_read = false;
-  for (int i = 0; i < length; i++) {
-    // check if numbers length exceeds the capacity of the image matrix
-    if (numbers_n == image->height * image->width) {
-      break;
-    }
-    if (line[i] == ',' || i == length - 1) {
-      n[n_idx] = '\0';
-      float val = atof(n);
-      if (!label_read) {
-        *label = val;
-        label_read = true;
-      } else {
-        int row = numbers_n / image->width;
-        int col = numbers_n % image->width;
-        matrix2d_set_elem(image, row, col, val);
-        numbers_n++;
-      }
-      n_idx = 0;
-    } else {
-      n[n_idx] = line[i];
-      n_idx++;
-    }
-  }
-}
+// void parse_line(char *line, int length, matrix2d_t *image, float *label) {
+//   char n[4] = {0};
+//   int n_idx = 0;
+//   int numbers_n = 0;
+//   bool label_read = false;
+//   for (int i = 0; i < length; i++) {
+//     // check if numbers length exceeds the capacity of the image matrix
+//     if (numbers_n == image->height * image->width) {
+//       break;
+//     }
+//     if (line[i] == ',' || i == length - 1) {
+//       n[n_idx] = '\0';
+//       float val = atof(n);
+//       if (!label_read) {
+//         *label = val;
+//         label_read = true;
+//       } else {
+//         int row = numbers_n / image->width;
+//         int col = numbers_n % image->width;
+//         matrix2d_set_elem(image, row, col, val);
+//         numbers_n++;
+//       }
+//       n_idx = 0;
+//     } else {
+//       n[n_idx] = line[i];
+//       n_idx++;
+//     }
+//   }
+// }
