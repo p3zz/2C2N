@@ -1,5 +1,5 @@
 /**
- * This library provides a basic implementation of a 2D/3D matrix, along with the most common
+ * @brief library provides a basic implementation of a 2D/3D matrix, along with the most common
  * manipulation/computation functions used in Convolutional Neural Networks (CNNs).
  * Every function (except for initialization functions) has been implemented such that every operation is performed
  * in place, without the need to use auxiliary dinamically allocated structures. This can save space and perform a

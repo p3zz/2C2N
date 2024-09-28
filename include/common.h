@@ -1,5 +1,5 @@
 /**
- * This library provides a basic implementation of the most common operations performed in Convolutional Neural Networks (CNNs),
+ * @brief This library provides a basic implementation of the most common operations performed in Convolutional Neural Networks (CNNs),
  * such as:
  * - Cross-correlation
  * - Convolution

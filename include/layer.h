@@ -1,5 +1,5 @@
 /**
- * This library provides a basic implementation of the most common layers used in Convolutional Neural Networks (CNNs),
+ * @brief This library provides a basic implementation of the most common layers used in Convolutional Neural Networks (CNNs),
  * such as convolutional layers, dense layers and pooling layers.
  * For each type of layer, the library provides a common interface to perform the main operations used in CNN, such as:
  * - Feeding
