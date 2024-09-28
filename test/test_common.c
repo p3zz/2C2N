@@ -355,51 +355,6 @@ void test_common_avg_pooling(void){
     matrix2d_destroy(&result);
 }
 
-void test_common_matrix2d_reshape(void){
-    matrix2d_t m = {0};
-    matrix2d_t result = {0};
-
-    float m_values[] = {
-        4.f, 3.f, 8.f,
-        9.f, 1.f, 2.f,
-    };
-    matrix2d_load(&m, 2, 3, &m_values[0]);
-
-    matrix2d_reshape(&m, &result, 3, 2);
-    TEST_ASSERT_EQUAL_INT(3, result.height);
-    TEST_ASSERT_EQUAL_INT(2, result.width);
-    TEST_ASSERT_EQUAL_FLOAT(4.f, matrix2d_get_elem(&result, 0, 0));
-    TEST_ASSERT_EQUAL_FLOAT(3.f, matrix2d_get_elem(&result, 0, 1));
-    TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 1, 0));
-    TEST_ASSERT_EQUAL_FLOAT(9.f, matrix2d_get_elem(&result, 1, 1));
-    TEST_ASSERT_EQUAL_FLOAT(1.f, matrix2d_get_elem(&result, 2, 0));
-    TEST_ASSERT_EQUAL_FLOAT(2.f, matrix2d_get_elem(&result, 2, 1));
-
-    matrix2d_destroy(&result);
-}
-
-void test_common_matrix2d_reshape_2(void){
-    matrix2d_t m = {0};
-    matrix2d_t result = {0};
-
-    float m_values[] = {
-        4.f, 3.f, 8.f,
-        9.f, 1.f, 2.f,
-        7.f, 7.f, 6.f
-    };
-    matrix2d_load(&m, 3, 3, &m_values[0]);
-
-    matrix2d_reshape(&m, &result, 1, 9);
-    TEST_ASSERT_EQUAL_INT(1, result.height);
-    TEST_ASSERT_EQUAL_INT(9, result.width);
-    TEST_ASSERT_EQUAL_FLOAT(4.f, matrix2d_get_elem(&result, 0, 0));
-    TEST_ASSERT_EQUAL_FLOAT(1.f, matrix2d_get_elem(&result, 0, 4));
-    TEST_ASSERT_EQUAL_FLOAT(7.f, matrix2d_get_elem(&result, 0, 6));
-    TEST_ASSERT_EQUAL_FLOAT(6.f, matrix2d_get_elem(&result, 0, 8));
-
-    matrix2d_destroy(&result);
-}
-
 void test_common_matrix3d_reshape(void){
     matrix3d_t m = {0};
     matrix3d_t result = {0};
@@ -522,8 +477,6 @@ int main(void)
     RUN_TEST(test_common_cross_correlation_padding_stride);
     RUN_TEST(test_common_max_pooling);
     RUN_TEST(test_common_avg_pooling);
-    RUN_TEST(test_common_matrix2d_reshape);
-    RUN_TEST(test_common_matrix2d_reshape_2);
     RUN_TEST(test_common_matrix3d_reshape);
     RUN_TEST(test_common_matrix3d_reshape_2);
     RUN_TEST(test_common_matrix2d_softmax_inplace);

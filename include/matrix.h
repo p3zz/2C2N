@@ -1,9 +1,28 @@
+/**
+ * This library provides a basic implementation of a 2D/3D matrix, along with the most common
+ * manipulation/computation functions mainly used in Convolutional Neural Networks (CNNs).
+ */
+
 #ifndef __MATRIX_H__
 #define __MATRIX_H__
 
 #include "stdbool.h"
 #include "utils.h"
 
+/**
+ * @struct matrix2d_t
+ * @brief Implementation of a 2D matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ * @param values: linear array that stores the data of the matrix.
+ * the data must be stored such that each row is stored consecutively
+ * in memory, with one row directly following the previous one. 
+ * @param loaded: flag used to keep track of the origin of the data.
+ * e.g. if loaded is true, the pointer to the data has been externally set from
+ * a caller of matrix2d_load(matrix2d_t *m, int height, int width),
+ * while false means that the data has been dinamically allocated by 
+ * the matrix2d_init(matrix2d_t *m, int height, int width)
+*/
 typedef struct {
   int height;
   int width;
@@ -11,6 +30,25 @@ typedef struct {
   bool loaded;
 } matrix2d_t;
 
+/**
+ * @struct matrix3d_t
+ * Implementation of a 3D matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ * @param depth: n. of slices of the matrix
+ * @param values: linear array that stores the data of the matrix.
+ * the data must be stored such that each row is stored consecutively
+ * in memory, with one row directly following the previous one.
+ * @param loaded: flag used to keep track of the origin of the data.
+ * e.g. if loaded is true, the pointer to the data has been set from
+ * a caller of matrix3d_load(matrix3d_t *m, int height, int width, int depth).
+ * In this case, the caller has the duty to free the pointed data (if dinamically
+ * allocated, otherwise in statically allocated do nothing),
+ * while false means that the data has been dinamically allocated by 
+ * the matrix3d_init(matrix2d_t *m, int height, int width).
+ * In this case, the caller needs to call matrix3d_destroy(matrix3d_t* m) in order
+ * to free the matrix
+*/
 typedef struct {
   int height;
   int width;
@@ -19,51 +57,187 @@ typedef struct {
   bool loaded;
 } matrix3d_t;
 
-// matrix2d
+
+/**
+ * @brief Returns a non-mutable pointer to a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return a non-mutable pointer to the cell if the indeces belongs to the matrix,
+ * otherwise NULL
+ */
 const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,
                                       int col_idx);
+/**
+ * @brief Returns a mutable pointer to a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return a mutable pointer to the cell if the indeces belongs to the matrix,
+ * otherwise NULL
+ */
 float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m, int row_idx,
                                     int col_idx);
+/**
+ * @brief Returns the value of a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return the value of the cell if the indeces belongs to the matrix,
+ * otherwise 0.f
+ */
 float matrix2d_get_elem(const matrix2d_t *const m, int row_idx, int col_idx);
+
+/**
+ * @brief Returns the value of a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return the value of the cell
+ */
 void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
                        float value);
+
+/**
+ * @brief Initialize the 2D matrix. The data of the matrix is dinamically allocated
+ * and its length will be equal to (height * width)
+ * @param m: the target matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ */
 void matrix2d_init(matrix2d_t *m, int height, int width);
+
+/**
+ * @brief Destroy the 2D matrix. The data will be deallocated only if "loaded" is set
+ * to false, otherwise does nothing
+ * @param m: the target matrix
+ */
 void matrix2d_destroy(const matrix2d_t *m);
-void matrix2d_print(const matrix2d_t *const m);
-void matrix2d_sum_inplace(const matrix2d_t *const m,
-                          const matrix2d_t *const result);
-void matrix2d_relu(const matrix2d_t *const m, matrix2d_t *result);
-void matrix2d_relu_inplace(const matrix2d_t *const m);
-void matrix2d_sigmoid(const matrix2d_t *const m, matrix2d_t *result);
-void matrix2d_sigmoid_inplace(const matrix2d_t *const m);
-void matrix2d_copy(const matrix2d_t *const input, matrix2d_t *output);
-void matrix2d_copy_inplace(const matrix2d_t *const input,
-                           const matrix2d_t *output);
-void matrix2d_randomize(matrix2d_t *input);
-void matrix2d_rotate180(const matrix2d_t *const input, matrix2d_t *output);
-void matrix2d_rotate180_inplace(const matrix2d_t *const input);
-void matrix2d_submatrix(const matrix2d_t *const input, matrix2d_t *output,
-                        int row_start, int row_end, int col_start, int col_end);
-void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
-                                           const matrix2d_t *const m2);
-void matrix2d_erase(matrix2d_t *input);
-void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int height,
-                      int width);
-void matrix2d_tanh_inplace(const matrix2d_t *const m);
-void matrix2d_softmax_inplace(const matrix2d_t *const m);
+
+/**
+ * @brief Initialize the 2D matrix. The data of the matrix is set through the base_address
+ * @param m: the target matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ * @param base_address: an existing memory address which will be the starting address
+ * of the data of the target matrix
+ */
 void matrix2d_load(matrix2d_t *m, int height, int width,
                    float *const base_address);
+/**
+ * @brief Write to stdout the 2D matrix in a rectangle-shaped form.
+ * e.g. if the matrix is 3x2, and the data is {1.f, 2.f, 3,f, 4.f, 5.f, 6.f},
+ * the function will print:
+ * | 1.f | 2.f |
+ * | 3.f | 4.f |
+ * | 5.f | 6.f |
+ * @param m: the target matrix
+ */
+void matrix2d_print(const matrix2d_t *const m);
+
+/**
+ * @brief Performs the element-wise sum of two 2D matrices, and stores
+ * the result inside the 2nd matrix
+ * @param m1: the first matrix
+ * @param m2: the second matrix, in which the result will be stored
+ */
+void matrix2d_sum_inplace(const matrix2d_t *const m1,
+                          const matrix2d_t *const m2);
+
+/**
+ * @brief Copy the "values" of the input matrix inside the output matrix.
+ * The output matrix must be allocated before calling this function
+ * @param input: the first matrix
+ * @param output: the second matrix, in which the result will be stored
+ */
+void matrix2d_copy_inplace(const matrix2d_t *const input,
+                           const matrix2d_t *output);
+/**
+ * @brief Randomize the content of the matrix.
+ * @param input: the target matrix
+ */
+void matrix2d_randomize(matrix2d_t *input);
+
+/**
+ * @brief Perform a 180° rotation of the input matrix.
+ * @param input: the target matrix
+ */
+void matrix2d_rotate180_inplace(const matrix2d_t *const input);
+
+/**
+ * @brief Performs an element-wise product between two 2D matrices, and stores the
+ * result inside the 1st matrix
+ * @param m1: the 1st matrix, in which the result will be stored
+ * @param m2: the 2nd matrix
+ */
+void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
+                                           const matrix2d_t *const m2);
+
+/**
+ * @brief Performs a softmax operation of the input matrix, and stores the
+ * result inside the same matrix. The function first performs a normalization
+ * of the content of the matrix.
+ * @param input: the target matrix
+ */
+void matrix2d_softmax_inplace(const matrix2d_t *const input);
+
+/**
+ * @brief Performs an element-wise activation operation of the input matrix, and stores the
+ * result inside the same matrix.
+ * @param input: the target matrix
+ * @param type: the activation type
+ */
 void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type);
 
-// matrix3d
+/**
+ * @brief Returns a non-mutable pointer to a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return a non-mutable pointer to the cell if the indeces belongs to the matrix,
+ * otherwise NULL
+ */
 const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
                                       int col_idx, int z_idx);
+
+/**
+ * @brief Returns a mutable pointer to a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return a mutable pointer to the cell if the indeces belongs to the matrix,
+ * otherwise NULL
+ */
 float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m, int row_idx,
                                     int col_idx, int z_idx);
+
+/**
+ * @brief Returns the value of a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return the value of the cell if the indeces belongs to the matrix,
+ * otherwise 0.f
+ */
 float matrix3d_get_elem(const matrix3d_t *const m, int row_idx, int col_idx,
                         int z_idx);
+
+/**
+ * @brief Returns the value of a specific cell of the matrix
+ * @param m: the target matrix
+ * @param row_idx: the index of the row
+ * @param col_idx: the index of the column
+ * @return the value of the cell
+ */
 void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
                        int z_idx, float value);
+
+/**
+ * @brief Retrieve a slice at a specific index of a 3D input matrix and stores it in the result 2D matrix
+ * @param m: the target matrix
+ * @param result: the 2D matrix in which the slice will be stored
+ * @param z_idx: the index of the slice
+ */
 void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
                                    int z_idx);
 void matrix3d_init(matrix3d_t *m, int height, int width, int depth);

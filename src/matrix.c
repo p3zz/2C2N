@@ -230,11 +230,11 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
   }
 }
 
-void matrix2d_sum_inplace(const matrix2d_t *const m,
-                          const matrix2d_t *const result) {
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      *matrix2d_get_elem_as_mut_ref(result, i, j) += matrix2d_get_elem(m, i, j);
+void matrix2d_sum_inplace(const matrix2d_t *const m1,
+                          const matrix2d_t *const m2) {
+  for (int i = 0; i < m1->height; i++) {
+    for (int j = 0; j < m1->width; j++) {
+      *matrix2d_get_elem_as_mut_ref(m2, i, j) += matrix2d_get_elem(m1, i, j);
     }
   }
 }
@@ -255,21 +255,6 @@ void matrix3d_print(const matrix3d_t *const m) {
     printf("[Layer %d]\n", i);
     matrix3d_get_slice_as_mut_ref(m, &slice, i);
     matrix2d_print(&slice);
-  }
-}
-
-void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int height,
-                      int width) {
-  int m_elems_n = m->height * m->width;
-  int result_elems_n = height * width;
-  if (m_elems_n != result_elems_n) {
-    return;
-  }
-  matrix2d_init(result, height, width);
-  for (int i = 0; i < result_elems_n; i++) {
-    *matrix2d_get_elem_as_mut_ref(result, i / result->width,
-                                  i % result->width) =
-        matrix2d_get_elem(m, i / m->width, i % m->width);
   }
 }
 
