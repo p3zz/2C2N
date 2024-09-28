@@ -212,8 +212,10 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
     }
   }
 
-  // Calculate the exponentials of each input element and the sum of
-  // exponentials
+  /*
+  calculate the exponentials of each input element and the sum of
+  exponentials
+  */
   for (int i = 0; i < m->height; i++) {
     for (int j = 0; j < m->width; j++) {
       float *m_val = matrix2d_get_elem_as_mut_ref(m, i, j);
@@ -222,7 +224,9 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
     }
   }
 
-  // Normalize the values to make the sum equal to 1 (probabilities)
+  /*
+  Normalize the values to make the sum equal to 1 (probabilities)
+  */
   for (int i = 0; i < m->height; i++) {
     for (int j = 0; j < m->width; j++) {
       *matrix2d_get_elem_as_mut_ref(m, i, j) /= sum;
@@ -232,6 +236,10 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
 
 void matrix2d_sum_inplace(const matrix2d_t *const m1,
                           const matrix2d_t *const m2) {
+  if(m1->height != m2->height || m1->width != m2->width){
+    return;
+  }
+
   for (int i = 0; i < m1->height; i++) {
     for (int j = 0; j < m1->width; j++) {
       *matrix2d_get_elem_as_mut_ref(m2, i, j) += matrix2d_get_elem(m1, i, j);

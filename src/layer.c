@@ -319,25 +319,30 @@ void conv_layer_forwarding(conv_layer_t *layer) {
 
   matrix2d_init(&result, layer->output->height, layer->output->width);
 
+  /* for each kernel */
   for (int i = 0; i < layer->kernels_n; i++) {
     matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
     matrix3d_get_slice_as_mut_ref(layer->output_activated, &out_act_slice, i);
 
+    /* for each slice of the kernel */
     for (int j = 0; j < layer->kernels[i].depth; j++) {
       matrix3d_get_slice_as_mut_ref(&layer->kernels[i], &kernel_slice, j);
       matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, j);
-      // compute the cross correlation between a channel of the input and its
-      // corresponding kernel
+      /*
+      compute the cross correlation between a channel of the input and its
+      corresponding kernel
+      */ 
       cross_correlation(&in_slice, &kernel_slice, &result, layer->padding,
                         layer->stride);
       if (j == 0) {
-        // perform an early sum of the biases to the final output layer
+        /* perform an early sum of the biases to the final output layer */
         matrix2d_sum_inplace(&layer->biases[i], &out_slice);
       }
-      // then we sum the resulting matrix to the output
+      /* then we sum the resulting matrix to the output */
       matrix2d_sum_inplace(&result, &out_slice);
     }
     matrix2d_copy_content(&out_slice, &out_act_slice);
+    /* activate the output */
     matrix2d_activate_inplace(&out_act_slice, layer->activation_type);
   }
   matrix2d_destroy(&result);
@@ -346,31 +351,38 @@ void conv_layer_forwarding(conv_layer_t *layer) {
 /* ----------------------------------- BACKPROPAGATION
  * -----------------------------------*/
 
-// the input is the derivative of the cost w.r.t the output, coming from the
-// next layer the output if the derivative of the input, that has to be passed
-// to the previous layer https://www.youtube.com/watch?v=AbLvJVwySEo
 void dense_layer_backpropagation(dense_layer_t *layer,
                                  const matrix3d_t *const input,
                                  float learning_rate) {
+  float d_input = 0.f;
+  float common = 0.f;
+  float d_weight = 0.f;
+  float weight_new = 0.f;
+  float bias_new = 0.f;
+
   for (int i = 0; i < layer->weights->height; i++) {
-    float d_input = 0.f;
+    d_input = 0.f;
     for (int j = 0; j < layer->weights->width; j++) {
-      // d_actf(z_j) * d_act
-      float common = d_activate(matrix3d_get_elem(layer->output, 0, j, 0),
+      /* compute d_actf(z_j) * d_act */
+      common = d_activate(matrix3d_get_elem(layer->output, 0, j, 0),
                                 layer->activation_type) *
                      matrix3d_get_elem(input, 0, j, 0);
-      // compute d_weight
-      // dC/dw_ij = x_i * d_actf(z_j) * d_act
-      float d_weight = matrix3d_get_elem(layer->input, 0, i, 0) * common;
+      /*
+      compute d_weight
+      dC/dw_ij = x_i * d_actf(z_j) * d_act
+      */ 
+      d_weight = matrix3d_get_elem(layer->input, 0, i, 0) * common;
 
-      // compute d_input
+      /* compute d_input += w_ij * d_actf(z_j) * d_act */
       d_input += (matrix2d_get_elem(layer->weights, i, j) * common);
 
-      float weight_new = gradient_descent(
+      /* correct the weight */
+      weight_new = gradient_descent(
           matrix2d_get_elem(layer->weights, i, j), learning_rate, d_weight);
       matrix2d_set_elem(layer->weights, i, j, weight_new);
 
-      float bias_new = gradient_descent(matrix2d_get_elem(layer->biases, 0, j),
+      /* correct the bias */
+      bias_new = gradient_descent(matrix2d_get_elem(layer->biases, 0, j),
                                         learning_rate, common);
       matrix2d_set_elem(layer->biases, 0, j, bias_new);
     }
@@ -382,13 +394,15 @@ void softmax_layer_backpropagation(softmax_layer_t *layer,
                                    const matrix3d_t *const input) {
   matrix2d_t aux = {0};
   matrix2d_t sample = {0};
+  float aux_val = 0.f;
+
   matrix3d_get_slice_as_mut_ref(layer->output, &sample, 0);
 
   matrix2d_init(&aux, layer->output->width, layer->output->width);
 
   for (int i = 0; i < sample.width; i++) {
     for (int j = 0; j < sample.width; j++) {
-      float aux_val = 0.f;
+      aux_val = 0.f;
       if (i == j) {
         aux_val = matrix2d_get_elem(&sample, 0, i) *
                   (1 - matrix2d_get_elem(&sample, 0, i));
@@ -437,17 +451,19 @@ void pool_layer_backpropagation(pool_layer_t *layer,
     for (int l = 0; l < layer->output->depth; l++) {
       for (int h = 0; h < layer->output->height; h++) {
         for (int w = 0; w < layer->output->width; w++) {
-          // The gradient from the output for this pooled region
+          /* the gradient from the output for this pooled region */
           float gradient = matrix3d_get_elem(input, h, w, l);
 
-          // Distribute the gradient to each input element in the pooling region
+          /* distribute the gradient to each input element in the pooling region */
           for (int i = 0; i < layer->kernel_size; i++) {
             for (int j = 0; j < layer->kernel_size; j++) {
               int input_h = h * layer->stride + i;
               int input_w = w * layer->stride + j;
 
-              // Ensure we're within bounds (important for cases where pooling
-              // window goes out of input bounds)
+              /*
+              Ensure we're within bounds (important for cases where pooling
+              window goes out of input bounds)
+              */
               if (input_h < layer->input->height &&
                   input_w < layer->input->width) {
                 *matrix3d_get_elem_as_mut_ref(layer->d_input, input_h, input_w,
@@ -468,16 +484,20 @@ void pool_layer_backpropagation(pool_layer_t *layer,
 void conv_layer_backpropagation(conv_layer_t *layer,
                                 const matrix3d_t *const input,
                                 float learning_rate) {
-  // matrix used to store the product (element x element) between the input and
-  // the derivative of the activation function of each output of the layer
+  /* matrix used to store the product (element x element) between the input and 
+  the derivative of the activation function of each output of the layer
+  */
   matrix2d_t d_output = {0};
-  // allocate memory for d_kernel, that is the matrix that contains the
-  // correction that has to be applied to the weights of the kernels after the
-  // whole computation
+  /* allocate memory for d_kernel, that is the matrix that contains the
+  correction that has to be applied to the weights of the kernels after the
+  whole computation
+  */ 
   matrix3d_t *d_kernel =
       (matrix3d_t *)malloc(layer->kernels_n * sizeof(matrix3d_t));
-  // matrix used to store the result of each convolution between the input (from
-  // the next layer) and the kernel
+  /*
+  matrix used to store the result of each convolution between the input (from
+  the next layer) and the kernel
+  */ 
   matrix2d_t d_input_aux = {0};
 
   matrix2d_t in_slice = {0};
@@ -494,7 +514,7 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 
   matrix2d_init(&d_input_aux, layer->d_input->height, layer->d_input->width);
 
-  // for each kernel of the layer
+  /* for each kernel of the layer compute the derivative of the activation function w.r.t. the output */
   for (int i = 0; i < layer->kernels_n; i++) {
     for (int m = 0; m < d_output.height; m++) {
       for (int n = 0; n < d_output.width; n++) {
@@ -507,9 +527,9 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 
     matrix2d_element_wise_product_inplace(&d_output, &in_slice);
 
-    // for each layer of the current kernel compute the derivative
-    // using the cross correlation between the j-th input and the i-th output
-    // (rotated)
+    /* for each layer of the current kernel compute the derivative
+    using the cross correlation between the j-th input and the i-th output
+    */
     matrix3d_t *kernel = &layer->kernels[i];
     for (int j = 0; j < kernel->depth; j++) {
       matrix3d_get_slice_as_mut_ref(input, &in_slice, j);
@@ -517,17 +537,16 @@ void conv_layer_backpropagation(conv_layer_t *layer,
       matrix3d_get_slice_as_mut_ref(kernel, &kernel_slice, j);
       matrix3d_get_slice_as_mut_ref(layer->d_input, &d_input_slice, j);
 
-      // compute the derivative for the correction of the kernel
-      // TODO correct also we the stride
+      /* compute the derivative for the correction of the kernel */
       cross_correlation(&in_slice, &d_output, &d_kernel_slice, layer->padding,
                         1);
-      // compute the derivative for the correction of the input
+      /* compute the derivative for the correction of the input */
       convolution(&d_output, &kernel_slice, &d_input_aux,
                   kernel->height - input->height + 1, 1);
       matrix2d_sum_inplace(&d_input_aux, &d_input_slice);
     }
 
-    // update biases
+    /* correct biases */ 
     for (int m = 0; m < d_output.height; m++) {
       for (int n = 0; n < d_output.height; n++) {
         *matrix2d_get_elem_as_mut_ref(&layer->biases[i], m, n) =
@@ -537,7 +556,7 @@ void conv_layer_backpropagation(conv_layer_t *layer,
     }
   }
 
-  // update weights
+  /* correct weights */ 
   for (int i = 0; i < layer->kernels_n; i++) {
     for (int j = 0; j < layer->kernels[i].depth; j++) {
       for (int m = 0; m < layer->kernels[i].height; m++) {
@@ -551,6 +570,7 @@ void conv_layer_backpropagation(conv_layer_t *layer,
     }
   }
 
+  /* free allocated matrices */ 
   for (int i = 0; i < layer->kernels_n; i++) {
     matrix3d_destroy(&d_kernel[i]);
   }
