@@ -1,6 +1,6 @@
 /**
  * This library provides a basic implementation of a 2D/3D matrix, along with the most common
- * manipulation/computation functions mainly used in Convolutional Neural Networks (CNNs).
+ * manipulation/computation functions used in Convolutional Neural Networks (CNNs).
  */
 
 #ifndef __MATRIX_H__
@@ -19,9 +19,13 @@
  * in memory, with one row directly following the previous one. 
  * @param loaded: flag used to keep track of the origin of the data.
  * e.g. if loaded is true, the pointer to the data has been externally set from
- * a caller of matrix2d_load(matrix2d_t *m, int height, int width),
+ * a caller of matrix2d_load(matrix2d_t *m, int height, int width).
+ * In this case, the caller has the duty to free the pointed data (if dinamically
+ * allocated, otherwise in statically allocated do nothing),
  * while false means that the data has been dinamically allocated by 
  * the matrix2d_init(matrix2d_t *m, int height, int width)
+ * In this case, the caller needs to call matrix3d_destroy(matrix3d_t* m) in order
+ * to free the matrix
 */
 typedef struct {
   int height;
@@ -93,14 +97,14 @@ float matrix2d_get_elem(const matrix2d_t *const m, int row_idx, int col_idx);
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @return the value of the cell
+ * @param value: the new value of the cell
  */
 void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
                        float value);
 
 /**
  * @brief Initialize the 2D matrix. The data of the matrix is dinamically allocated
- * and its length will be equal to (height * width)
+ * and its length will be equal to (height * width), and the "loaded" flag will be set to false
  * @param m: the target matrix
  * @param height: n. of rows of the matrix
  * @param width: n. of columns of the matrix
@@ -115,7 +119,8 @@ void matrix2d_init(matrix2d_t *m, int height, int width);
 void matrix2d_destroy(const matrix2d_t *m);
 
 /**
- * @brief Initialize the 2D matrix. The data of the matrix is set through the base_address
+ * @brief Initialize the 2D matrix. The data of the matrix is set through the base_address,
+ * and the "loaded" flag will be set to true
  * @param m: the target matrix
  * @param height: n. of rows of the matrix
  * @param width: n. of columns of the matrix
@@ -240,16 +245,67 @@ void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
  */
 void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
                                    int z_idx);
+
+/**
+ * @brief Initialize the 2D matrix. The data of the matrix is dinamically allocated
+ * and its length will be equal to (height * width)
+ * @param m: the target matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ */
 void matrix3d_init(matrix3d_t *m, int height, int width, int depth);
-void matrix3d_destroy(const matrix3d_t *m);
-void matrix3d_print(const matrix3d_t *const m);
-void matrix3d_erase(matrix3d_t *input);
-void matrix3d_copy(const matrix3d_t *const input, matrix3d_t *output);
-void matrix3d_copy_inplace(const matrix3d_t *const input,
-                           const matrix3d_t *output);
-void matrix3d_randomize(matrix3d_t *input);
-void matrix3d_reshape(const matrix3d_t *const m, matrix3d_t *result);
+
+/**
+ * @brief Initialize the 3D matrix. The data of the matrix is set through the base_address
+ * @param m: the target matrix
+ * @param height: n. of rows of the matrix
+ * @param width: n. of columns of the matrix
+ * @param depth: n. of slices of the matrix
+ * @param base_address: an existing memory address which will be the starting address
+ * of the data of the target matrix
+ */
 void matrix3d_load(matrix3d_t *m, int height, int width, int depth,
                    float *const base_address);
+
+/**
+ * @brief Destroy the 2D matrix. The data will be deallocated only if "loaded" is set
+ * to false, otherwise does nothing
+ * @param m: the target matrix
+ */
+void matrix3d_destroy(const matrix3d_t *m);
+
+/**
+ * @brief Write to stdout the 2D matrix in a rectangle-shaped form.
+ * e.g. if the matrix is 3x2, and the data is {1.f, 2.f, 3,f, 4.f, 5.f, 6.f},
+ * the function will print:
+ * | 1.f | 2.f |
+ * | 3.f | 4.f |
+ * | 5.f | 6.f |
+ * @param m: the target matrix
+ */
+void matrix3d_print(const matrix3d_t *const m);
+
+/**
+ * @brief Copy the "values" of the input matrix inside the output matrix.
+ * The output matrix must be allocated before calling this function
+ * @param input: the first matrix
+ * @param output: the second matrix, in which the result will be stored
+ */
+void matrix3d_copy_inplace(const matrix3d_t *const input,
+                           const matrix3d_t *output);
+
+/**
+ * @brief Randomize the content of the matrix.
+ * @param input: the target matrix
+ */
+void matrix3d_randomize(matrix3d_t *input);
+
+/**
+ * @brief Reshape the input matrix using the width/height/depth of the output matrix,
+ * and stores the values result into the output matrix
+ * @param input: the input matrix
+ * @param output: the output matrix, in which the result will be stored
+ */
+void matrix3d_reshape(const matrix3d_t *const input, matrix3d_t *output);
 
 #endif
