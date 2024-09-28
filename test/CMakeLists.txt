@@ -31,3 +31,15 @@ target_link_libraries(test_layer
 )
 
 add_test(test_layer test_layer)
+
+add_executable(test_matrix
+    test_matrix.c
+)
+
+target_link_libraries(test_matrix
+    c_cnn_framework
+    unity
+    m
+)
+
+add_test(test_matrix test_matrix)

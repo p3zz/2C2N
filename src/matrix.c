@@ -174,66 +174,6 @@ void matrix3d_destroy(const matrix3d_t *m) {
   }
 }
 
-void matrix2d_activate_inplace(const matrix2d_t *const m,
-                               activation_type type) {
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
-      switch (type) {
-      case ACTIVATION_TYPE_RELU:
-        *elem = relu(*elem);
-        break;
-      case ACTIVATION_TYPE_SIGMOID:
-        *elem = sigmoid(*elem);
-        break;
-      case ACTIVATION_TYPE_TANH:
-        *elem = tanh(*elem);
-        break;
-      case ACTIVATION_TYPE_IDENTITY:
-        break;
-      default:
-        break;
-      }
-    }
-  }
-}
-
-void matrix2d_softmax_inplace(const matrix2d_t *const m) {
-  float sum = 0.0;
-  float max_input = matrix2d_get_elem(m, 0, 0);
-
-  // normalize to avoid overflow on exp
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      float m_val = matrix2d_get_elem(m, i, j);
-      if (m_val > max_input) {
-        max_input = m_val;
-      }
-    }
-  }
-
-  /*
-  calculate the exponentials of each input element and the sum of
-  exponentials
-  */
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      float *m_val = matrix2d_get_elem_as_mut_ref(m, i, j);
-      *m_val = exp(*m_val / max_input);
-      sum += *m_val;
-    }
-  }
-
-  /*
-  Normalize the values to make the sum equal to 1 (probabilities)
-  */
-  for (int i = 0; i < m->height; i++) {
-    for (int j = 0; j < m->width; j++) {
-      *matrix2d_get_elem_as_mut_ref(m, i, j) /= sum;
-    }
-  }
-}
-
 void matrix2d_sum_inplace(const matrix2d_t *const m1,
                           const matrix2d_t *const m2) {
   if(m1->height != m2->height || m1->width != m2->width){

@@ -184,22 +184,6 @@ void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
                                            const matrix2d_t *const m2);
 
 /**
- * @brief Performs a softmax operation of a 2D matrix, and stores the
- * result inside the same matrix. The function first performs a normalization
- * of the content of the matrix.
- * @param input: the target matrix
- */
-void matrix2d_softmax_inplace(const matrix2d_t *const input);
-
-/**
- * @brief Performs an element-wise activation operation of a 2D matrix, and
- * stores the result inside the same matrix.
- * @param input: the target matrix
- * @param type: the activation type
- */
-void matrix2d_activate_inplace(const matrix2d_t *const m, activation_type type);
-
-/**
  * @brief Returns a non-mutable pointer to a specific cell of a 3D matrix
  * @param m: the target matrix
  * @param row_idx: the index of the row

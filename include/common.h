@@ -105,6 +105,22 @@ void mean_squared_error_derivative(const matrix2d_t *const m,
                                    const matrix2d_t *const target,
                                    const matrix2d_t *const result);
 
+/**
+ * @brief Performs a softmax operation of a 2D matrix, and stores the
+ * result inside the same matrix. The function first performs a normalization
+ * of the content of the matrix.
+ * @param input: the target matrix
+ */
+void softmax_inplace(const matrix2d_t *const input);
+
+/**
+ * @brief Performs an element-wise activation operation of a 2D matrix, and
+ * stores the result inside the same matrix.
+ * @param input: the target matrix
+ * @param type: the activation type
+ */
+void activate_inplace(const matrix2d_t *const m, activation_type type);
+
 // void parse_line(char *line, int length, matrix2d_t *image, float *label);
 
 #endif
