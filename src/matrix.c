@@ -112,7 +112,7 @@ void matrix3d_randomize(matrix3d_t *const input) {
   }
 }
 
-void matrix2d_copy_inplace(const matrix2d_t *const input,
+void matrix2d_copy_content(const matrix2d_t *const input,
                            const matrix2d_t *const output) {
   if (input->height != output->height || input->width != output->width) {
     return;

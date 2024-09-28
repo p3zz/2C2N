@@ -215,7 +215,7 @@ void dense_layer_forwarding(dense_layer_t *layer) {
                    matrix2d_get_elem(layer->weights, j, i));
     }
   }
-  matrix2d_copy_inplace(&output, &output_activated);
+  matrix2d_copy_content(&output, &output_activated);
   matrix2d_activate_inplace(&output_activated, layer->activation_type);
 }
 
@@ -225,7 +225,7 @@ void softmax_layer_forwarding(softmax_layer_t *layer) {
   for (int i = 0; i < layer->input->depth; i++) {
     matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, i);
     matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
-    matrix2d_copy_inplace(&in_slice, &out_slice);
+    matrix2d_copy_content(&in_slice, &out_slice);
     matrix2d_softmax_inplace(&out_slice);
   }
 }
@@ -278,7 +278,7 @@ void conv_layer_forwarding(conv_layer_t *layer) {
       // then we sum the resulting matrix to the output
       matrix2d_sum_inplace(&result, &out_slice);
     }
-    matrix2d_copy_inplace(&out_slice, &out_act_slice);
+    matrix2d_copy_content(&out_slice, &out_act_slice);
     matrix2d_activate_inplace(&out_act_slice, layer->activation_type);
   }
   matrix2d_destroy(&result);
