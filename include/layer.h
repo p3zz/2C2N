@@ -140,6 +140,19 @@ void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int stride, int padding, activation_type activation_type);
 
 
+/**
+ * @brief Initialize a convolutional layer.
+ * @param layer: pointer to the target layer
+ * @param kernels: pointer to the kernels
+ * @param kernels_n: n. of kernels
+ * @param biases: pointer to the biases
+ * @param output: pointer to the output
+ * @param output_activated: pointer to the output activated
+ * @param d_input: pointer to the d_input
+ * @param stride: stride
+ * @param padding: padding
+ * @param activation_type: the type of activation used to activate the output
+ */
 void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
                             int kernels_n, matrix2d_t *biases,
                             matrix3d_t *output, matrix3d_t *output_activated,
@@ -152,6 +165,13 @@ void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
  * @param input: pointer to the input to copy from 
  */
 void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input);
+
+/**
+ * @brief Feed a convolutional layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
+void conv_layer_feed_load(conv_layer_t *layer, matrix3d_t *const input);
 
 /**
  * @brief Perform the back-propagation stage of a convolutional layer.
@@ -181,15 +201,26 @@ void conv_layer_forwarding(conv_layer_t *layer);
  * @param input_width: width of the input
  * @param input_depth: depth of the input
  * @param kernel_size: length of the kernel side
- * @param stride: stride
- * @param padding: padding
+ * @param stride: stride used to perform the pooling operation
+ * @param padding: padding used to perform the pooling operation
  * @param type: the type of pooling used to compute the output
  */
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type);
 
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *input, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+/**
+ * @brief Initialize a pooling layer.
+ * @param layer: pointer to the target layer
+ * @param output: pointer to the output
+ * @param d_input: pointer to the d_input
+ * @param indexes: pointer to indexes
+ * @param kernel_size: length of the kernel side
+ * @param stride: stride used to perform the pooling operation
+ * @param padding: padding used to perform the pooling operation
+ * @param pooling_type: the type of pooling used to compute the output
+ */
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
 int kernel_size, int stride, int padding, pooling_type type);
 
 /**
@@ -199,6 +230,14 @@ int kernel_size, int stride, int padding, pooling_type type);
  * @param input: pointer to the input to copy from 
  */
 void pool_layer_feed(pool_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Feed a pooling layer
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
+void pool_layer_feed_load(pool_layer_t *layer, matrix3d_t *const input);
 
 /**
  * @brief Perform the forwarding stage of a pooling layer.
@@ -231,6 +270,16 @@ void pool_layer_destroy(pool_layer_t *layer);
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type);
 
+/**
+ * @brief Initialize a convolutional layer.
+ * @param layer: pointer to the target layer
+ * @param weights: pointer to the biases
+ * @param biases: pointer to the biases
+ * @param output: pointer to the output
+ * @param output_activated: pointer to the output activated
+ * @param d_input: pointer to the d_input
+ * @param activation_type: the type of activation used to activate the output
+ */
 void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
                              matrix2d_t *biases, matrix3d_t *output,
                              matrix3d_t *output_activated,
@@ -243,6 +292,14 @@ void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
  * @param input: pointer to the input to copy from 
  */
 void dense_layer_feed(dense_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Feed a dense layer
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
+void dense_layer_feed_load(dense_layer_t *layer, matrix3d_t *const input);
 
 /**
  * @brief Perform the forwarding stage of a dense layer.
@@ -273,7 +330,13 @@ void dense_layer_destroy(dense_layer_t *layer);
  */
 void softmax_layer_init(softmax_layer_t *layer, int input_n);
 
-void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *input, matrix3d_t *output,
+/**
+ * @brief Initialize a softmax layer.
+ * @param layer: pointer to the target layer
+ * @param output: pointer to the output
+ * @param d_input: pointer to the d_input
+ */
+void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *output,
                             matrix3d_t *d_input);
 
 /**
@@ -283,6 +346,14 @@ void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *input, matrix
  * @param input: pointer to the input to copy from 
  */
 void softmax_layer_feed(softmax_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Feed a softmax layer
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
+void softmax_layer_feed_load(softmax_layer_t *layer, matrix3d_t *const input);
 
 /**
  * @brief Perform the forwarding stage of a softmax layer.

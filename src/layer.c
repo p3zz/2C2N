@@ -179,7 +179,7 @@ void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
   layer->activation_type = activation_type;
 }
 
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *input, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
 int kernel_size, int stride, int padding, pooling_type type) {
 
   layer->loaded = true;
@@ -188,7 +188,6 @@ int kernel_size, int stride, int padding, pooling_type type) {
     layer->indexes = indexes;
   }
   
-  layer->input = input;
   layer->output = output;
   layer->d_input = d_input;
   layer->kernel_size = kernel_size;
@@ -197,11 +196,10 @@ int kernel_size, int stride, int padding, pooling_type type) {
   layer->type = type;
 }
 
-void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *input, matrix3d_t *output,
+void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *output,
                             matrix3d_t *d_input) {
   layer->loaded = true;
 
-  layer->input = input;
   layer->output = output;
   layer->d_input = d_input;
 }
@@ -394,8 +392,6 @@ void softmax_layer_backpropagation(softmax_layer_t *layer,
   matrix2d_destroy(&aux);
 }
 
-// https://lanstonchu.wordpress.com/2018/09/01/convolutional-neural-network-cnn-backward-propagation-of-the-pooling-layers/
-// TODO add avg_pooling handling, this is correct just for max_pooling
 void pool_layer_backpropagation(pool_layer_t *layer,
                                 const matrix3d_t *const input) {
   matrix2d_t i_slice = {0};
