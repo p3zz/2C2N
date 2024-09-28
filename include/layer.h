@@ -65,16 +65,24 @@ typedef struct {
 /**
  * @struct dense_layer_t
  * @brief Implementation of a dense layer
- * @param input: pointer to the input of the layer. This is used during the feed-forward stage
+ * @param input: pointer to the input of the layer. This is used during the feed-forward stage.
+ * The input matrix has height = 1, depth = 1, and width equals to the n. of inputs.
+ * It's like a linear 1D array, but for compatibility with other layers it's implemented as a 3D matrix.
  * @param weights: pointer to the weights of the layer. Weights are stored inside a 2D matrix, 
  * where the width is equal to the height of the output, and the height is equal to the width of the input
  * @param biases: pointer to the biases of the layer. Biases are stored inside a 2D matrix,
  * where the width is equal to the height of the output, and the height is equal to 1
  * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
+ * The output matrix has height = 1, depth = 1, and width equals to the n. of outputs.
+ * It's a 1D array, but for compatibility with other layers it's implemented as a 3D matrix.
  * @param output_activated: pointer to the activated output of the layer. This is computed as the
- * result of element-wise operation applied to the output of the layer
+ * result of element-wise activation applied to the output of the layer.
+ * The output_activated matrix has height = 1, depth = 1, and width equals to the n. of outputs.
+ * It's a 1D array, but for compatibility with other layers it's implemented as a 3D matrix.
  * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
- * back-proagation of the layer
+ * back-proagation of the layer.
+ * The d_input matrix has height = 1, depth = 1, and width equals to the n. of inputs.
+ * It's a 1D array, but for compatibility with other layers it's implemented as a 3D matrix.
  * @param activation_type: the type of activation used by the layer to compute the activated output.
  * @param loaded: flag used to keep track of the origin of the pointers.
  */
@@ -151,6 +159,17 @@ void conv_layer_destroy(conv_layer_t *layer);
  */
 void conv_layer_forwarding(conv_layer_t *layer);
 
+/**
+ * @brief Initialize a convolutional layer. Each member of the layer is dinamically allocated.
+ * @param layer: pointer to the target layer
+ * @param input_height: height of the input
+ * @param input_width: width of the input
+ * @param input_depth: depth of the input
+ * @param kernel_size: length of the kernel side
+ * @param stride: stride
+ * @param padding: padding
+ * @param type: the type of pooling used to compute the output
+ */
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type);
@@ -184,7 +203,13 @@ void pool_layer_backpropagation(pool_layer_t *layer,
  */
 void pool_layer_destroy(pool_layer_t *layer);
 
-
+/**
+ * @brief Initialize a dense layer. Each member of the layer is dinamically allocated.
+ * @param layer: pointer to the target layer
+ * @param input_n: length of the input
+ * @param output_n: length of the output
+ * @param activation_type: the type of activation function used to compute the output
+ */
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type);
 
@@ -218,11 +243,39 @@ void dense_layer_backpropagation(dense_layer_t *layer,
  */
 void dense_layer_destroy(dense_layer_t *layer);
 
+/**
+ * @brief Initialize a softmax layer. Each member of the layer is dinamically allocated.
+ * @param layer: pointer to the target layer
+ * @param input_n: length of the input
+ */
 void softmax_layer_init(softmax_layer_t *layer, int input_n);
+
+/**
+ * @brief Feed a softmax layer, and copy the content of a 3D matrix inside the "input"
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
 void softmax_layer_feed(softmax_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Perform the forwarding stage of a softmax layer.
+ * @param layer: pointer to the target layer
+ */
 void softmax_layer_forwarding(softmax_layer_t *layer);
+
+/**
+ * @brief Perform the back-propagation stage of a softmax layer.
+ * @param layer: pointer to the target layer
+ * @param input: derivative of the input w.r.t. the output coming from the next layer
+ */
 void softmax_layer_backpropagation(softmax_layer_t *layer,
                                    const matrix3d_t *const input);
+
+/**
+ * @brief Destroy a softmax layer. Each member of the layer will be freed.
+ * @param layer: pointer to the target layer
+ */
 void softmax_layer_destroy(softmax_layer_t *layer);
 
 #endif
