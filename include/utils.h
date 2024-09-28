@@ -11,6 +11,8 @@ typedef enum {
   ACTIVATION_TYPE_IDENTITY,
 } activation_type;
 
+typedef enum { POOLING_TYPE_AVERAGE, POOLING_TYPE_MAX } pooling_type;
+
 typedef float (*activation_function)(float);
 
 float sigmoid(float x);

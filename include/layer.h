@@ -3,24 +3,53 @@
 
 #include "common.h"
 
-typedef enum { POOLING_TYPE_AVERAGE, POOLING_TYPE_MAX } pooling_type;
-
+/**
+ * @struct conv_layer_t
+ * @brief Implementation of a convolutional layer
+ * @param input: pointer to the input of the layer. This is used during the feed-forward stage
+ * @param kernels: pointer to the kernels of the layer. The layer supports multiple 3D kernels.
+ * @param biases: pointer to the biases of the layer. The layer supports multiple 3D biases,
+ * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
+ * @param output_activated: pointer to the activated output of the layer. This is computed as the
+ * result of element-wise operation applied to the output of the layer
+ * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
+ * back-proagation of the layer
+ * @param kernels_n: n. of kernels
+ * @param stride: stride that will be applied to the convolution of each layer
+ * @param padding: padding that will be applied to the convolution of each layer
+ * @param activation_type: the type of activation used by the layer to compute the activated output.
+ * @param loaded: flag used to keep track of the origin of the pointers.
+ */
 typedef struct {
   matrix3d_t *input;
-  // kernels is an array of 3d matrices, with length kernels_n
   matrix3d_t *kernels;
-  int kernels_n;
-  // biases is an array of 2d matrices, with length kernels_n
   matrix2d_t *biases;
-  int stride;
-  int padding;
-  activation_type activation_type;
   matrix3d_t *output;
   matrix3d_t *output_activated;
   matrix3d_t *d_input;
+  int kernels_n;
+  int stride;
+  int padding;
+  activation_type activation_type;
   bool loaded;
 } conv_layer_t;
 
+/**
+ * @struct pool_layer_t
+ * @brief Implementation of a pooling layer
+ * @param input: pointer to the input of the layer. This is used during the feed-forward stage
+ * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
+ * @param indexes: pointer to multiple 3D matrices used to keep track of the indeces of the maximum values
+ * found during the feed-forward stage of a max pooling layer. For each slice of the output matrix, a 3D matrix
+ * with depth = 2 (slice 0 to save row indeces, slice 1 to save column indeces) is used to keep track of the indeces
+ * of the values contained in the output matrix w.r.t. the input matrix.
+ * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
+ * @param kernel_size: the size of the kernel side (the pooling is performed using a squared kernel of size size*size)
+ * @param stride: stride that will be applied to the pooling of each layer
+ * @param padding: padding that will be applied to the pooling of each layer
+ * @param type: the type of pooling used by the layer to compute the output.
+ * @param loaded: flag used to keep track of the origin of the pointers.
+ */
 typedef struct {
   matrix3d_t *input;
   matrix3d_t *output;
@@ -33,17 +62,42 @@ typedef struct {
   bool loaded;
 } pool_layer_t;
 
+/**
+ * @struct dense_layer_t
+ * @brief Implementation of a dense layer
+ * @param input: pointer to the input of the layer. This is used during the feed-forward stage
+ * @param weights: pointer to the weights of the layer. Weights are stored inside a 2D matrix, 
+ * where the width is equal to the height of the output, and the height is equal to the width of the input
+ * @param biases: pointer to the biases of the layer. Biases are stored inside a 2D matrix,
+ * where the width is equal to the height of the output, and the height is equal to 1
+ * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
+ * @param output_activated: pointer to the activated output of the layer. This is computed as the
+ * result of element-wise operation applied to the output of the layer
+ * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
+ * back-proagation of the layer
+ * @param activation_type: the type of activation used by the layer to compute the activated output.
+ * @param loaded: flag used to keep track of the origin of the pointers.
+ */
 typedef struct {
   matrix3d_t *input;
   matrix2d_t *weights;
   matrix2d_t *biases;
-  activation_type activation_type;
   matrix3d_t *output;
   matrix3d_t *output_activated;
   matrix3d_t *d_input;
+  activation_type activation_type;
   bool loaded;
 } dense_layer_t;
 
+/**
+ * @struct softmax_layer_t
+ * @brief Implementation of a softmax layer
+ * @param input: pointer to the input of the layer. This is used during the feed-forward stage
+ * @param output: pointer to the output of the layer. This is computed after the feed-forward stage
+ * @param d_input: pointer to the derivative of the input w.r.t. the output. This is computed after the
+ * back-proagation of the layer
+ * @param loaded: flag used to keep track of the origin of the pointers.
+ */
 typedef struct {
   matrix3d_t *input;
   matrix3d_t *d_input;
