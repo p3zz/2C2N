@@ -1,7 +1,7 @@
 #include "layer.h"
 #include <stdlib.h>
 
-// ------------------------------ INIT ------------------------------
+/* ----------------------------------- INIT -----------------------------------*/
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type) {
@@ -150,7 +150,9 @@ void softmax_layer_init(softmax_layer_t *layer, int input_n) {
   
 }
 
-void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
+/* ----------------------------------- INIT LOAD -----------------------------------*/
+
+void conv_layer_init_load(conv_layer_t *layer, matrix3d_t *kernels,
                             int kernels_n, matrix2d_t *biases,
                             matrix3d_t *output, matrix3d_t *output_activated,
                             matrix3d_t *d_input, int stride, int padding, activation_type activation_type) {
@@ -166,7 +168,7 @@ void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
   layer->activation_type = activation_type;
 }
 
-void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
+void dense_layer_init_load(dense_layer_t *layer, matrix2d_t *weights,
                              matrix2d_t *biases, matrix3d_t *output,
                              matrix3d_t *output_activated,
                              matrix3d_t *d_input, activation_type activation_type) {
@@ -179,7 +181,7 @@ void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
   layer->activation_type = activation_type;
 }
 
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+void pool_layer_init_load(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
 int kernel_size, int stride, int padding, pooling_type type) {
 
   layer->loaded = true;
@@ -196,7 +198,7 @@ int kernel_size, int stride, int padding, pooling_type type) {
   layer->type = type;
 }
 
-void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *output,
+void softmax_layer_init_load(softmax_layer_t *layer, matrix3d_t *output,
                             matrix3d_t *d_input) {
   layer->loaded = true;
 
@@ -204,41 +206,43 @@ void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *output,
   layer->d_input = d_input;
 }
 
-// ------------------------------ FEED ------------------------------
+/* ----------------------------------- FEED -----------------------------------*/
 
 void dense_layer_feed(dense_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->input);
-}
-
-void dense_layer_feed_load(dense_layer_t *layer, matrix3d_t *const input) {
-  layer->input = input;
 }
 
 void pool_layer_feed(pool_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->input);
 }
 
-void pool_layer_feed_load(pool_layer_t *layer, matrix3d_t *const input) {
-  layer->input = input;
-}
-
 void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input) {
   matrix3d_copy_inplace(input, layer->input);
-}
-
-void conv_layer_feed_load(conv_layer_t *layer, matrix3d_t *const input) {
-  layer->input = input;
 }
 
 void softmax_layer_feed(softmax_layer_t *layer, const matrix3d_t *const input) {
   matrix3d_copy_inplace(input, layer->input);
 }
 
+/* ----------------------------------- FEED LOAD -----------------------------------*/
+
+void dense_layer_feed_load(dense_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
+}
+
+void pool_layer_feed_load(pool_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
+}
+
+void conv_layer_feed_load(conv_layer_t *layer, matrix3d_t *const input) {
+  layer->input = input;
+}
+
 void softmax_layer_feed_load(softmax_layer_t *layer, matrix3d_t *const input) {
   layer->input = input;
 }
 
-// ------------------------------ PROCESS ------------------------------
+/* ----------------------------------- FORWARDING -----------------------------------*/
 
 void dense_layer_forwarding(dense_layer_t *layer) {
   matrix2d_t output = {0};
@@ -291,8 +295,6 @@ void pool_layer_forwarding(pool_layer_t *layer) {
   }
 }
 
-// TODO check if depth of each kernel is equal to the number of channels of the
-// input
 void conv_layer_forwarding(conv_layer_t *layer) {
   matrix2d_t result = {0};
   matrix2d_t out_slice = {0};
@@ -326,7 +328,7 @@ void conv_layer_forwarding(conv_layer_t *layer) {
   matrix2d_destroy(&result);
 }
 
-// ------------------------------ BACK-PROPAGATE ------------------------------
+/* ----------------------------------- BACKPROPAGATION -----------------------------------*/
 
 // the input is the derivative of the cost w.r.t the output, coming from the
 // next layer the output if the derivative of the input, that has to be passed
@@ -542,23 +544,34 @@ void conv_layer_backpropagation(conv_layer_t *layer,
   matrix2d_destroy(&d_input_aux);
 }
 
-// ------------------------------ DESTROY ------------------------------
+/* ----------------------------------- DESTROY -----------------------------------*/
 
 void dense_layer_destroy(dense_layer_t *layer) {
   if (layer->loaded) {
     return;
   }
 
+  /* free input */
   matrix3d_destroy(layer->input);
   free(layer->input);
+  
+  /* free d_input */
   matrix3d_destroy(layer->d_input);
   free(layer->d_input);
+  
+  /* free weights */
   matrix2d_destroy(layer->weights);
   free(layer->weights);
+  
+  /* free biases */
   matrix2d_destroy(layer->biases);
   free(layer->biases);
+  
+  /* free output */
   matrix3d_destroy(layer->output);
   free(layer->output);
+  
+  /* free output activated */
   matrix3d_destroy(layer->output_activated);
   free(layer->output_activated);
 }
@@ -568,20 +581,28 @@ void conv_layer_destroy(conv_layer_t *layer) {
     return;
   }
 
+  /* free input */
   matrix3d_destroy(layer->input);
-  matrix3d_destroy(layer->d_input);
   free(layer->input);
+
+  /* free d_input */
+  matrix3d_destroy(layer->d_input);
   free(layer->d_input);
 
+  /* free kernels/biases */
   for (int i = 0; i < layer->kernels_n; i++) {
     matrix3d_destroy(&layer->kernels[i]);
     matrix2d_destroy(&layer->biases[i]);
   }
   free(layer->kernels);
   free(layer->biases);
+
+  /* free output */
   matrix3d_destroy(layer->output);
-  matrix3d_destroy(layer->output_activated);
   free(layer->output);
+
+  /* free output activated */
+  matrix3d_destroy(layer->output_activated);
   free(layer->output_activated);
 }
 
@@ -590,6 +611,7 @@ void pool_layer_destroy(pool_layer_t *layer) {
     return;
   }
 
+  /* free indexes */
   if (layer->type == POOLING_TYPE_MAX) {
     for (int i = 0; i < layer->input->depth; i++) {
       matrix3d_destroy(&layer->indexes[i]);
@@ -597,12 +619,15 @@ void pool_layer_destroy(pool_layer_t *layer) {
   }
   free(layer->indexes);
 
+  /* free output */
   matrix3d_destroy(layer->output);
   free(layer->output);
 
+  /* free input */
   matrix3d_destroy(layer->input);
   free(layer->input);
 
+  /* free d_input */
   matrix3d_destroy(layer->d_input);
   free(layer->d_input);
 }
@@ -612,10 +637,15 @@ void softmax_layer_destroy(softmax_layer_t *layer) {
     return;
   }
 
+  /* free input */
   matrix3d_destroy(layer->input);
   free(layer->input);
+  
+  /* free output */
   matrix3d_destroy(layer->output);
   free(layer->output);
+  
+  /* free d_input */
   matrix3d_destroy(layer->d_input);
   free(layer->d_input);
 }

@@ -153,7 +153,7 @@ void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
  * @param padding: padding
  * @param activation_type: the type of activation used to activate the output
  */
-void conv_layer_load_params(conv_layer_t *layer, matrix3d_t *kernels,
+void conv_layer_init_load(conv_layer_t *layer, matrix3d_t *kernels,
                             int kernels_n, matrix2d_t *biases,
                             matrix3d_t *output, matrix3d_t *output_activated,
                             matrix3d_t *d_input, int stride, int padding, activation_type activation_type);
@@ -220,7 +220,7 @@ void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
  * @param padding: padding used to perform the pooling operation
  * @param pooling_type: the type of pooling used to compute the output
  */
-void pool_layer_load_params(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
+void pool_layer_init_load(pool_layer_t *layer, matrix3d_t *output, matrix3d_t *d_input, matrix3d_t *indexes,
 int kernel_size, int stride, int padding, pooling_type type);
 
 /**
@@ -280,7 +280,7 @@ void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
  * @param d_input: pointer to the d_input
  * @param activation_type: the type of activation used to activate the output
  */
-void dense_layer_load_params(dense_layer_t *layer, matrix2d_t *weights,
+void dense_layer_init_load(dense_layer_t *layer, matrix2d_t *weights,
                              matrix2d_t *biases, matrix3d_t *output,
                              matrix3d_t *output_activated,
                              matrix3d_t *d_input, activation_type activation_type);
@@ -336,7 +336,7 @@ void softmax_layer_init(softmax_layer_t *layer, int input_n);
  * @param output: pointer to the output
  * @param d_input: pointer to the d_input
  */
-void softmax_layer_load_params(softmax_layer_t *layer, matrix3d_t *output,
+void softmax_layer_init_load(softmax_layer_t *layer, matrix3d_t *output,
                             matrix3d_t *d_input);
 
 /**
