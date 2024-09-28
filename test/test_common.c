@@ -143,11 +143,11 @@ void test_common_cross_correlation_nopadding(void){
     int stride = 1;
     int result_height;
     int result_width;
-    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
-    TEST_ASSERT_EQUAL_INT(2, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, result.height);
+    TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(54.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(43.f, matrix2d_get_elem(&result, 0, 1));
     TEST_ASSERT_EQUAL_FLOAT(74.f, matrix2d_get_elem(&result, 1, 0));
@@ -178,11 +178,11 @@ void test_common_cross_correlation_padding(void){
     int stride = 1;
     int result_height;
     int result_width;
-    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
-    TEST_ASSERT_EQUAL_INT(4, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(4, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(4, result.height);
+    TEST_ASSERT_EQUAL_INT(4, result.width);
     TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(18.f, matrix2d_get_elem(&result, 0, 1));
     TEST_ASSERT_EQUAL_FLOAT(25.f, matrix2d_get_elem(&result, 0, 2));
@@ -228,11 +228,11 @@ void test_common_cross_correlation_nopadding_stride(void){
     int stride = 2;
     int result_height;
     int result_width;
-    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
-    TEST_ASSERT_EQUAL_INT(1, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(1, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(1, result.height);
+    TEST_ASSERT_EQUAL_INT(1, result.width);
     TEST_ASSERT_EQUAL_FLOAT(54.f, matrix2d_get_elem(&result, 0, 0));
 
     matrix2d_destroy(&result);
@@ -260,11 +260,11 @@ void test_common_cross_correlation_padding_stride(void){
     int stride = 2;
     int result_height;
     int result_width;
-    compute_output_size(m1.rows_n, m1.cols_n, m2.rows_n, padding, stride, &result_height, &result_width);
+    compute_output_size(m1.height, m1.width, m2.height, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
     full_cross_correlation(&m1, &m2, &result, padding, stride);
-    TEST_ASSERT_EQUAL_INT(2, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, result.height);
+    TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(25.f, matrix2d_get_elem(&result, 0, 1));
     TEST_ASSERT_EQUAL_FLOAT(41.f, matrix2d_get_elem(&result, 1, 0));
@@ -291,18 +291,18 @@ void test_common_max_pooling(void){
 
     int result_height;
     int result_width;
-    compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
+    compute_output_size(m.height, m.width, kernel_size, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
 
     matrix3d_init(&indexes, result_height, result_width, 2);
 
     max_pooling(&m, &result, &indexes, kernel_size, padding, stride);
 
-    TEST_ASSERT_EQUAL_INT(2, indexes.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, indexes.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, indexes.height);
+    TEST_ASSERT_EQUAL_INT(2, indexes.width);
 
-    TEST_ASSERT_EQUAL_INT(2, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, result.height);
+    TEST_ASSERT_EQUAL_INT(2, result.width);
 
     TEST_ASSERT_EQUAL_FLOAT(9.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_INT(1, matrix3d_get_elem(&indexes, 0, 0, 0));
@@ -341,12 +341,12 @@ void test_common_avg_pooling(void){
 
     int result_height;
     int result_width;
-    compute_output_size(m.rows_n, m.cols_n, kernel_size, padding, stride, &result_height, &result_width);
+    compute_output_size(m.height, m.width, kernel_size, padding, stride, &result_height, &result_width);
     matrix2d_init(&result, result_height, result_width);
 
     avg_pooling(&m, &result, kernel_size, padding, stride);
-    TEST_ASSERT_EQUAL_INT(2, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, result.height);
+    TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(4.25f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(3.5f, matrix2d_get_elem(&result, 0, 1));
     TEST_ASSERT_EQUAL_FLOAT(6.f, matrix2d_get_elem(&result, 1, 0));
@@ -366,8 +366,8 @@ void test_common_matrix2d_reshape(void){
     matrix2d_load(&m, 2, 3, &m_values[0]);
 
     matrix2d_reshape(&m, &result, 3, 2);
-    TEST_ASSERT_EQUAL_INT(3, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(3, result.height);
+    TEST_ASSERT_EQUAL_INT(2, result.width);
     TEST_ASSERT_EQUAL_FLOAT(4.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(3.f, matrix2d_get_elem(&result, 0, 1));
     TEST_ASSERT_EQUAL_FLOAT(8.f, matrix2d_get_elem(&result, 1, 0));
@@ -390,8 +390,8 @@ void test_common_matrix2d_reshape_2(void){
     matrix2d_load(&m, 3, 3, &m_values[0]);
 
     matrix2d_reshape(&m, &result, 1, 9);
-    TEST_ASSERT_EQUAL_INT(1, result.rows_n);
-    TEST_ASSERT_EQUAL_INT(9, result.cols_n);
+    TEST_ASSERT_EQUAL_INT(1, result.height);
+    TEST_ASSERT_EQUAL_INT(9, result.width);
     TEST_ASSERT_EQUAL_FLOAT(4.f, matrix2d_get_elem(&result, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(1.f, matrix2d_get_elem(&result, 0, 4));
     TEST_ASSERT_EQUAL_FLOAT(7.f, matrix2d_get_elem(&result, 0, 6));

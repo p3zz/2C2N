@@ -35,27 +35,27 @@ void test_init_conv_layer(void){
     // check kernels
     TEST_ASSERT_EQUAL_INT(1, layer.kernels_n);
     TEST_ASSERT_EQUAL_INT(2, layer.kernels[0].depth);
-    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].rows_n);
-    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].height);
+    TEST_ASSERT_EQUAL_INT(3,  layer.kernels[0].width);
     // check input
     TEST_ASSERT_EQUAL_INT(2, layer.input->depth);
-    TEST_ASSERT_EQUAL_INT(10, layer.input->rows_n);
-    TEST_ASSERT_EQUAL_INT(10, layer.input->cols_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.input->height);
+    TEST_ASSERT_EQUAL_INT(10, layer.input->width);
     // check d_input
     TEST_ASSERT_EQUAL_INT(2, layer.d_input->depth);
-    TEST_ASSERT_EQUAL_INT(10, layer.d_input->rows_n);
-    TEST_ASSERT_EQUAL_INT(10, layer.d_input->cols_n);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input->height);
+    TEST_ASSERT_EQUAL_INT(10, layer.d_input->width);
     // check biases
-    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].rows_n);
-    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].cols_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].height);
+    TEST_ASSERT_EQUAL_INT(8, layer.biases[0].width);
     // check output
     TEST_ASSERT_EQUAL_INT(1, layer.output->depth);
-    TEST_ASSERT_EQUAL_INT(8, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(8, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(8, layer.output->width);
     // check output activated
     TEST_ASSERT_EQUAL_INT(1, layer.output_activated->depth);
-    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->rows_n);
-    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->cols_n);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->height);
+    TEST_ASSERT_EQUAL_INT(8, layer.output_activated->width);
     conv_layer_destroy(&layer);
 }
 
@@ -115,10 +115,10 @@ void test_process_conv_layer(void){
     conv_layer_forwarding(&layer);
 
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->width);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->width);
     TEST_ASSERT_EQUAL_FLOAT(13.645, matrix3d_get_elem(layer.output, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(13.571, matrix3d_get_elem(layer.output, 0, 1, 0));
     TEST_ASSERT_EQUAL_FLOAT(12.458, matrix3d_get_elem(layer.output, 1, 0, 0));
@@ -149,8 +149,8 @@ void test_process_pool_layer_average(void){
     pool_layer_feed(&layer, &input);
     pool_layer_forwarding(&layer);
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->width);
     TEST_ASSERT_EQUAL_FLOAT(3, matrix3d_get_elem(layer.output, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(4, matrix3d_get_elem(layer.output, 0, 1, 0));
     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 1, 0, 0));
@@ -181,8 +181,8 @@ void test_process_pool_layer_max(void){
     pool_layer_feed(&layer, &input);
     pool_layer_forwarding(&layer);
     TEST_ASSERT_EQUAL_INT(2, layer.output->depth);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->width);
     TEST_ASSERT_EQUAL_FLOAT(5, matrix3d_get_elem(layer.output, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(6, matrix3d_get_elem(layer.output, 0, 1, 0));
     TEST_ASSERT_EQUAL_FLOAT(8, matrix3d_get_elem(layer.output, 1, 0, 0));
@@ -230,8 +230,8 @@ void test_process_dense_layer(void){
     dense_layer_feed(&layer, &input);
     
     dense_layer_forwarding(&layer);
-    TEST_ASSERT_EQUAL_INT(1, layer.output->rows_n);
-    TEST_ASSERT_EQUAL_INT(2, layer.output->cols_n);
+    TEST_ASSERT_EQUAL_INT(1, layer.output->height);
+    TEST_ASSERT_EQUAL_INT(2, layer.output->width);
     TEST_ASSERT_EQUAL_FLOAT(3.811, matrix3d_get_elem(layer.output, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(4.674, matrix3d_get_elem(layer.output, 0, 1, 0));
 
@@ -270,7 +270,7 @@ void test_backpropagation_dense_layer(void){
     TEST_ASSERT_EQUAL_FLOAT(3.429f, matrix3d_get_elem(layer.output, 0, 1, 0));
 
     matrix3d_t d_input = {0};
-    matrix3d_init(&d_input, output_target.rows_n, output_target.cols_n, 1);
+    matrix3d_init(&d_input, output_target.height, output_target.width, 1);
 
     matrix2d_t out_act_slice = {0};
     matrix2d_t out_tgt_slice = {0};
@@ -287,9 +287,9 @@ void test_backpropagation_dense_layer(void){
 
     dense_layer_backpropagation(&layer, &d_input, 0.15f);
 
-    TEST_ASSERT_EQUAL_FLOAT(6.496, matrix3d_get_elem(layer.d_inputs, 0, 0, 0));
-    TEST_ASSERT_EQUAL_FLOAT(6.315, matrix3d_get_elem(layer.d_inputs, 0, 1, 0));
-    TEST_ASSERT_EQUAL_FLOAT(1.624, matrix3d_get_elem(layer.d_inputs, 0, 2, 0));
+    TEST_ASSERT_EQUAL_FLOAT(6.496, matrix3d_get_elem(layer.d_input, 0, 0, 0));
+    TEST_ASSERT_EQUAL_FLOAT(6.315, matrix3d_get_elem(layer.d_input, 0, 1, 0));
+    TEST_ASSERT_EQUAL_FLOAT(1.624, matrix3d_get_elem(layer.d_input, 0, 2, 0));
 
     TEST_ASSERT_EQUAL_FLOAT(-0.2474061, matrix2d_get_elem(layer.weights, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(-0.9590769, matrix2d_get_elem(layer.weights, 0, 1));
@@ -369,7 +369,7 @@ void test_backpropagation_conv_layer(void){
     matrix3d_set_elem(&output_targets, 1, 1, 1, 1);
     
     matrix3d_t d_input = {0};
-    matrix3d_init(&d_input, output_targets.rows_n, output_targets.cols_n, layer.output_activated->depth);
+    matrix3d_init(&d_input, output_targets.height, output_targets.width, layer.output_activated->depth);
 
     matrix2d_t out_act_slice = {0};
     matrix2d_t out_tgt_slice = {0};
@@ -383,8 +383,8 @@ void test_backpropagation_conv_layer(void){
         mean_squared_error_derivative(&out_act_slice, &out_tgt_slice, &d_input_slice);
     }
     TEST_ASSERT_EQUAL_INT(2, d_input.depth);
-    TEST_ASSERT_EQUAL_INT(2, d_input.rows_n);
-    TEST_ASSERT_EQUAL_INT(2, d_input.cols_n);
+    TEST_ASSERT_EQUAL_INT(2, d_input.height);
+    TEST_ASSERT_EQUAL_INT(2, d_input.width);
     conv_layer_backpropagation(&layer, &d_input, learning_rate);
 
     matrix3d_destroy(&output_targets);
@@ -428,7 +428,7 @@ void test_backpropagation_max_pool_layer(void){
     matrix2d_t out_tgt_slice = {0};
     matrix2d_t d_input_slice = {0};
 
-    matrix3d_init(&d_input, output_targets.rows_n, output_targets.cols_n, layer.output->depth);
+    matrix3d_init(&d_input, output_targets.height, output_targets.width, layer.output->depth);
     for(int i=0;i<d_input.depth;i++){
         matrix3d_get_slice_as_mut_ref(layer.output,  &out_slice, i);
         matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
@@ -440,8 +440,8 @@ void test_backpropagation_max_pool_layer(void){
     pool_layer_backpropagation(&layer, &d_input);
 
     TEST_ASSERT_EQUAL_INT(2, layer.d_input->depth);
-    TEST_ASSERT_EQUAL_INT(3, layer.d_input->rows_n);
-    TEST_ASSERT_EQUAL_INT(3, layer.d_input->cols_n);
+    TEST_ASSERT_EQUAL_INT(3, layer.d_input->height);
+    TEST_ASSERT_EQUAL_INT(3, layer.d_input->width);
 
     TEST_ASSERT_EQUAL_FLOAT(0.0, matrix3d_get_elem(layer.d_input, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(0.0, matrix3d_get_elem(layer.d_input, 0, 1, 0));
@@ -494,7 +494,7 @@ void test_backpropagation_avg_pool_layer(void){
     matrix2d_t out_tgt_slice = {0};
     matrix2d_t d_input_slice = {0};
 
-    matrix3d_init(&d_input, output_targets.rows_n, output_targets.cols_n, layer.output->depth);
+    matrix3d_init(&d_input, output_targets.height, output_targets.width, layer.output->depth);
     for(int i=0;i<d_input.depth;i++){
         matrix3d_get_slice_as_mut_ref(layer.output,  &out_slice, i);
         matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
@@ -510,8 +510,8 @@ void test_backpropagation_avg_pool_layer(void){
     pool_layer_backpropagation(&layer, &d_input);
 
     TEST_ASSERT_EQUAL_INT(2, layer.d_input->depth);
-    TEST_ASSERT_EQUAL_INT(3, layer.d_input->rows_n);
-    TEST_ASSERT_EQUAL_INT(3, layer.d_input->cols_n);
+    TEST_ASSERT_EQUAL_INT(3, layer.d_input->height);
+    TEST_ASSERT_EQUAL_INT(3, layer.d_input->width);
 
     TEST_ASSERT_EQUAL_FLOAT(1.0, matrix3d_get_elem(layer.d_input, 0, 0, 0));
     TEST_ASSERT_EQUAL_FLOAT(2.5, matrix3d_get_elem(layer.d_input, 0, 1, 0));
@@ -570,7 +570,7 @@ void test_perceptron_or(void){
     
     dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    matrix3d_init(&d_input, output_targets.rows_n, output_targets.cols_n, 1);
+    matrix3d_init(&d_input, output_targets.height, output_targets.width, 1);
 
     matrix2d_t out_slice = {0};
     matrix2d_t out_tgt_slice = {0};
@@ -588,7 +588,7 @@ void test_perceptron_or(void){
             dense_layer_forwarding(&hidden_layer);
             mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
             dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
-            dense_layer_backpropagation(&input_layer, hidden_layer.d_inputs, learning_rate);
+            dense_layer_backpropagation(&input_layer, hidden_layer.d_input, learning_rate);
         }
     }
 
@@ -651,7 +651,7 @@ void test_perceptron_and(void){
     
     dense_layer_init(&hidden_layer, 4, 1, ACTIVATION_TYPE_RELU);
 
-    matrix3d_init(&d_input, output_targets.rows_n, output_targets.cols_n, 1);
+    matrix3d_init(&d_input, output_targets.height, output_targets.width, 1);
 
     matrix2d_t out_slice = {0};
     matrix2d_t out_tgt_slice = {0};
@@ -669,7 +669,7 @@ void test_perceptron_and(void){
             dense_layer_forwarding(&hidden_layer);
             mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
             dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
-            dense_layer_backpropagation(&input_layer, hidden_layer.d_inputs, learning_rate);
+            dense_layer_backpropagation(&input_layer, hidden_layer.d_input, learning_rate);
         }
     }
 
@@ -782,9 +782,9 @@ void test_lenet5_cnn(void){
     softmax_layer_init(&layer7, 10);
 
     // draw the digit 1
-    for(int i=0;i<input.rows_n;i++){
-        for(int j=0;j<input.cols_n;j++){
-            if(j == input.cols_n / 2){
+    for(int i=0;i<input.height;i++){
+        for(int j=0;j<input.width;j++){
+            if(j == input.width / 2){
                 matrix3d_set_elem(&input, i, j, 0, 255);
             }
         }
@@ -812,7 +812,7 @@ void test_lenet5_cnn(void){
         conv_layer_forwarding(&layer2);
         pool_layer_feed(&layer3, layer2.output_activated);
         pool_layer_forwarding(&layer3);
-        matrix3d_reshape(layer3.output, layer4.inputs);
+        matrix3d_reshape(layer3.output, layer4.input);
         dense_layer_forwarding(&layer4);
         dense_layer_feed(&layer5, layer4.output_activated);
         dense_layer_forwarding(&layer5);
@@ -825,9 +825,9 @@ void test_lenet5_cnn(void){
 
         softmax_layer_backpropagation(&layer7, &d_input);
         dense_layer_backpropagation(&layer6, layer7.d_input, learning_rate);
-        dense_layer_backpropagation(&layer5, layer6.d_inputs, learning_rate);
-        dense_layer_backpropagation(&layer4, layer5.d_inputs, learning_rate);
-        matrix3d_reshape(layer4.d_inputs, &aux);
+        dense_layer_backpropagation(&layer5, layer6.d_input, learning_rate);
+        dense_layer_backpropagation(&layer4, layer5.d_input, learning_rate);
+        matrix3d_reshape(layer4.d_input, &aux);
         pool_layer_backpropagation(&layer3, &aux);
         conv_layer_backpropagation(&layer2, layer3.d_input, learning_rate);
         pool_layer_backpropagation(&layer1, layer2.d_input);

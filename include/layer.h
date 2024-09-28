@@ -34,13 +34,13 @@ typedef struct {
 } pool_layer_t;
 
 typedef struct {
-  matrix3d_t *inputs;
+  matrix3d_t *input;
   matrix2d_t *weights;
   matrix2d_t *biases;
   activation_type activation_type;
   matrix3d_t *output;
   matrix3d_t *output_activated;
-  matrix3d_t *d_inputs;
+  matrix3d_t *d_input;
   bool loaded;
 } dense_layer_t;
 

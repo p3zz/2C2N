@@ -4,8 +4,8 @@
 
 void zero_pad(const matrix2d_t *const m, matrix2d_t *const result,
               int padding) {
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       int row = i + padding;
       int col = j + padding;
       float v = matrix2d_get_elem(m, i, j);
@@ -17,14 +17,14 @@ void zero_pad(const matrix2d_t *const m, matrix2d_t *const result,
 void full_cross_correlation(const matrix2d_t *const m1,
                             const matrix2d_t *const m2,
                             matrix2d_t *const result, int padding, int stride) {
-  for (int i = 0; i < result->rows_n; i++) {
-    for (int j = 0; j < result->cols_n; j++) {
+  for (int i = 0; i < result->height; i++) {
+    for (int j = 0; j < result->width; j++) {
       float sum = 0;
-      for (int m = 0; m < m2->rows_n; m++) {
-        for (int n = 0; n < m2->cols_n; n++) {
+      for (int m = 0; m < m2->height; m++) {
+        for (int n = 0; n < m2->width; n++) {
           int row = i * stride + m - padding;
           int col = j * stride + n - padding;
-          if (row >= 0 && row < m1->rows_n && col >= 0 && col < m1->cols_n) {
+          if (row >= 0 && row < m1->height && col >= 0 && col < m1->width) {
             float v1 = matrix2d_get_elem(m1, row, col);
             float v2 = matrix2d_get_elem(m2, m, n);
             sum += (v1 * v2);
@@ -47,8 +47,8 @@ void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
 void max_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  const matrix3d_t *const indexes, int kernel_size, int padding,
                  int stride) {
-  for (int i = 0; i < result->rows_n; i++) {
-    for (int j = 0; j < result->cols_n; j++) {
+  for (int i = 0; i < result->height; i++) {
+    for (int j = 0; j < result->width; j++) {
       float max = 0;
       int max_i = 0;
       int max_j = 0;
@@ -56,7 +56,7 @@ void max_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
         for (int n = 0; n < kernel_size; n++) {
           int row = i * stride + m - padding;
           int col = j * stride + n - padding;
-          if (row >= 0 && row < mat->rows_n && col >= 0 && col < mat->cols_n) {
+          if (row >= 0 && row < mat->height && col >= 0 && col < mat->width) {
             float val = matrix2d_get_elem(mat, row, col);
             if (val > max) {
               max_i = row;
@@ -75,15 +75,15 @@ void max_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
 
 void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
                  int kernel_size, int padding, int stride) {
-  for (int i = 0; i < result->rows_n; i++) {
-    for (int j = 0; j < result->cols_n; j++) {
+  for (int i = 0; i < result->height; i++) {
+    for (int j = 0; j < result->width; j++) {
       float sum = 0;
       int values_len = 0;
       for (int m = 0; m < kernel_size; m++) {
         for (int n = 0; n < kernel_size; n++) {
           int row = i * stride + m - padding;
           int col = j * stride + n - padding;
-          if (row >= 0 && row < mat->rows_n && col >= 0 && col < mat->cols_n) {
+          if (row >= 0 && row < mat->height && col >= 0 && col < mat->width) {
             sum += matrix2d_get_elem(mat, row, col);
             values_len++;
           }
@@ -97,8 +97,8 @@ void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
 void mean_squared_error_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
-  for (int i = 0; i < output->rows_n; i++) {
-    for (int j = 0; j < output->cols_n; j++) {
+  for (int i = 0; i < output->height; i++) {
+    for (int j = 0; j < output->width; j++) {
       float out_val = matrix2d_get_elem(output, i, j);
       float target_out_val = matrix2d_get_elem(target_output, i, j);
       float res = 2 * (out_val - target_out_val);
@@ -110,8 +110,8 @@ void mean_squared_error_derivative(const matrix2d_t *const output,
 void cross_entropy_loss_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
-  for (int i = 0; i < output->rows_n; i++) {
-    for (int j = 0; j < output->cols_n; j++) {
+  for (int i = 0; i < output->height; i++) {
+    for (int j = 0; j < output->width; j++) {
       float n0 = 1 - matrix2d_get_elem(target_output, i, j);
       float d0 = 1 - matrix2d_get_elem(output, i, j);
       float n1 = matrix2d_get_elem(target_output, i, j);
@@ -130,21 +130,21 @@ void cross_entropy_loss_derivative(const matrix2d_t *const output,
 float mean_squared_error(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
   float sum = 0.f;
-  for (int i = 0; i < output->rows_n; i++) {
-    for (int j = 0; j < output->cols_n; j++) {
+  for (int i = 0; i < output->height; i++) {
+    for (int j = 0; j < output->width; j++) {
       float delta = matrix2d_get_elem(target_output, i, j) -
                     matrix2d_get_elem(output, i, j);
       sum += (delta * delta);
     }
   }
-  return sum / output->cols_n;
+  return sum / output->width;
 }
 
 float cross_entropy_loss(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
   float sum = 0.f;
-  for (int i = 0; i < output->rows_n; i++) {
-    for (int j = 0; j < output->cols_n; j++) {
+  for (int i = 0; i < output->height; i++) {
+    for (int j = 0; j < output->width; j++) {
       float target_out = matrix2d_get_elem(target_output, i, j);
       float out = matrix2d_get_elem(output, i, j);
       float d = (target_out * logf(out)) + ((1 - target_out) * logf(1 - out));
@@ -154,7 +154,7 @@ float cross_entropy_loss(const matrix2d_t *const output,
       sum += d;
     }
   }
-  return -sum / output->cols_n;
+  return -sum / output->width;
 }
 
 void parse_line(char *line, int length, matrix2d_t *image, float *label) {
@@ -164,7 +164,7 @@ void parse_line(char *line, int length, matrix2d_t *image, float *label) {
   bool label_read = false;
   for (int i = 0; i < length; i++) {
     // check if numbers length exceeds the capacity of the image matrix
-    if (numbers_n == image->rows_n * image->cols_n) {
+    if (numbers_n == image->height * image->width) {
       break;
     }
     if (line[i] == ',' || i == length - 1) {
@@ -174,8 +174,8 @@ void parse_line(char *line, int length, matrix2d_t *image, float *label) {
         *label = val;
         label_read = true;
       } else {
-        int row = numbers_n / image->cols_n;
-        int col = numbers_n % image->cols_n;
+        int row = numbers_n / image->width;
+        int col = numbers_n % image->width;
         matrix2d_set_elem(image, row, col, val);
         numbers_n++;
       }

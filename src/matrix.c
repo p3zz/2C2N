@@ -11,8 +11,8 @@ const float *matrix2d_get_elem_as_ref(const matrix2d_t *const m, int row_idx,
 
 float *matrix2d_get_elem_as_mut_ref(const matrix2d_t *const m, int row_idx,
                                     int col_idx) {
-  if (row_idx < m->rows_n && col_idx < m->cols_n) {
-    return &m->values[row_idx * m->cols_n + col_idx];
+  if (row_idx < m->height && col_idx < m->width) {
+    return &m->values[row_idx * m->width + col_idx];
   }
   return NULL;
 }
@@ -40,8 +40,8 @@ const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
 
 float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m, int row_idx,
                                     int col_idx, int z_idx) {
-  if (row_idx < m->rows_n && col_idx < m->cols_n && z_idx < m->depth) {
-    return &m->values[(z_idx * m->rows_n * m->cols_n) + (row_idx * m->cols_n) +
+  if (row_idx < m->height && col_idx < m->width && z_idx < m->depth) {
+    return &m->values[(z_idx * m->height * m->width) + (row_idx * m->width) +
                       col_idx];
   }
   return NULL;
@@ -69,35 +69,35 @@ void matrix3d_get_slice_as_mut_ref(const matrix3d_t *const m,
   if (z_idx >= m->depth) {
     return;
   }
-  result->rows_n = m->rows_n;
-  result->cols_n = m->cols_n;
-  result->values = &m->values[result->rows_n * result->cols_n * z_idx];
+  result->height = m->height;
+  result->width = m->width;
+  result->values = &m->values[result->height * result->width * z_idx];
 }
 
 void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
                                            const matrix2d_t *const m2) {
-  for (int i = 0; i < m1->rows_n; i++) {
-    for (int j = 0; j < m1->cols_n; j++) {
+  for (int i = 0; i < m1->height; i++) {
+    for (int j = 0; j < m1->width; j++) {
       *matrix2d_get_elem_as_mut_ref(m1, i, j) *= matrix2d_get_elem(m2, i, j);
     }
   }
 }
 
-void matrix2d_init(matrix2d_t *m, int rows_n, int cols_n) {
+void matrix2d_init(matrix2d_t *m, int height, int width) {
   m->loaded = false;
-  m->rows_n = rows_n;
-  m->cols_n = cols_n;
-  m->values = (float *)malloc(rows_n * cols_n * sizeof(float));
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  m->height = height;
+  m->width = width;
+  m->values = (float *)malloc(height * width * sizeof(float));
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       matrix2d_set_elem(m, i, j, 0.f);
     }
   }
 }
 
 void matrix2d_randomize(matrix2d_t *const input) {
-  for (int i = 0; i < input->rows_n; i++) {
-    for (int j = 0; j < input->cols_n; j++) {
+  for (int i = 0; i < input->height; i++) {
+    for (int j = 0; j < input->width; j++) {
       float v = generate_random();
       matrix2d_set_elem(input, i, j, v);
     }
@@ -114,31 +114,31 @@ void matrix3d_randomize(matrix3d_t *const input) {
 
 void matrix2d_copy_inplace(const matrix2d_t *const input,
                            const matrix2d_t *const output) {
-  if (input->rows_n != output->rows_n || input->cols_n != output->cols_n) {
+  if (input->height != output->height || input->width != output->width) {
     return;
   }
   memcpy((void *)output->values, (void *)input->values,
-         output->rows_n * output->cols_n * sizeof(float));
+         output->height * output->width * sizeof(float));
 }
 
 void matrix3d_copy_inplace(const matrix3d_t *const input,
                            const matrix3d_t *const output) {
-  if (input->rows_n != output->rows_n || input->cols_n != output->cols_n ||
+  if (input->height != output->height || input->width != output->width ||
       input->depth != output->depth) {
     return;
   }
   memcpy((void *)output->values, (void *)input->values,
-         output->rows_n * output->cols_n * output->depth * sizeof(float));
+         output->height * output->width * output->depth * sizeof(float));
 }
 
 void matrix2d_rotate180_inplace(const matrix2d_t *const input) {
   float aux = 0;
   int i_opposite = 0;
   int j_opposite = 0;
-  for (int i = 0; i < input->rows_n; i++) {
-    for (int j = 0; j < input->cols_n; j++) {
-      i_opposite = input->rows_n - i - 1;
-      j_opposite = input->cols_n - j - 1;
+  for (int i = 0; i < input->height; i++) {
+    for (int j = 0; j < input->width; j++) {
+      i_opposite = input->height - i - 1;
+      j_opposite = input->width - j - 1;
       aux = matrix2d_get_elem(input, i, j);
       *matrix2d_get_elem_as_mut_ref(input, i, j) =
           matrix2d_get_elem(input, i_opposite, j_opposite);
@@ -153,14 +153,14 @@ void matrix2d_destroy(const matrix2d_t *m) {
   }
 }
 
-void matrix3d_init(matrix3d_t *const m, int rows_n, int cols_n, int depth) {
+void matrix3d_init(matrix3d_t *const m, int height, int width, int depth) {
   m->loaded = false;
-  m->rows_n = rows_n;
-  m->cols_n = cols_n;
+  m->height = height;
+  m->width = width;
   m->depth = depth;
-  m->values = (float *)malloc(rows_n * cols_n * depth * sizeof(float));
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  m->values = (float *)malloc(height * width * depth * sizeof(float));
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       for (int z = 0; z < m->depth; z++) {
         *matrix3d_get_elem_as_mut_ref(m, i, j, z) = 0.f;
       }
@@ -176,8 +176,8 @@ void matrix3d_destroy(const matrix3d_t *m) {
 
 void matrix2d_activate_inplace(const matrix2d_t *const m,
                                activation_type type) {
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
       switch (type) {
       case ACTIVATION_TYPE_RELU:
@@ -203,8 +203,8 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
   float max_input = matrix2d_get_elem(m, 0, 0);
 
   // normalize to avoid overflow on exp
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       float m_val = matrix2d_get_elem(m, i, j);
       if (m_val > max_input) {
         max_input = m_val;
@@ -214,8 +214,8 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
 
   // Calculate the exponentials of each input element and the sum of
   // exponentials
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       float *m_val = matrix2d_get_elem_as_mut_ref(m, i, j);
       *m_val = exp(*m_val / max_input);
       sum += *m_val;
@@ -223,8 +223,8 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
   }
 
   // Normalize the values to make the sum equal to 1 (probabilities)
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       *matrix2d_get_elem_as_mut_ref(m, i, j) /= sum;
     }
   }
@@ -232,17 +232,17 @@ void matrix2d_softmax_inplace(const matrix2d_t *const m) {
 
 void matrix2d_sum_inplace(const matrix2d_t *const m,
                           const matrix2d_t *const result) {
-  for (int i = 0; i < m->rows_n; i++) {
-    for (int j = 0; j < m->cols_n; j++) {
+  for (int i = 0; i < m->height; i++) {
+    for (int j = 0; j < m->width; j++) {
       *matrix2d_get_elem_as_mut_ref(result, i, j) += matrix2d_get_elem(m, i, j);
     }
   }
 }
 
 void matrix2d_print(const matrix2d_t *const m) {
-  for (int i = 0; i < m->rows_n; i++) {
+  for (int i = 0; i < m->height; i++) {
     printf("|");
-    for (int j = 0; j < m->cols_n; j++) {
+    for (int j = 0; j < m->width; j++) {
       printf(" %.2f |", matrix2d_get_elem(m, i, j));
     }
     printf("\n");
@@ -258,53 +258,53 @@ void matrix3d_print(const matrix3d_t *const m) {
   }
 }
 
-void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int rows_n,
-                      int cols_n) {
-  int m_elems_n = m->rows_n * m->cols_n;
-  int result_elems_n = rows_n * cols_n;
+void matrix2d_reshape(const matrix2d_t *const m, matrix2d_t *result, int height,
+                      int width) {
+  int m_elems_n = m->height * m->width;
+  int result_elems_n = height * width;
   if (m_elems_n != result_elems_n) {
     return;
   }
-  matrix2d_init(result, rows_n, cols_n);
+  matrix2d_init(result, height, width);
   for (int i = 0; i < result_elems_n; i++) {
-    *matrix2d_get_elem_as_mut_ref(result, i / result->cols_n,
-                                  i % result->cols_n) =
-        matrix2d_get_elem(m, i / m->cols_n, i % m->cols_n);
+    *matrix2d_get_elem_as_mut_ref(result, i / result->width,
+                                  i % result->width) =
+        matrix2d_get_elem(m, i / m->width, i % m->width);
   }
 }
 
 void matrix3d_reshape(const matrix3d_t *const m, matrix3d_t *result) {
-  int m_elems_n = m->rows_n * m->cols_n * m->depth;
-  int result_elems_n = result->rows_n * result->cols_n * result->depth;
+  int m_elems_n = m->height * m->width * m->depth;
+  int result_elems_n = result->height * result->width * result->depth;
   if (m_elems_n != result_elems_n) {
     return;
   }
   for (int i = 0; i < result_elems_n; i++) {
-    int m_i = i / (m->rows_n * m->cols_n);
-    int m_j = (i % (m->rows_n * m->cols_n)) / m->cols_n;
-    int m_k = i % m->cols_n;
+    int m_i = i / (m->height * m->width);
+    int m_j = (i % (m->height * m->width)) / m->width;
+    int m_k = i % m->width;
 
-    int result_i = i / (result->rows_n * result->cols_n);
-    int result_j = (i % (result->rows_n * result->cols_n)) / result->cols_n;
-    int result_k = i % result->cols_n;
+    int result_i = i / (result->height * result->width);
+    int result_j = (i % (result->height * result->width)) / result->width;
+    int result_k = i % result->width;
     *matrix3d_get_elem_as_mut_ref(result, result_j, result_k, result_i) =
         matrix3d_get_elem(m, m_j, m_k, m_i);
   }
 }
 
-void matrix2d_load(matrix2d_t *m, int rows_n, int cols_n,
+void matrix2d_load(matrix2d_t *m, int height, int width,
                    float *const base_address) {
   m->loaded = true;
-  m->rows_n = rows_n;
-  m->cols_n = cols_n;
+  m->height = height;
+  m->width = width;
   m->values = base_address;
 }
 
-void matrix3d_load(matrix3d_t *m, int rows_n, int cols_n, int depth,
+void matrix3d_load(matrix3d_t *m, int height, int width, int depth,
                    float *const base_address) {
   m->loaded = true;
-  m->rows_n = rows_n;
-  m->cols_n = cols_n;
+  m->height = height;
+  m->width = width;
   m->depth = depth;
   m->values = base_address;
 }
