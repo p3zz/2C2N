@@ -105,33 +105,117 @@ typedef struct {
   bool loaded;
 } softmax_layer_t;
 
+
+/**
+ * @brief Initialize a convolutional layer. Each member of the layer is dinamically allocated.
+ * @param layer: pointer to the target layer
+ * @param input_height: height of the input
+ * @param input_width: width of the input
+ * @param input_depth: depth of the input
+ * @param kernel_size: length of the kernel side
+ * @param kernels_n: n. of kernels
+ * @param stride: stride
+ * @param padding: padding
+ * @param activation_type: the type of activation used to activate the output
+ */
 void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int kernels_n,
                      int stride, int padding, activation_type activation_type);
 
+/**
+ * @brief Feed a convolutional layer, and copy the content of a 3D matrix inside the "input"
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
 void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input);
+
+/**
+ * @brief Perform the back-propagation stage of a convolutional layer.
+ * @param layer: pointer to the target layer
+ * @param input: derivative of the input w.r.t. the output coming from the next layer
+ * @param learning_rate: the learning rate that corrects weights and biases
+ */
 void conv_layer_backpropagation(conv_layer_t *layer,
                                 const matrix3d_t *const input,
                                 float learning_rate);
+/**
+ * @brief Destroy a convolutional layer. Each member of the layer will be freed.
+ * @param layer: pointer to the target layer
+ */
 void conv_layer_destroy(conv_layer_t *layer);
+
+/**
+ * @brief Perform the forwarding stage of a convolutional layer.
+ * @param layer: pointer to the target layer
+ */
 void conv_layer_forwarding(conv_layer_t *layer);
 
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type);
+
+/**
+ * @brief Feed a pooling layer, and copy the content of a 3D matrix inside the "input"
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
 void pool_layer_feed(pool_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Perform the forwarding stage of a pooling layer.
+ * @param layer: pointer to the target layer
+ */
 void pool_layer_forwarding(pool_layer_t *layer);
+
+/**
+ * @brief Perform the back-propagation stage of a pooling layer.
+ * @param layer: pointer to the target layer
+ * @param input: derivative of the input w.r.t. the output coming from the next layer
+ * @param learning_rate: the learning rate that corrects weights and biases
+ */
 void pool_layer_backpropagation(pool_layer_t *layer,
                                 const matrix3d_t *const input);
+
+/**
+ * @brief Destroy a pooling layer. Each member of the layer will be freed.
+ * @param layer: pointer to the target layer
+ */
 void pool_layer_destroy(pool_layer_t *layer);
+
 
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type);
+
+/**
+ * @brief Feed a dense layer, and copy the content of a 3D matrix inside the "input"
+ * member of the layer
+ * @param layer: pointer to the target layer
+ * @param input: pointer to the input to copy from 
+ */
 void dense_layer_feed(dense_layer_t *layer, const matrix3d_t *const input);
+
+/**
+ * @brief Perform the forwarding stage of a dense layer.
+ * @param layer: pointer to the target layer
+ */
 void dense_layer_forwarding(dense_layer_t *layer);
+
+/**
+ * @brief Perform the back-propagation stage of a dense layer.
+ * @param layer: pointer to the target layer
+ * @param input: derivative of the input w.r.t. the output coming from the next layer
+ * @param learning_rate: the learning rate that corrects weights and biases
+ */
 void dense_layer_backpropagation(dense_layer_t *layer,
                                  const matrix3d_t *const input,
                                  float learning_rate);
+
+/**
+ * @brief Destroy a dense layer. Each member of the layer will be freed.
+ * @param layer: pointer to the target layer
+ */
 void dense_layer_destroy(dense_layer_t *layer);
 
 void softmax_layer_init(softmax_layer_t *layer, int input_n);
