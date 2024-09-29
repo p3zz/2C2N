@@ -2,21 +2,6 @@
 ## Description
 2C2N is a C-based framework, inspired by PyTorch, for building and running Convolutional Neural Networks (CNNs). It features implementations of commonly used CNN layers such as convolutional, pooling, and dense (or fully connected) layers, along with its related forwarding and back-propagation procedures. The framework also includes well-known computation functions and data structures like matrix2d/3d for efficient matrix operations. The code has been developed in order to provide an easy, intuitive and modular interface with a low footprint memory usage.
 
-### Test
-2 tests are available in test/ folder:
-- test_common
-- test_layer
-
-### Tools
-Several tools are available in tools/ folder:
-- build.sh: build all targets (CMake)
-- clear.sh: remove the build folder
-- test.sh: run tests in verbose mode (CTest)
-- format.sh: code formatting (Clang Format)
-- heap-check.sh: run memory leaks check over tests (Valgrind)
-
-https://drive.google.com/file/d/1eEKzfmEu6WKdRlohBQiqi3PhW_uIVJVP/view
-
 ## Matrix
 ![Matrix2D](./assets/matrix2d.jpg)
 ![Matrix3D](./assets/matrix3d.jpg)
@@ -121,36 +106,209 @@ void matrix3d_reshape(const matrix3d_t *const input, matrix3d_t *output);
 
 ```
 
+## Layers
+The framework provides a common interface to build, run and destroy the most used
+type of layers of a CNN:
+
+- Convolutional layer
+- Pooling layer
+- Dense (fully connected) layer
+
+The shared opeations that can be performed on a generic layer are:
+- init
+- feed
+- forwarding
+- back-propagation
+- destroy
+
+From a memory point-of-view, every inner member of a layer that will be used to perform
+feed, forwarding and back-propagation are allocated during the init phase of the layer.
+
 ## Convolutional layer
 The **convolutional layer** is implemented using the *conv_layer* struct.
 ```c
+typedef struct {
+  matrix3d_t *input;
+  matrix3d_t *kernels;
+  matrix2d_t *biases;
+  matrix3d_t *output;
+  matrix3d_t *output_activated;
+  matrix3d_t *d_input;
+  int kernels_n;
+  int stride;
+  int padding;
+  activation_type activation_type;
+  bool loaded;
+} conv_layer_t;
+```
+
+A **convolutional layer** can be created as follows:
+
+```c
+/* initialze a convolutional layer, and allocate dinamically every pointer of the struct */
+void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
+                     int input_depth, int kernel_size, int kernels_n,
+                     int stride, int padding, activation_type activation_type);
+
+/* initialze a convolutional layer, and set every pointer of the struct to the corresponding
+argument*/
+void conv_layer_init_load(conv_layer_t *layer, matrix3d_t *kernels,
+                          int kernels_n, matrix2d_t *biases, matrix3d_t *output,
+                          matrix3d_t *output_activated, matrix3d_t *d_input,
+                          int stride, int padding,
+                          activation_type activation_type);
+```
+
+and destroyed as follows:
+```c
+/* destroy a layer (frees every dynamically allocated inner member, has no effect 
+if the layer has been created with conv_layer_init_load(...))*/
+void conv_layer_destroy(conv_layer_t *layer);
+```
+
+The shared operations has been developed as follows:
+```c
+/* feed the layer (copy the content of the *values pointer of the input to the corresponding inner member
+of the layer */
+void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input);
+
+/* feed the layer (set the *values pointer of the corresponding inner member
+of the layer to the input */
+void conv_layer_feed_load(conv_layer_t *layer, matrix3d_t *const input);
+
+/* perform the forwarding stage. The result will be available inside the *output* and *output_activated*
+inner members */
+void conv_layer_forwarding(conv_layer_t *layer);
+
+/* perform the back-propagation stage. Every weight/bias will be corrected during this stage, and 
+the result will be available inside the *d_input* inner member */
+void conv_layer_backpropagation(conv_layer_t *layer,
+                                const matrix3d_t *const input,
+                                float learning_rate);
 
 ```
 
+### Forwarding
+The formula used to compute the output matrix is:
+$$
+Y_i = B_i + \sum_{j=1}^{n} X_j * K_{ij}\\
+Yactv_{i} = actv(Y_i)
+$$
+where:
+- Y_i is the i-th slice of the output
+- B_i is the i-th bias
+- X_j is the j-th slice of the input
+- K_ij is the j-th slice of the i-th kernel
+
+In order to compute the i-th slice of the output matrix, we perform the sum of the cross_correlation between each j-th slice of the i-th kernel and the j-th slice of the input, then add the bias to it.
+
 ![Convolutional layer - Forwarding](./assets/convolutional_layer_forwarding.jpg)
 *Convolutional layer forwarding - input (5x4x4), 2 kernels (3x3x3), 2 biases (3x2), padding 0, stride 1*
+
+### Back-propagation
+The formula used to correct the kernels/biases and to compute the derivative of the error w.r.t. to the input are:
+$$
+\frac{dE}{dK_{ij}} = X_j * \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
+\frac{dE}{dB_i} = \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
+\frac{dE}{dXj} = \sum_{i=1}^{n} (\frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} *_{full} K_{ij}) \\
+$$
+Each derivative (except for the derivative of the error w.r.t. the input) are then used to correct
+the kernels/biases using the gradient descent:
+$$
+K_{ij} = K_{ij} - (\frac{dE}{dK_{ij}} * \alpha) \\
+B_{i} = B_{i} - (\frac{dE}{dB_{i}} * \alpha)
+$$
+where alpha is the learning rate
+
 ![Convolutional layer - Back-propagation](./assets/convolutional_layer_backpropagation.jpg)
 *Convolutional layer backpropagation*
 
 ## Dense layer
+
+### Forwarding
+The formula used to compute the output matrix is:
+$$
+Y = B + X * W \\
+Yactv = actv(Y)
+$$
+where:
+- Y is the output
+- B are the biases
+- X is the input
+- W are the weights
+
+In order to compute the output matrix, you need to perform a matrix multiplication between the input matrix and the weights matrix, then add the bias to it.
+
 ![Dense layer - Forwarding](./assets/dense_layer_forwarding.jpg)
 *Dense layer forwarding - input (1x7), weights (7x4), biases (1x4)*
 
+### Back-propagation
+The formula used to correct weights/biases, as well as the derivative of the error w.r.t. the input is:
+$$
+\frac{dE}{dW_{ij}} = X_i * \frac{dE}{dY_j} * \frac{dactv}{dY_j} \\
+\frac{dE}{dB_i} = \frac{dE}{dY_i} * \frac{dactv}{dY_i} \\
+\frac{dE}{dY_i} = \sum_{j=0}^{n} (\frac{dE}{dW_{ji}} * \frac{dE}{dY_i} * \frac{dactv}{dY_i}) \\
+$$
+
+The correction of the weights/biases are performed the same way as the convolutional layer
 ![Dense layer - Back-propagation](./assets/dense_layer_backpropagation.jpg)
 *Dense layer backpropagation*
 
 ## Pooling layer
 ### Average pooling layer
+#### Forwarding
+The formula used to compute the output matrix is:
+$$
+Y_{pqc} = \frac{1}{k^2} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1}X_{shp+i, swq+j, c}
+$$
+where:
+- Y_pqc is the output value at index pqc
+- k is the size of the edge of the kernel (the kernel is squared)
+- p and q are the indices for the output feature map
+- c is the channel index
+- *shp* and *swq* represent the top-left corner of the pooling window applied to the input feature map.
+
 ![Average pooling layer - Forwarding](./assets/avg_pooling_layer_forwarding.jpg)
-*Average pooling layer forwarding - input (4x4x3), kernel (2x2x3)*
+*Average pooling layer forwarding - input (4x4x3), kernel (2x2x3), padding 0, stride 2*
 
+#### Back-propagation
+The back-propagation is pretty easy in this case. We need to propagate the derivative of the error w.r.t. the output only in the portion of the input that has been involved in the computation of a specific value of the output matrix.
 ![Average pooling layer - Back-propagation](./assets/avg_pooling_layer_backpropagation.jpg)
-### Max pooling layer
-![Max pooling layer - Forwarding](./assets/max_pooling_layer_forwarding.jpg)
-*Max pooling layer forwarding - input (4x4x3), kernel (2x2x3)*
 
+### Max pooling layer
+#### Forwarding
+The formula used to compute the output matrix is:
+$$
+Y_{pqc} = max_{0 \leq i \leq k_h, 0 \leq j \leq k_w} X_{shp + i, swq + j, c}
+$$
+where the nomenclature is the same as the average pooling layer.
+![Max pooling layer - Forwarding](./assets/max_pooling_layer_forwarding.jpg)
+*Max pooling layer forwarding - input (4x4x3), kernel (2x2x3), padding 0, stride 2*
+
+During the forwarding stage, we need to remember the position of a specific value of the output matrix w.r.t. the input matrix, so during the back-propagation we already know which values of the input matrix have affected the following layers. To do this, for each channel of the output matrix, we use a 3D matrix in which, on the 1st channel, we keep track of the row index of the element that is referring to, while in the 2nd channel we keep track of the column index of the same element.
 ![Max pooling layer - Forwarding (example)](./assets/max_pooling_layer_forwarding_example.jpg)
-![Average pooling layer - Back-propagation](./assets/max_pooling_layer_backpropagation.jpg)
+*Max pooling layer forwarding example - input (4x4x1), kernel (2x2x1), padding 0, stride 2*
+
+#### Back-propagation
+During the back-propagation, we compute a derivative matrix in which we propagate backward the derivative of the error w.r.t. the output, only if the position of the input element is found inside the indexes matrices.
+![Max pooling layer - Back-propagation](./assets/max_pooling_layer_backpropagation.jpg)
+
 ### Softmax layer
 ![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
 ![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
+
+
+### Test
+2 tests are available in test/ folder:
+- test_common
+- test_layer
+
+### Tools
+Several tools are available in tools/ folder:
+- build.sh: build all targets (CMake)
+- clear.sh: remove the build folder
+- test.sh: run tests in verbose mode (CTest)
+- format.sh: code formatting (Clang Format)
+- heap-check.sh: run memory leaks check over tests (Valgrind)
+
+https://drive.google.com/file/d/1eEKzfmEu6WKdRlohBQiqi3PhW_uIVJVP/view
