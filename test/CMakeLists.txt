@@ -13,7 +13,7 @@ add_executable(test_common
 )
 
 target_link_libraries(test_common
-    c_cnn_framework
+    2c2n
     unity
     m
 )
@@ -25,7 +25,7 @@ add_executable(test_layer
 )
 
 target_link_libraries(test_layer
-    c_cnn_framework
+    2c2n
     unity
     m
 )
@@ -37,7 +37,7 @@ add_executable(test_matrix
 )
 
 target_link_libraries(test_matrix
-    c_cnn_framework
+    2c2n
     unity
     m
 )

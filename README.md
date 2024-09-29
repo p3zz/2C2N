@@ -19,7 +19,7 @@ cd build
 cmake ..
 cmake --build . --target all
 ```
-The framework will be builded as a single static library, called libc_cnn_framework.a
+The framework will be builded as a single static library, called lib2c2n.a
 
 To clear the build folder, run:
 ```bash
