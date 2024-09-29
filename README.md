@@ -2,7 +2,7 @@
 
 ## Description
 
-2C2N is a C-based framework, inspired by PyTorch, for building and running Convolutional Neural Networks (CNNs). It features implementations of commonly used CNN layers such as convolutional, pooling, and dense (or fully connected) layers, along with its related forwarding and back-propagation procedures. The framework also includes well-known computation functions and data structures like matrix2d/3d for efficient matrix operations. The code has been developed in order to provide an easy, intuitive and modular interface with a low footprint memory usage.
+2C2N is a C-based framework, inspired by PyTorch, for building and running Convolutional Neural Networks (CNNs). It features implementations of commonly used CNN layers such as convolutional, pooling, and dense (or fully connected) layers, along with their related forwarding and back-propagation procedures. The framework also includes well-known computation functions and data structures like matrix2d/3d for efficient matrix operations. The code has been developed in order to provide an easy, intuitive and modular interface with a low footprint memory usage.
 
 ## Tools
 
@@ -11,7 +11,9 @@ The build process is performed using [CMake](https://cmake.org/).
 To build the whole project (every target), run:
 ```bash
 ./tools/build.sh
+
 #or
+
 mkdir build
 cd build
 cmake ..
@@ -22,7 +24,9 @@ The framework will be builded as a single static library, called libc_cnn_framew
 To clear the build folder, run:
 ```bash
 ./tools/clear.sh
+
 #or
+
 rm -r build
 ```
 
@@ -302,7 +306,7 @@ typedef enum {
 } activation_type;
 ```
 
-The shared opeations that can be performed on a generic layer are:
+The shared operations that can be performed on a generic layer are:
 - init
 - feed
 - forwarding
@@ -378,10 +382,11 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 
 ##### Forwarding
 The formula used to compute the output matrix is:
-$$
+```math
 Y_i = B_i + \sum_{j=1}^{n} X_j * K_{ij}\\
 Yactv_{i} = actv(Y_i)
-$$
+```
+
 where:
 - Y_i is the i-th channel of the output
 - B_i is the i-th bias
@@ -395,17 +400,20 @@ In order to compute the i-th channel of the output matrix, we perform the sum of
 
 ##### Back-propagation
 The formula used to correct the kernels/biases and to compute the derivative of the error w.r.t. to the input are:
-$$
+```math
 \frac{dE}{dK_{ij}} = X_j * \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
 \frac{dE}{dB_i} = \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
 \frac{dE}{dXj} = \sum_{i=1}^{n} (\frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} *_{full} K_{ij}) \\
-$$
+```
+
 Each derivative (except for the derivative of the error w.r.t. the input) are then used to correct
 the kernels/biases using the gradient descent:
-$$
+
+```math
 K_{ij} = K_{ij} - (\frac{dE}{dK_{ij}} * \alpha) \\
 B_{i} = B_{i} - (\frac{dE}{dB_{i}} * \alpha)
-$$
+```
+
 where alpha is the learning rate
 
 ![Convolutional layer - Back-propagation](./assets/convolutional_layer_backpropagation.jpg)
@@ -472,10 +480,11 @@ void dense_layer_backpropagation(dense_layer_t *layer,
 
 ##### Forwarding
 The formula used to compute the output matrix is:
-$$
+```math
 Y = B + X * W \\
 Yactv = actv(Y)
-$$
+```
+
 where:
 - Y is the output
 - B are the biases
@@ -489,11 +498,11 @@ In order to compute the output matrix, you need to perform a matrix multiplicati
 
 ##### Back-propagation
 The formula used to correct weights/biases, as well as the derivative of the error w.r.t. the input is:
-$$
+```math
 \frac{dE}{dW_{ij}} = X_i * \frac{dE}{dY_j} * \frac{dactv}{dY_j} \\
 \frac{dE}{dB_i} = \frac{dE}{dY_i} * \frac{dactv}{dY_i} \\
 \frac{dE}{dY_i} = \sum_{j=0}^{n} (\frac{dE}{dW_{ji}} * \frac{dE}{dY_i} * \frac{dactv}{dY_i}) \\
-$$
+```
 
 The correction of the weights/biases are performed the same way as the convolutional layer
 
@@ -560,9 +569,9 @@ void pool_layer_backpropagation(pool_layer_t *layer, const matrix3d_t *const inp
 #### Average pooling layer
 ##### Forwarding
 The formula used to compute the output matrix is:
-$$
+```math
 Y_{pqc} = \frac{1}{k^2} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1}X_{shp+i, swq+j, c}
-$$
+```
 where:
 - Y_pqc is the output value at index pqc
 - k is the size of the edge of the kernel (the kernel is squared)
@@ -582,9 +591,9 @@ The back-propagation is pretty easy in this case. We need to propagate the deriv
 #### Max pooling layer
 ##### Forwarding
 The formula used to compute the output matrix is:
-$$
+```math
 Y_{pqc} = max_{0 \leq i \leq k_h, 0 \leq j \leq k_w} X_{shp + i, swq + j, c}
-$$
+```
 where the nomenclature is the same as the average pooling layer.
 
 ![Max pooling layer - Forwarding](./assets/max_pooling_layer_forwarding.jpg)
@@ -652,18 +661,19 @@ void softmax_layer_backpropagation(softmax_layer_t *layer, const matrix3d_t *con
 
 ##### Forwarding
 The formula to compute the output matrix is:
-$$
+```math
 \sigma(Y_{ij}) = \frac{e^{Y_{ij}}}{\sum_{j=0}^{n-1} \sum_{k=0}^{m-1} e^{Y_{jk}}}
-$$
+```
 where Y_ij is the value of the 2D output matrix.
 
 ![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
 ##### Back-propagation
 The formula to compute the derivative of the error w.r.t. the input is:
-$$
+```math
 \frac{d\sigma}{dY_{i}} = \sigma(Y_{i}) * (1 - \sigma(Y_{i})) \text{ if i=j}\\
 \frac{d\sigma}{dY_{i}} = -\sigma(Y_{i}) * \sigma(Y_{j}) \text{ otherwise }
-$$
+```
+
 where Y_i and Y_j are the i/j-th value of the output matrix
 
 ![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
