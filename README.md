@@ -384,7 +384,9 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 The formula used to compute the output matrix is:
 ```math
 Y_i = B_i + \sum_{j=1}^{n} X_j * K_{ij}\\
-Yactv_{i} = actv(Y_i)
+
+Yactv_{i} = actv(Y_i) \\
+
 ```
 
 where:
@@ -402,8 +404,11 @@ In order to compute the i-th channel of the output matrix, we perform the sum of
 The formula used to correct the kernels/biases and to compute the derivative of the error w.r.t. to the input are:
 ```math
 \frac{dE}{dK_{ij}} = X_j * \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
+
 \frac{dE}{dB_i} = \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
+
 \frac{dE}{dXj} = \sum_{i=1}^{n} (\frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} *_{full} K_{ij}) \\
+
 ```
 
 Each derivative (except for the derivative of the error w.r.t. the input) are then used to correct
@@ -411,7 +416,9 @@ the kernels/biases using the gradient descent:
 
 ```math
 K_{ij} = K_{ij} - (\frac{dE}{dK_{ij}} * \alpha) \\
-B_{i} = B_{i} - (\frac{dE}{dB_{i}} * \alpha)
+
+B_{i} = B_{i} - (\frac{dE}{dB_{i}} * \alpha) \\
+
 ```
 
 where alpha is the learning rate
@@ -482,7 +489,9 @@ void dense_layer_backpropagation(dense_layer_t *layer,
 The formula used to compute the output matrix is:
 ```math
 Y = B + X * W \\
-Yactv = actv(Y)
+
+Yactv = actv(Y) \\
+
 ```
 
 where:
@@ -500,7 +509,9 @@ In order to compute the output matrix, you need to perform a matrix multiplicati
 The formula used to correct weights/biases, as well as the derivative of the error w.r.t. the input is:
 ```math
 \frac{dE}{dW_{ij}} = X_i * \frac{dE}{dY_j} * \frac{dactv}{dY_j} \\
+
 \frac{dE}{dB_i} = \frac{dE}{dY_i} * \frac{dactv}{dY_i} \\
+
 \frac{dE}{dY_i} = \sum_{j=0}^{n} (\frac{dE}{dW_{ji}} * \frac{dE}{dY_i} * \frac{dactv}{dY_i}) \\
 ```
 
@@ -670,7 +681,8 @@ where Y_ij is the value of the 2D output matrix.
 ##### Back-propagation
 The formula to compute the derivative of the error w.r.t. the input is:
 ```math
-\frac{d\sigma}{dY_{i}} = \sigma(Y_{i}) * (1 - \sigma(Y_{i})) \text{ if i=j}\\
+\frac{d\sigma}{dY_{i}} = \sigma(Y_{i}) * (1 - \sigma(Y_{i})) \text{ if i=j} \\
+
 \frac{d\sigma}{dY_{i}} = -\sigma(Y_{i}) * \sigma(Y_{j}) \text{ otherwise }
 ```
 
