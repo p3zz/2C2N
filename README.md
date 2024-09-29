@@ -75,6 +75,71 @@ valgrind --leak-check=full build/test/test_common
 valgrind --leak-check=full build/test/test_matrix
 ```
 
+## Snippet
+Here's a snippet of code that shows a basic usage of the framework, creating a network of 3 layers:
+- convolutional
+- average pooling 
+- dense
+
+and performing forwarding and back-propagation.
+
+```c
+const float learning_rate = 0.015;
+float error = 0.f;
+matrix3d_t input = {0};
+matrix3d_t d_error = {0};
+matrix3d_t aux = {0};
+matrix2d_t output_target = {0};
+float output_target_values[] = {0.f, 1.f};
+
+matrix2d_t output_channel = {0};
+matrix2d_t d_error_channel = {0};
+
+conv_layer_t layer0 = {0};
+pool_layer_t layer1 = {0};
+dense_layer_t layer2 = {0};
+
+/* initialize 3D input matrix of (7x7x2) and randomize its content */
+matrix3d_init(&input, 7, 7, 2);
+matrix3d_randomize(&input);
+
+matrix3d_init(&d_error, 1, 2, 1);
+matrix3d_init(&aux, 1, 2, 2, 2);
+matrix2d_load(&output_target, 1, 2, output_target_values);
+
+/* initialize convolutional layer - input (7x7x2), 2 kernels (4x4x2), stride 1, padding 0, activation relu */
+conv_layer_init(&layer0, 7, 7, 2, 4, 2, 1, 0, ACTIVATION_TYPE_RELU);
+/* initialize avg pooling layer - input (4x4x2), kernel (2x2x2), padding 0, stride 2 */
+pool_layer_init(&layer1, 4, 4, 2, 2, 0, 2, POOLING_TYPE_AVERAGE);
+/* initialize dense layer - input (1x8), output (1x2), activation tanh*/
+dense_layer_init(&layer2, 8, 2, ACTIVATION_TYPE_TANH);
+
+/* retrieve a reference of each channel of interesting matrixes */
+matrix3d_get_slice_as_mut_ref(layer2.output,  &output_channel, 0);
+matrix3d_get_slice_as_mut_ref(&d_error, &d_error_channel, 0);
+
+/* forwarding */
+conv_layer_feed(&layer0, input);
+conv_layer_forwarding(&layer0);
+pool_layer_feed(&layer1, layer0.output_activated);
+pool_layer_forwarding(&layer1);
+/* reshape the pool layer output to fit the dense layer input */
+matrix3d_reshape(layer1.output, layer2.input);
+/* the feed has been done by the reshape */
+dense_layer_forwarding(&layer2);
+
+/* compute the loss */
+error = mean_squared_error(&output_channel, &output_target);
+/* compute the loss derivative */
+mean_squared_error_derivative(&output_channel, &output_target, &d_error_channel);
+
+/* back-propagation */
+dense_layer_backpropagation(&layer2, &d_error_channel, learning_rate);
+matrix3d_reshape(&layer2.d_input, &aux);
+pool_layer_backpropagation(&layer1, &aux, learning_rate);
+conv_layer_backpropagation(&layer0, &layer1.d_input, learning_rate);
+```
+
 ## Core
 
 ### Matrix
