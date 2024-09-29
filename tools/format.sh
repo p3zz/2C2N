@@ -1,3 +1,4 @@
 #! /bin/bash
 
-clang-format -i {include,src,test}/*
+clang-format -i {include,src}/*
+clang-format -i test/test_*
