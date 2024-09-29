@@ -68,16 +68,16 @@ void test_matrix3d_get_elem(void) {
   TEST_ASSERT_EQUAL_FLOAT(4.f, ref);
 }
 
-void test_matrix3d_get_slice_as_mut_ref(void) {
+void test_matrix3d_get_channel_as_mut_ref(void) {
   matrix3d_t m1 = {0};
-  matrix2d_t slice = {0};
+  matrix2d_t channel = {0};
 
   float content[] = {3.f, 1.f, 2.f, 5.f,  6.f,  7.f,
 
                      9.f, 4.f, 5.f, 12.f, 11.f, 10.f};
   matrix3d_load(&m1, 2, 3, 2, content);
-  matrix3d_get_slice_as_mut_ref(&m1, &slice, 1);
-  float ref = matrix2d_get_elem(&slice, 1, 1);
+  matrix3d_get_channel_as_mut_ref(&m1, &channel, 1);
+  float ref = matrix2d_get_elem(&channel, 1, 1);
   TEST_ASSERT_EQUAL_FLOAT(11.f, ref);
 }
 
@@ -148,7 +148,7 @@ int main(void) {
   RUN_TEST(test_matrix3d_get_elem_as_ref);
   RUN_TEST(test_matrix3d_get_elem_as_mut_ref);
   RUN_TEST(test_matrix3d_get_elem);
-  RUN_TEST(test_matrix3d_get_slice_as_mut_ref);
+  RUN_TEST(test_matrix3d_get_channel_as_mut_ref);
   RUN_TEST(test_common_matrix3d_reshape);
   RUN_TEST(test_common_matrix3d_reshape_2);
   RUN_TEST(test_matrix2d_load);

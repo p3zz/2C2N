@@ -255,9 +255,9 @@ void dense_layer_forwarding(dense_layer_t *layer) {
   matrix2d_t output_activated = {0};
   matrix2d_t input = {0};
 
-  matrix3d_get_slice_as_mut_ref(layer->output, &output, 0);
-  matrix3d_get_slice_as_mut_ref(layer->output_activated, &output_activated, 0);
-  matrix3d_get_slice_as_mut_ref(layer->input, &input, 0);
+  matrix3d_get_channel_as_mut_ref(layer->output, &output, 0);
+  matrix3d_get_channel_as_mut_ref(layer->output_activated, &output_activated, 0);
+  matrix3d_get_channel_as_mut_ref(layer->input, &input, 0);
 
   for (int i = 0; i < output.width; i++) {
     float *out_val = matrix2d_get_elem_as_mut_ref(&output, 0, i);
@@ -278,13 +278,13 @@ void softmax_layer_forwarding(softmax_layer_t *layer) {
     return;
   }
 
-  matrix2d_t in_slice = {0};
-  matrix2d_t out_slice = {0};
+  matrix2d_t in_channel = {0};
+  matrix2d_t out_channel = {0};
   for (int i = 0; i < layer->input->depth; i++) {
-    matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, i);
-    matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
-    matrix2d_copy_content(&in_slice, &out_slice);
-    softmax_inplace(&out_slice);
+    matrix3d_get_channel_as_mut_ref(layer->input, &in_channel, i);
+    matrix3d_get_channel_as_mut_ref(layer->output, &out_channel, i);
+    matrix2d_copy_content(&in_channel, &out_channel);
+    softmax_inplace(&out_channel);
   }
 }
 
@@ -293,18 +293,18 @@ void pool_layer_forwarding(pool_layer_t *layer) {
     return;
   }
 
-  matrix2d_t in_slice = {0};
-  matrix2d_t out_slice = {0};
+  matrix2d_t in_channel = {0};
+  matrix2d_t out_channel = {0};
   for (int i = 0; i < layer->input->depth; i++) {
-    matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, i);
-    matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
+    matrix3d_get_channel_as_mut_ref(layer->input, &in_channel, i);
+    matrix3d_get_channel_as_mut_ref(layer->output, &out_channel, i);
     switch (layer->type) {
     case POOLING_TYPE_AVERAGE:
-      avg_pooling(&in_slice, &out_slice, layer->kernel_size, layer->padding,
+      avg_pooling(&in_channel, &out_channel, layer->kernel_size, layer->padding,
                   layer->stride);
       break;
     case POOLING_TYPE_MAX:
-      max_pooling(&in_slice, &out_slice, &layer->indexes[i], layer->kernel_size,
+      max_pooling(&in_channel, &out_channel, &layer->indexes[i], layer->kernel_size,
                   layer->padding, layer->stride);
       break;
     }
@@ -313,38 +313,38 @@ void pool_layer_forwarding(pool_layer_t *layer) {
 
 void conv_layer_forwarding(conv_layer_t *layer) {
   matrix2d_t result = {0};
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_act_slice = {0};
-  matrix2d_t in_slice = {0};
-  matrix2d_t kernel_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_act_channel = {0};
+  matrix2d_t in_channel = {0};
+  matrix2d_t kernel_channel = {0};
 
   matrix2d_init(&result, layer->output->height, layer->output->width);
 
   /* for each kernel */
   for (int i = 0; i < layer->kernels_n; i++) {
-    matrix3d_get_slice_as_mut_ref(layer->output, &out_slice, i);
-    matrix3d_get_slice_as_mut_ref(layer->output_activated, &out_act_slice, i);
+    matrix3d_get_channel_as_mut_ref(layer->output, &out_channel, i);
+    matrix3d_get_channel_as_mut_ref(layer->output_activated, &out_act_channel, i);
 
-    /* for each slice of the kernel */
+    /* for each channel of the kernel */
     for (int j = 0; j < layer->kernels[i].depth; j++) {
-      matrix3d_get_slice_as_mut_ref(&layer->kernels[i], &kernel_slice, j);
-      matrix3d_get_slice_as_mut_ref(layer->input, &in_slice, j);
+      matrix3d_get_channel_as_mut_ref(&layer->kernels[i], &kernel_channel, j);
+      matrix3d_get_channel_as_mut_ref(layer->input, &in_channel, j);
       /*
       compute the cross correlation between a channel of the input and its
       corresponding kernel
       */
-      cross_correlation(&in_slice, &kernel_slice, &result, layer->padding,
+      cross_correlation(&in_channel, &kernel_channel, &result, layer->padding,
                         layer->stride);
       if (j == 0) {
         /* perform an early sum of the biases to the final output layer */
-        matrix2d_sum_inplace(&layer->biases[i], &out_slice);
+        matrix2d_sum_inplace(&layer->biases[i], &out_channel);
       }
       /* then we sum the resulting matrix to the output */
-      matrix2d_sum_inplace(&result, &out_slice);
+      matrix2d_sum_inplace(&result, &out_channel);
     }
-    matrix2d_copy_content(&out_slice, &out_act_slice);
+    matrix2d_copy_content(&out_channel, &out_act_channel);
     /* activate the output */
-    activate_inplace(&out_act_slice, layer->activation_type);
+    activate_inplace(&out_act_channel, layer->activation_type);
   }
   matrix2d_destroy(&result);
 }
@@ -397,7 +397,7 @@ void softmax_layer_backpropagation(softmax_layer_t *layer,
   matrix2d_t sample = {0};
   float aux_val = 0.f;
 
-  matrix3d_get_slice_as_mut_ref(layer->output, &sample, 0);
+  matrix3d_get_channel_as_mut_ref(layer->output, &sample, 0);
 
   matrix2d_init(&aux, layer->output->width, layer->output->width);
 
@@ -427,19 +427,19 @@ void softmax_layer_backpropagation(softmax_layer_t *layer,
 
 void pool_layer_backpropagation(pool_layer_t *layer,
                                 const matrix3d_t *const input) {
-  matrix2d_t i_slice = {0};
-  matrix2d_t j_slice = {0};
+  matrix2d_t i_channel = {0};
+  matrix2d_t j_channel = {0};
 
   switch (layer->type) {
   case POOLING_TYPE_MAX: {
     for (int i = 0; i < layer->d_input->depth; i++) {
-      matrix3d_get_slice_as_mut_ref(&layer->indexes[i], &i_slice, 0);
-      matrix3d_get_slice_as_mut_ref(&layer->indexes[i], &j_slice, 1);
+      matrix3d_get_channel_as_mut_ref(&layer->indexes[i], &i_channel, 0);
+      matrix3d_get_channel_as_mut_ref(&layer->indexes[i], &j_channel, 1);
 
-      for (int m = 0; m < i_slice.height; m++) {
-        for (int n = 0; n < i_slice.width; n++) {
-          int row_i = matrix2d_get_elem(&i_slice, m, n);
-          int col_i = matrix2d_get_elem(&j_slice, m, n);
+      for (int m = 0; m < i_channel.height; m++) {
+        for (int n = 0; n < i_channel.width; n++) {
+          int row_i = matrix2d_get_elem(&i_channel, m, n);
+          int col_i = matrix2d_get_elem(&j_channel, m, n);
           *matrix3d_get_elem_as_mut_ref(layer->d_input, row_i, col_i, i) +=
               matrix3d_get_elem(input, m, n, i);
         }
@@ -502,10 +502,10 @@ void conv_layer_backpropagation(conv_layer_t *layer,
   */
   matrix2d_t d_input_aux = {0};
 
-  matrix2d_t in_slice = {0};
-  matrix2d_t d_kernel_slice = {0};
-  matrix2d_t kernel_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t in_channel = {0};
+  matrix2d_t d_kernel_channel = {0};
+  matrix2d_t kernel_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
   matrix2d_init(&d_output, layer->output->height, layer->output->width);
 
@@ -526,27 +526,27 @@ void conv_layer_backpropagation(conv_layer_t *layer,
       }
     }
 
-    matrix3d_get_slice_as_mut_ref(input, &in_slice, i);
+    matrix3d_get_channel_as_mut_ref(input, &in_channel, i);
 
-    matrix2d_element_wise_product_inplace(&d_output, &in_slice);
+    matrix2d_element_wise_product_inplace(&d_output, &in_channel);
 
     /* for each layer of the current kernel compute the derivative
     using the cross correlation between the j-th input and the i-th output
     */
     matrix3d_t *kernel = &layer->kernels[i];
     for (int j = 0; j < kernel->depth; j++) {
-      matrix3d_get_slice_as_mut_ref(input, &in_slice, j);
-      matrix3d_get_slice_as_mut_ref(&d_kernel[i], &d_kernel_slice, j);
-      matrix3d_get_slice_as_mut_ref(kernel, &kernel_slice, j);
-      matrix3d_get_slice_as_mut_ref(layer->d_input, &d_input_slice, j);
+      matrix3d_get_channel_as_mut_ref(input, &in_channel, j);
+      matrix3d_get_channel_as_mut_ref(&d_kernel[i], &d_kernel_channel, j);
+      matrix3d_get_channel_as_mut_ref(kernel, &kernel_channel, j);
+      matrix3d_get_channel_as_mut_ref(layer->d_input, &d_input_channel, j);
 
       /* compute the derivative for the correction of the kernel */
-      cross_correlation(&in_slice, &d_output, &d_kernel_slice, layer->padding,
+      cross_correlation(&in_channel, &d_output, &d_kernel_channel, layer->padding,
                         1);
       /* compute the derivative for the correction of the input */
-      convolution(&d_output, &kernel_slice, &d_input_aux,
+      convolution(&d_output, &kernel_channel, &d_input_aux,
                   kernel->height - input->height + 1, 1);
-      matrix2d_sum_inplace(&d_input_aux, &d_input_slice);
+      matrix2d_sum_inplace(&d_input_aux, &d_input_channel);
     }
 
     /* correct biases */

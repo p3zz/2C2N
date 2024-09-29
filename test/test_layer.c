@@ -253,18 +253,18 @@ void test_backpropagation_dense_layer(void) {
   matrix3d_t d_input = {0};
   matrix3d_init(&d_input, output_target.height, output_target.width, 1);
 
-  matrix2d_t out_act_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_act_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_slice_as_mut_ref(layer.output_activated, &out_act_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&output_target, &out_tgt_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+  matrix3d_get_channel_as_mut_ref(layer.output_activated, &out_act_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&output_target, &out_tgt_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
-  mean_squared_error_derivative(&out_act_slice, &out_tgt_slice, &d_input_slice);
+  mean_squared_error_derivative(&out_act_channel, &out_tgt_channel, &d_input_channel);
 
-  TEST_ASSERT_EQUAL_FLOAT(2.524f, matrix2d_get_elem(&d_input_slice, 0, 0));
-  TEST_ASSERT_EQUAL_FLOAT(6.858f, matrix2d_get_elem(&d_input_slice, 0, 1));
+  TEST_ASSERT_EQUAL_FLOAT(2.524f, matrix2d_get_elem(&d_input_channel, 0, 0));
+  TEST_ASSERT_EQUAL_FLOAT(6.858f, matrix2d_get_elem(&d_input_channel, 0, 1));
 
   dense_layer_backpropagation(&layer, &d_input, 0.15f);
 
@@ -350,17 +350,17 @@ void test_backpropagation_conv_layer(void) {
   matrix3d_init(&d_input, output_targets.height, output_targets.width,
                 layer.output_activated->depth);
 
-  matrix2d_t out_act_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_act_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
   for (int i = 0; i < d_input.depth; i++) {
-    matrix3d_get_slice_as_mut_ref(layer.output_activated, &out_act_slice, i);
-    matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
-    matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, i);
+    matrix3d_get_channel_as_mut_ref(layer.output_activated, &out_act_channel, i);
+    matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
+    matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
 
-    mean_squared_error_derivative(&out_act_slice, &out_tgt_slice,
-                                  &d_input_slice);
+    mean_squared_error_derivative(&out_act_channel, &out_tgt_channel,
+                                  &d_input_channel);
   }
   TEST_ASSERT_EQUAL_INT(2, d_input.depth);
   TEST_ASSERT_EQUAL_INT(2, d_input.height);
@@ -400,18 +400,18 @@ void test_backpropagation_max_pool_layer(void) {
 
   matrix3d_t d_input = {0};
 
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
   matrix3d_init(&d_input, output_targets.height, output_targets.width,
                 layer.output->depth);
   for (int i = 0; i < d_input.depth; i++) {
-    matrix3d_get_slice_as_mut_ref(layer.output, &out_slice, i);
-    matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
-    matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, i);
+    matrix3d_get_channel_as_mut_ref(layer.output, &out_channel, i);
+    matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
+    matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
 
-    mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
   }
 
   pool_layer_backpropagation(&layer, &d_input);
@@ -462,17 +462,17 @@ void test_backpropagation_avg_pool_layer(void) {
   matrix3d_set_elem(&output_targets, 1, 1, 1, 1);
 
   matrix3d_t d_input = {0};
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
   matrix3d_init(&d_input, output_targets.height, output_targets.width,
                 layer.output->depth);
   for (int i = 0; i < d_input.depth; i++) {
-    matrix3d_get_slice_as_mut_ref(layer.output, &out_slice, i);
-    matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
-    matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, i);
-    mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+    matrix3d_get_channel_as_mut_ref(layer.output, &out_channel, i);
+    matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
+    matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
   }
 
   TEST_ASSERT_EQUAL_FLOAT(4.0, matrix3d_get_elem(&d_input, 0, 0, 0));
@@ -545,21 +545,21 @@ void test_perceptron_or(void) {
 
   matrix3d_init(&d_input, output_targets.height, output_targets.width, 1);
 
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_slice_as_mut_ref(hidden_layer.output_activated, &out_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations_n; i++) {
     for (int j = 0; j < inputs_n; j++) {
-      matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, j);
+      matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, j);
       dense_layer_feed(&input_layer, &inputs[j]);
       dense_layer_forwarding(&input_layer);
       dense_layer_feed(&hidden_layer, input_layer.output_activated);
       dense_layer_forwarding(&hidden_layer);
-      mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+      mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
       dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
       dense_layer_backpropagation(&input_layer, hidden_layer.d_input,
                                   learning_rate);
@@ -567,13 +567,13 @@ void test_perceptron_or(void) {
   }
 
   for (int i = 0; i < inputs_n; i++) {
-    matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
+    matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
     dense_layer_feed(&input_layer, &inputs[i]);
     dense_layer_forwarding(&input_layer);
     dense_layer_feed(&hidden_layer, input_layer.output_activated);
     dense_layer_forwarding(&hidden_layer);
-    TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_slice, 0, 0),
-                             matrix2d_get_elem(&out_slice, 0, 0));
+    TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_channel, 0, 0),
+                             matrix2d_get_elem(&out_channel, 0, 0));
   }
 
   for (int i = 0; i < inputs_n; i++) {
@@ -628,21 +628,21 @@ void test_perceptron_and(void) {
 
   matrix3d_init(&d_input, output_targets.height, output_targets.width, 1);
 
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_slice_as_mut_ref(hidden_layer.output_activated, &out_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations_n; i++) {
     for (int j = 0; j < inputs_n; j++) {
-      matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, j);
+      matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, j);
       dense_layer_feed(&input_layer, &inputs[j]);
       dense_layer_forwarding(&input_layer);
       dense_layer_feed(&hidden_layer, input_layer.output_activated);
       dense_layer_forwarding(&hidden_layer);
-      mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+      mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
       dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
       dense_layer_backpropagation(&input_layer, hidden_layer.d_input,
                                   learning_rate);
@@ -650,13 +650,13 @@ void test_perceptron_and(void) {
   }
 
   for (int i = 0; i < inputs_n; i++) {
-    matrix3d_get_slice_as_mut_ref(&output_targets, &out_tgt_slice, i);
+    matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
     dense_layer_feed(&input_layer, &inputs[i]);
     dense_layer_forwarding(&input_layer);
     dense_layer_feed(&hidden_layer, input_layer.output_activated);
     dense_layer_forwarding(&hidden_layer);
-    TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_slice, 0, 0),
-                             matrix2d_get_elem(&out_slice, 0, 0));
+    TEST_ASSERT_FLOAT_WITHIN(0.00001, matrix2d_get_elem(&out_tgt_channel, 0, 0),
+                             matrix2d_get_elem(&out_channel, 0, 0));
   }
 
   for (int i = 0; i < inputs_n; i++) {
@@ -679,9 +679,9 @@ void test_conv_layer_backpropagation_freerun(void) {
   matrix3d_t aux = {0};
   matrix3d_t aux_rev = {0};
 
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
   // it's a 2
   float input_values[] = {
@@ -697,15 +697,15 @@ void test_conv_layer_backpropagation_freerun(void) {
   matrix3d_init(&aux, 1, 18, 1);
   matrix3d_init(&aux_rev, 3, 3, 2);
 
-  matrix3d_get_slice_as_mut_ref(&output_target, &out_tgt_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+  matrix3d_get_channel_as_mut_ref(&output_target, &out_tgt_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations; i++) {
     conv_layer_feed(&in_layer, &input);
     conv_layer_forwarding(&in_layer);
     matrix3d_reshape(in_layer.output_activated, &aux);
-    matrix3d_get_slice_as_mut_ref(&aux, &out_slice, 0);
-    mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+    matrix3d_get_channel_as_mut_ref(&aux, &out_channel, 0);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
     matrix3d_reshape(&d_input, &aux_rev);
     conv_layer_backpropagation(&in_layer, &aux_rev, learning_rate);
   }
@@ -769,13 +769,13 @@ void test_lenet5_cnn(void) {
 
   matrix3d_set_elem(&output_target, 0, 1, 0, 1.0);
 
-  matrix2d_t out_slice = {0};
-  matrix2d_t out_tgt_slice = {0};
-  matrix2d_t d_input_slice = {0};
+  matrix2d_t out_channel = {0};
+  matrix2d_t out_tgt_channel = {0};
+  matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_slice_as_mut_ref(layer7.output, &out_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&output_target, &out_tgt_slice, 0);
-  matrix3d_get_slice_as_mut_ref(&d_input, &d_input_slice, 0);
+  matrix3d_get_channel_as_mut_ref(layer7.output, &out_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&output_target, &out_tgt_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations; i++) {
     conv_layer_feed(&layer0, &input);
@@ -795,7 +795,7 @@ void test_lenet5_cnn(void) {
     softmax_layer_feed(&layer7, layer6.output_activated);
     softmax_layer_forwarding(&layer7);
 
-    mean_squared_error_derivative(&out_slice, &out_tgt_slice, &d_input_slice);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
 
     softmax_layer_backpropagation(&layer7, &d_input);
     dense_layer_backpropagation(&layer6, layer7.d_input, learning_rate);
@@ -863,8 +863,8 @@ void test_doc_example(void) {
 
   /* retrieve a reference of each channel of interesting matrixes so
   we can compute the cost function */
-  matrix3d_get_slice_as_mut_ref(layer2.output, &output_channel, 0);
-  matrix3d_get_slice_as_mut_ref(&d_error, &d_error_channel, 0);
+  matrix3d_get_channel_as_mut_ref(layer2.output, &output_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_error, &d_error_channel, 0);
 
   /* forwarding */
   conv_layer_feed(&layer0, &input);

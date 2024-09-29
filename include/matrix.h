@@ -42,11 +42,11 @@ typedef struct {
  * Implementation of a 3D matrix
  * @param height: n. of rows of the matrix
  * @param width: n. of columns of the matrix
- * @param depth: n. of slices of the matrix
+ * @param depth: n. of channels of the matrix
  * @param values: linear array that stores the data of the matrix.
- * the data must be stored such that each row of each slice is stored
+ * the data must be stored such that each row of each channel is stored
  * consecutively in memory, with one row directly following the previous one,
- * and one slice following the previous one.
+ * and one channel following the previous one.
  * @param loaded: flag used to keep track of the origin of the data.
  * e.g. if loaded is true, the pointer to the data has been set from
  * a caller of matrix3d_load(matrix3d_t *m, int height, int width, int depth).
@@ -188,7 +188,7 @@ void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @param z_idx: the index of the slice
+ * @param z_idx: the index of the channel
  * @return a non-mutable pointer to the cell if the indexes belongs to the
  * matrix, otherwise NULL
  */
@@ -200,7 +200,7 @@ const float *matrix3d_get_elem_as_ref(const matrix3d_t *const m, int row_idx,
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @param z_idx: the index of the slice
+ * @param z_idx: the index of the channel
  * @return a mutable pointer to the cell if the indexes belongs to the matrix,
  * otherwise NULL
  */
@@ -212,7 +212,7 @@ float *matrix3d_get_elem_as_mut_ref(const matrix3d_t *const m, int row_idx,
  * @param m: the target matrix
  * @param row_idx: the index of the row
  * @param col_idx: the index of the column
- * @param z_idx: the index of the slice
+ * @param z_idx: the index of the channel
  * @return the value of the cell if the indexes belongs to the matrix,
  * otherwise 0.f
  */
@@ -231,13 +231,13 @@ void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
                        int z_idx, float value);
 
 /**
- * @brief Retrieve a slice at a specific index of a 3D input matrix and stores
+ * @brief Retrieve a channel at a specific index of a 3D input matrix and stores
  * it in the result 2D matrix
  * @param m: the target matrix
- * @param result: the 2D matrix in which the slice will be stored
- * @param z_idx: the index of the slice
+ * @param result: the 2D matrix in which the channel will be stored
+ * @param z_idx: the index of the channel
  */
-void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
+void matrix3d_get_channel_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
                                    int z_idx);
 
 /**
@@ -246,7 +246,7 @@ void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
  * @param m: the target matrix
  * @param height: n. of rows of the matrix
  * @param width: n. of columns of the matrix
- * @param depth: n. of slices of the matrix
+ * @param depth: n. of channels of the matrix
  */
 void matrix3d_init(matrix3d_t *m, int height, int width, int depth);
 
@@ -256,7 +256,7 @@ void matrix3d_init(matrix3d_t *m, int height, int width, int depth);
  * @param m: the target matrix
  * @param height: n. of rows of the matrix
  * @param width: n. of columns of the matrix
- * @param depth: n. of slices of the matrix
+ * @param depth: n. of channels of the matrix
  * @param base_address: an existing memory address which will be the starting
  * address of the data of the target matrix
  */

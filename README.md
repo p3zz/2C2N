@@ -60,6 +60,7 @@ To format the code, run:
 ./tools/format.sh
 # or
 clang-format -i {include,src}/*
+clang-format -i test/test_*
 ```
 
 ### Memory check
@@ -124,8 +125,8 @@ void test_doc_example(void) {
 
   /* retrieve a reference of each channel of interesting matrixes so
   we can compute the cost function */
-  matrix3d_get_slice_as_mut_ref(layer2.output, &output_channel, 0);
-  matrix3d_get_slice_as_mut_ref(&d_error, &d_error_channel, 0);
+  matrix3d_get_channel_as_mut_ref(layer2.output, &output_channel, 0);
+  matrix3d_get_channel_as_mut_ref(&d_error, &d_error_channel, 0);
 
   /* forwarding */
   conv_layer_feed(&layer0, &input);
@@ -232,8 +233,8 @@ void matrix2d_set_elem(const matrix2d_t *const m, int row_idx, int col_idx,
 void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
                        int z_idx, float value);
 
-/* get a slice of 3D matrix as a 2D matrix */
-void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
+/* get a channel of 3D matrix as a 2D matrix */
+void matrix3d_get_channel_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
                                    int z_idx);
 
 ```
@@ -355,12 +356,12 @@ Y_i = B_i + \sum_{j=1}^{n} X_j * K_{ij}\\
 Yactv_{i} = actv(Y_i)
 $$
 where:
-- Y_i is the i-th slice of the output
+- Y_i is the i-th channel of the output
 - B_i is the i-th bias
-- X_j is the j-th slice of the input
-- K_ij is the j-th slice of the i-th kernel
+- X_j is the j-th channel of the input
+- K_ij is the j-th channel of the i-th kernel
 
-In order to compute the i-th slice of the output matrix, we perform the sum of the cross_correlation between each j-th slice of the i-th kernel and the j-th slice of the input, then add the bias to it.
+In order to compute the i-th channel of the output matrix, we perform the sum of the cross_correlation between each j-th channel of the i-th kernel and the j-th channel of the input, then add the bias to it.
 
 ![Convolutional layer - Forwarding](./assets/convolutional_layer_forwarding.jpg)
 *Convolutional layer forwarding - input (5x4x4), 2 kernels (3x3x3), 2 biases (3x2), padding 0, stride 1*

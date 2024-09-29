@@ -64,7 +64,7 @@ void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
   }
 }
 
-void matrix3d_get_slice_as_mut_ref(const matrix3d_t *const m,
+void matrix3d_get_channel_as_mut_ref(const matrix3d_t *const m,
                                    matrix2d_t *const result, int z_idx) {
   if (z_idx >= m->depth) {
     return;
@@ -107,7 +107,7 @@ void matrix2d_randomize(matrix2d_t *const input) {
 void matrix3d_randomize(matrix3d_t *const input) {
   matrix2d_t layer = {0};
   for (int i = 0; i < input->depth; i++) {
-    matrix3d_get_slice_as_mut_ref(input, &layer, i);
+    matrix3d_get_channel_as_mut_ref(input, &layer, i);
     matrix2d_randomize(&layer);
   }
 }
@@ -198,11 +198,11 @@ void matrix2d_print(const matrix2d_t *const m) {
 }
 
 void matrix3d_print(const matrix3d_t *const m) {
-  matrix2d_t slice = {0};
+  matrix2d_t channel = {0};
   for (int i = 0; i < m->depth; i++) {
     printf("[Layer %d]\n", i);
-    matrix3d_get_slice_as_mut_ref(m, &slice, i);
-    matrix2d_print(&slice);
+    matrix3d_get_channel_as_mut_ref(m, &channel, i);
+    matrix2d_print(&channel);
   }
 }
 

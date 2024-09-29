@@ -59,8 +59,8 @@ typedef struct {
  * feed-forward stage
  * @param indexes: pointer to multiple 3D matrices used to keep track of the
  * indexes of the maximum values found during the feed-forward stage of a max
- * pooling layer. For each slice of the output matrix, a 3D matrix with depth =
- * 2 (slice 0 to save row indexes, slice 1 to save column indexes) is used to
+ * pooling layer. For each channel of the output matrix, a 3D matrix with depth =
+ * 2 (channel 0 to save row indexes, channel 1 to save column indexes) is used to
  * keep track of the indexes of the values contained in the output matrix w.r.t.
  * the input matrix.
  * @param d_input: pointer to the derivative of the input w.r.t. the output.
