@@ -17,6 +17,8 @@ cd build
 cmake ..
 cmake --build . --target all
 ```
+The framework will be builded as a single static library, called libc_cnn_framework.a
+
 To clear the build folder, run:
 ```bash
 ./tools/clear.sh
@@ -39,7 +41,9 @@ git submodule update
 To run a test, run:
 ```bash
 ./tools/test.sh
+
 # or
+
 cd build/test
 ctest -V
 ```
@@ -58,7 +62,9 @@ The code style and formatting is performed using [CLang Format](https://clang.ll
 To format the code, run:
 ```bash
 ./tools/format.sh
+
 # or
+
 clang-format -i {include,src}/*
 clang-format -i test/test_*
 ```
@@ -70,7 +76,9 @@ The memory has been checked in every test suite.
 To perform a heap-check, run:
 ```bash
 ./tools/heap-check.sh
+
 # or
+
 valgrind --leak-check=full build/test/test_layer
 valgrind --leak-check=full build/test/test_common
 valgrind --leak-check=full build/test/test_matrix
@@ -162,10 +170,19 @@ void test_doc_example(void) {
 ```
 
 ## Core
+2C2N is built around 2 main components:
+- matrix: a collection of matrix structures and functions that manipulates and performs the most common operations on matrixes
+- layer: a collection of the most common layers of a CNN and their related operations
 
 ### Matrix
+
 ![Matrix2D](./assets/matrix2d.jpg)
+
+*2D matrix*
+
 ![Matrix3D](./assets/matrix3d.jpg)
+
+*3D matrix*
 
 The framework is built around 2 main structures: *matrix2d_t* and *matrix3d_t*, defined as follows:
 ```c
@@ -239,9 +256,9 @@ void matrix3d_get_channel_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
 
 ```
 
-Furthermore, the framework expose a bunch of useful functions for matrix operations:
+Furthermore, the framework exposes a bunch of useful functions for matrix operations:
 ```c
-// copy the content of *values* of the input matrix inside the output matriux
+// copy the content of *values* of the input matrix inside the output matrix
 void matrix3d_copy_content(const matrix3d_t *const input,
                            const matrix3d_t *output);
 void matrix2d_copy_content(const matrix2d_t *const input,
@@ -267,13 +284,23 @@ void matrix3d_reshape(const matrix3d_t *const input, matrix3d_t *output);
 
 ```
 
-### Layers
+### Layer
 The framework provides a common interface to build, run and destroy the most used
 type of layers of a CNN:
 
 - Convolutional layer
 - Pooling layer
 - Dense (fully connected) layer
+
+and few activation functions:
+```c
+typedef enum {
+  ACTIVATION_TYPE_RELU,
+  ACTIVATION_TYPE_SIGMOID,
+  ACTIVATION_TYPE_TANH,
+  ACTIVATION_TYPE_IDENTITY,
+} activation_type;
+```
 
 The shared opeations that can be performed on a generic layer are:
 - init
@@ -306,12 +333,12 @@ typedef struct {
 A **convolutional layer** can be created as follows:
 
 ```c
-/* initialze a convolutional layer, and allocate dinamically every pointer of the struct */
+/* initialize a convolutional layer, and allocate dinamically every pointer of the struct */
 void conv_layer_init(conv_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int kernels_n,
                      int stride, int padding, activation_type activation_type);
 
-/* initialze a convolutional layer, and set every pointer of the struct to the corresponding
+/* initialize a convolutional layer, and set every pointer of the struct to the corresponding
 argument*/
 void conv_layer_init_load(conv_layer_t *layer, matrix3d_t *kernels,
                           int kernels_n, matrix2d_t *biases, matrix3d_t *output,
@@ -402,11 +429,11 @@ typedef struct {
 A **dense layer** can be created as follows:
 
 ```c
-/* initialze a dense layer, and allocate dinamically every pointer of the struct */
+/* initialize a dense layer, and allocate dinamically every pointer of the struct */
 void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
                       activation_type activation_type);
 
-/* initialze a dense layer, and set every pointer of the struct to the corresponding
+/* initialize a dense layer, and set every pointer of the struct to the corresponding
 argument*/
 void dense_layer_init_load(dense_layer_t *layer, matrix2d_t *weights,
                            matrix2d_t *biases, matrix3d_t *output,
@@ -469,6 +496,7 @@ $$
 $$
 
 The correction of the weights/biases are performed the same way as the convolutional layer
+
 ![Dense layer - Back-propagation](./assets/dense_layer_backpropagation.jpg)
 *Dense layer backpropagation*
 
@@ -491,12 +519,12 @@ typedef struct {
 A **pooling layer** can be created as follows:
 
 ```c
-/* initialze a pool layer, and allocate dinamically every pointer of the struct */
+/* initialize a pool layer, and allocate dinamically every pointer of the struct */
 void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
                      int input_depth, int kernel_size, int padding, int stride,
                      pooling_type type);
 
-/* initialze a pool layer, and set every pointer of the struct to the corresponding
+/* initialize a pool layer, and set every pointer of the struct to the corresponding
 argument*/
 void pool_layer_init_load(pool_layer_t *layer, matrix3d_t *output,
                           matrix3d_t *d_input, matrix3d_t *indexes,
@@ -547,7 +575,9 @@ where:
 
 ##### Back-propagation
 The back-propagation is pretty easy in this case. We need to propagate the derivative of the error w.r.t. the output only in the portion of the input that has been involved in the computation of a specific value of the output matrix.
+
 ![Average pooling layer - Back-propagation](./assets/avg_pooling_layer_backpropagation.jpg)
+*Average pooling layer back-propagation*
 
 #### Max pooling layer
 ##### Forwarding
@@ -556,16 +586,20 @@ $$
 Y_{pqc} = max_{0 \leq i \leq k_h, 0 \leq j \leq k_w} X_{shp + i, swq + j, c}
 $$
 where the nomenclature is the same as the average pooling layer.
+
 ![Max pooling layer - Forwarding](./assets/max_pooling_layer_forwarding.jpg)
 *Max pooling layer forwarding - input (4x4x3), kernel (2x2x3), padding 0, stride 2*
 
 During the forwarding stage, we need to remember the position of a specific value of the output matrix w.r.t. the input matrix, so during the back-propagation we already know which values of the input matrix have affected the following layers. To do this, for each channel of the output matrix, we use a 3D matrix in which, on the 1st channel, we keep track of the row index of the element that is referring to, while in the 2nd channel we keep track of the column index of the same element.
+
 ![Max pooling layer - Forwarding (example)](./assets/max_pooling_layer_forwarding_example.jpg)
 *Max pooling layer forwarding example - input (4x4x1), kernel (2x2x1), padding 0, stride 2*
 
 ##### Back-propagation
 During the back-propagation, we compute a derivative matrix in which we propagate backward the derivative of the error w.r.t. the output, only if the position of the input element is found inside the indexes matrices.
+
 ![Max pooling layer - Back-propagation](./assets/max_pooling_layer_backpropagation.jpg)
+*Max pooling layer back-propagation*
 
 #### Softmax layer
 The **softmax layer** is implemented using the *softmax_layer* struct.
@@ -581,10 +615,10 @@ typedef struct {
 A **softmax layer** can be created as follows:
 
 ```c
-/* initialze a pool layer, and allocate dinamically every pointer of the struct */
+/* initialize a pool layer, and allocate dinamically every pointer of the struct */
 void softmax_layer_init(softmax_layer_t *layer, int input_n);
 
-/* initialze a pool layer, and set every pointer of the struct to the corresponding
+/* initialize a pool layer, and set every pointer of the struct to the corresponding
 argument*/
 void softmax_layer_init_load(softmax_layer_t *layer, matrix3d_t *output,
                              matrix3d_t *d_input);
@@ -625,5 +659,11 @@ where Y_ij is the value of the 2D output matrix.
 
 ![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
 ##### Back-propagation
+The formula to compute the derivative of the error w.r.t. the input is:
+$$
+\frac{d\sigma}{dY_{i}} = \sigma(Y_{i}) * (1 - \sigma(Y_{i})) \text{ if i=j}\\
+\frac{d\sigma}{dY_{i}} = -\sigma(Y_{i}) * \sigma(Y_{j}) \text{ otherwise }
+$$
+where Y_i and Y_j are the i/j-th value of the output matrix
 
 ![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
