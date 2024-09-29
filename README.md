@@ -1,8 +1,83 @@
-# 2C2N
+# 2C2N - A CNN development framework, written in C
+
 ## Description
+
 2C2N is a C-based framework, inspired by PyTorch, for building and running Convolutional Neural Networks (CNNs). It features implementations of commonly used CNN layers such as convolutional, pooling, and dense (or fully connected) layers, along with its related forwarding and back-propagation procedures. The framework also includes well-known computation functions and data structures like matrix2d/3d for efficient matrix operations. The code has been developed in order to provide an easy, intuitive and modular interface with a low footprint memory usage.
 
-## Matrix
+## Tools
+
+### Build
+The build process is performed using [CMake](https://cmake.org/).
+To build the whole project (every target), run:
+```bash
+./tools/build.sh
+#or
+mkdir build
+cd build
+cmake ..
+cmake --build . --target all
+```
+To clear the build folder, run:
+```bash
+./tools/clear.sh
+#or
+rm -r build
+```
+
+### Test
+The whole project is tested using the [Unity](https://github.com/ThrowTheSwitch/Unity.git) framework,
+whose repository has to be cloned as submodule:
+```bash
+git clone --recurse-submodules git@github.com:p3zz/c_neural_network.git
+
+#or
+
+git clone git@github.com:p3zz/c_neural_network.git
+git submodule init
+git submodule update
+```
+To run a test, run:
+```bash
+./tools/test.sh
+# or
+cd build/test
+ctest -V
+```
+
+Each library (common, matrix, layer, utils) has been tested using 3 different test suites:
+- test_common
+- test_layer
+- test_matrix
+
+The core part of the testing is the layer suite, where almost every part of the framework is linked together to perform
+some "free-runs" of perceptrons (and / or) and an MNIST network.
+
+### Code formatting
+The code style and formatting is performed using [CLang Format](https://clang.llvm.org/docs/ClangFormat.html).
+
+To format the code, run:
+```bash
+./tools/format.sh
+# or
+clang-format -i {include,src}/*
+```
+
+### Memory check
+The memory check of the project has been performed using [Valgrind](https://valgrind.org/docs/manual/mc-manual.html).
+The memory has been checked in every test suite.
+
+To perform a heap-check, run:
+```bash
+./tools/heap-check.sh
+# or
+valgrind --leak-check=full build/test/test_layer
+valgrind --leak-check=full build/test/test_common
+valgrind --leak-check=full build/test/test_matrix
+```
+
+## Core
+
+### Matrix
 ![Matrix2D](./assets/matrix2d.jpg)
 ![Matrix3D](./assets/matrix3d.jpg)
 
@@ -106,7 +181,7 @@ void matrix3d_reshape(const matrix3d_t *const input, matrix3d_t *output);
 
 ```
 
-## Layers
+### Layers
 The framework provides a common interface to build, run and destroy the most used
 type of layers of a CNN:
 
@@ -124,7 +199,7 @@ The shared opeations that can be performed on a generic layer are:
 From a memory point-of-view, every inner member of a layer that will be used to perform
 feed, forwarding and back-propagation are allocated during the init phase of the layer.
 
-## Convolutional layer
+#### Convolutional layer
 The **convolutional layer** is implemented using the *conv_layer* struct.
 ```c
 typedef struct {
@@ -188,7 +263,7 @@ void conv_layer_backpropagation(conv_layer_t *layer,
 
 ```
 
-### Forwarding
+##### Forwarding
 The formula used to compute the output matrix is:
 $$
 Y_i = B_i + \sum_{j=1}^{n} X_j * K_{ij}\\
@@ -205,7 +280,7 @@ In order to compute the i-th slice of the output matrix, we perform the sum of t
 ![Convolutional layer - Forwarding](./assets/convolutional_layer_forwarding.jpg)
 *Convolutional layer forwarding - input (5x4x4), 2 kernels (3x3x3), 2 biases (3x2), padding 0, stride 1*
 
-### Back-propagation
+##### Back-propagation
 The formula used to correct the kernels/biases and to compute the derivative of the error w.r.t. to the input are:
 $$
 \frac{dE}{dK_{ij}} = X_j * \frac{dE}{dY_i} *_{wise} \frac{dactv}{dY_i} \\
@@ -223,7 +298,7 @@ where alpha is the learning rate
 ![Convolutional layer - Back-propagation](./assets/convolutional_layer_backpropagation.jpg)
 *Convolutional layer backpropagation*
 
-## Dense layer
+#### Dense layer
 The **dense layer** is implemented using the *dense_layer* struct.
 ```c
 typedef struct {
@@ -282,7 +357,7 @@ void dense_layer_backpropagation(dense_layer_t *layer,
 
 ```
 
-### Forwarding
+##### Forwarding
 The formula used to compute the output matrix is:
 $$
 Y = B + X * W \\
@@ -299,7 +374,7 @@ In order to compute the output matrix, you need to perform a matrix multiplicati
 ![Dense layer - Forwarding](./assets/dense_layer_forwarding.jpg)
 *Dense layer forwarding - input (1x7), weights (7x4), biases (1x4)*
 
-### Back-propagation
+##### Back-propagation
 The formula used to correct weights/biases, as well as the derivative of the error w.r.t. the input is:
 $$
 \frac{dE}{dW_{ij}} = X_i * \frac{dE}{dY_j} * \frac{dactv}{dY_j} \\
@@ -311,7 +386,7 @@ The correction of the weights/biases are performed the same way as the convoluti
 ![Dense layer - Back-propagation](./assets/dense_layer_backpropagation.jpg)
 *Dense layer backpropagation*
 
-## Pooling layer
+#### Pooling layer
 The **pooling layer** is implemented using the *pool_layer* struct.
 ```c
 typedef struct {
@@ -368,8 +443,8 @@ void pool_layer_forwarding(pool_layer_t *layer);
 void pool_layer_backpropagation(pool_layer_t *layer, const matrix3d_t *const input);
 ```
 
-### Average pooling layer
-#### Forwarding
+#### Average pooling layer
+##### Forwarding
 The formula used to compute the output matrix is:
 $$
 Y_{pqc} = \frac{1}{k^2} \sum_{i=0}^{k-1} \sum_{j=0}^{k-1}X_{shp+i, swq+j, c}
@@ -384,12 +459,12 @@ where:
 ![Average pooling layer - Forwarding](./assets/avg_pooling_layer_forwarding.jpg)
 *Average pooling layer forwarding - input (4x4x3), kernel (2x2x3), padding 0, stride 2*
 
-#### Back-propagation
+##### Back-propagation
 The back-propagation is pretty easy in this case. We need to propagate the derivative of the error w.r.t. the output only in the portion of the input that has been involved in the computation of a specific value of the output matrix.
 ![Average pooling layer - Back-propagation](./assets/avg_pooling_layer_backpropagation.jpg)
 
-### Max pooling layer
-#### Forwarding
+#### Max pooling layer
+##### Forwarding
 The formula used to compute the output matrix is:
 $$
 Y_{pqc} = max_{0 \leq i \leq k_h, 0 \leq j \leq k_w} X_{shp + i, swq + j, c}
@@ -402,11 +477,11 @@ During the forwarding stage, we need to remember the position of a specific valu
 ![Max pooling layer - Forwarding (example)](./assets/max_pooling_layer_forwarding_example.jpg)
 *Max pooling layer forwarding example - input (4x4x1), kernel (2x2x1), padding 0, stride 2*
 
-#### Back-propagation
+##### Back-propagation
 During the back-propagation, we compute a derivative matrix in which we propagate backward the derivative of the error w.r.t. the output, only if the position of the input element is found inside the indexes matrices.
 ![Max pooling layer - Back-propagation](./assets/max_pooling_layer_backpropagation.jpg)
 
-### Softmax layer
+#### Softmax layer
 The **softmax layer** is implemented using the *softmax_layer* struct.
 ```c
 typedef struct {
@@ -455,7 +530,7 @@ void softmax_layer_backpropagation(softmax_layer_t *layer, const matrix3d_t *con
 ```
 
 
-#### Forwarding
+##### Forwarding
 The formula to compute the output matrix is:
 $$
 \sigma(Y_{ij}) = \frac{e^{Y_{ij}}}{\sum_{j=0}^{n-1} \sum_{k=0}^{m-1} e^{Y_{jk}}}
@@ -463,21 +538,6 @@ $$
 where Y_ij is the value of the 2D output matrix.
 
 ![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
-#### Back-propagation
+##### Back-propagation
 
 ![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
-
-### Test
-2 tests are available in test/ folder:
-- test_common
-- test_layer
-
-### Tools
-Several tools are available in tools/ folder:
-- build.sh: build all targets (CMake)
-- clear.sh: remove the build folder
-- test.sh: run tests in verbose mode (CTest)
-- format.sh: code formatting (Clang Format)
-- heap-check.sh: run memory leaks check over tests (Valgrind)
-
-https://drive.google.com/file/d/1eEKzfmEu6WKdRlohBQiqi3PhW_uIVJVP/view
