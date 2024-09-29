@@ -176,7 +176,7 @@ void matrix3d_destroy(const matrix3d_t *m) {
 
 void matrix2d_sum_inplace(const matrix2d_t *const m1,
                           const matrix2d_t *const m2) {
-  if(m1->height != m2->height || m1->width != m2->width){
+  if (m1->height != m2->height || m1->width != m2->width) {
     return;
   }
 

@@ -27,7 +27,7 @@ void convolution(const matrix2d_t *const m1, const matrix2d_t *const m2,
                  matrix2d_t *const result, int padding, int stride) {
   matrix2d_rotate180_inplace(m2);
   cross_correlation(m1, m2, result, padding, stride);
-  // restore the rotated matrix
+  /* restore the rotated matrix */
   matrix2d_rotate180_inplace(m2);
 }
 
@@ -84,7 +84,8 @@ void avg_pooling(const matrix2d_t *const mat, const matrix2d_t *const result,
 void mean_squared_error_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
-  if(output->height != target_output->height || output->width != target_output->width){
+  if (output->height != target_output->height ||
+      output->width != target_output->width) {
     return;
   }
 
@@ -101,8 +102,9 @@ void mean_squared_error_derivative(const matrix2d_t *const output,
 void cross_entropy_loss_derivative(const matrix2d_t *const output,
                                    const matrix2d_t *const target_output,
                                    const matrix2d_t *const result) {
-  
-  if(output->height != target_output->height || output->width != target_output->width){
+
+  if (output->height != target_output->height ||
+      output->width != target_output->width) {
     return;
   }
 
@@ -125,8 +127,9 @@ void cross_entropy_loss_derivative(const matrix2d_t *const output,
 
 float mean_squared_error(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
-  
-  if(output->height != target_output->height || output->width != target_output->width){
+
+  if (output->height != target_output->height ||
+      output->width != target_output->width) {
     return 0.f;
   }
 
@@ -143,8 +146,9 @@ float mean_squared_error(const matrix2d_t *const output,
 
 float cross_entropy_loss(const matrix2d_t *const output,
                          const matrix2d_t *const target_output) {
-  
-  if(output->height != target_output->height || output->width != target_output->width){
+
+  if (output->height != target_output->height ||
+      output->width != target_output->width) {
     return 0.f;
   }
 
@@ -163,8 +167,7 @@ float cross_entropy_loss(const matrix2d_t *const output,
   return -sum / output->width;
 }
 
-void activate_inplace(const matrix2d_t *const m,
-                               activation_type type) {
+void activate_inplace(const matrix2d_t *const m, activation_type type) {
   for (int i = 0; i < m->height; i++) {
     for (int j = 0; j < m->width; j++) {
       float *elem = matrix2d_get_elem_as_mut_ref(m, i, j);
