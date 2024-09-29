@@ -213,19 +213,19 @@ void softmax_layer_init_load(softmax_layer_t *layer, matrix3d_t *output,
  * -----------------------------------*/
 
 void dense_layer_feed(dense_layer_t *layer, const matrix3d_t *const input) {
-  matrix3d_copy_inplace(input, layer->input);
+  matrix3d_copy_content(input, layer->input);
 }
 
 void pool_layer_feed(pool_layer_t *layer, const matrix3d_t *const input) {
-  matrix3d_copy_inplace(input, layer->input);
+  matrix3d_copy_content(input, layer->input);
 }
 
 void conv_layer_feed(conv_layer_t *layer, matrix3d_t *input) {
-  matrix3d_copy_inplace(input, layer->input);
+  matrix3d_copy_content(input, layer->input);
 }
 
 void softmax_layer_feed(softmax_layer_t *layer, const matrix3d_t *const input) {
-  matrix3d_copy_inplace(input, layer->input);
+  matrix3d_copy_content(input, layer->input);
 }
 
 /* ----------------------------------- FEED LOAD

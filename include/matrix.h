@@ -289,7 +289,7 @@ void matrix3d_print(const matrix3d_t *const m);
  * @param input: the first matrix
  * @param output: the second matrix, in which the result will be stored
  */
-void matrix3d_copy_inplace(const matrix3d_t *const input,
+void matrix3d_copy_content(const matrix3d_t *const input,
                            const matrix3d_t *output);
 
 /**

@@ -121,7 +121,7 @@ void matrix2d_copy_content(const matrix2d_t *const input,
          output->height * output->width * sizeof(float));
 }
 
-void matrix3d_copy_inplace(const matrix3d_t *const input,
+void matrix3d_copy_content(const matrix3d_t *const input,
                            const matrix3d_t *const output) {
   if (input->height != output->height || input->width != output->width ||
       input->depth != output->depth) {
