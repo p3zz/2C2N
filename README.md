@@ -224,6 +224,63 @@ where alpha is the learning rate
 *Convolutional layer backpropagation*
 
 ## Dense layer
+The **dense layer** is implemented using the *dense_layer* struct.
+```c
+typedef struct {
+  matrix3d_t *input;
+  matrix2d_t *weights;
+  matrix2d_t *biases;
+  matrix3d_t *output;
+  matrix3d_t *output_activated;
+  matrix3d_t *d_input;
+  activation_type activation_type;
+  bool loaded;
+} dense_layer_t;
+```
+
+A **dense layer** can be created as follows:
+
+```c
+/* initialze a dense layer, and allocate dinamically every pointer of the struct */
+void dense_layer_init(dense_layer_t *layer, int input_n, int output_n,
+                      activation_type activation_type);
+
+/* initialze a dense layer, and set every pointer of the struct to the corresponding
+argument*/
+void dense_layer_init_load(dense_layer_t *layer, matrix2d_t *weights,
+                           matrix2d_t *biases, matrix3d_t *output,
+                           matrix3d_t *output_activated, matrix3d_t *d_input,
+                           activation_type activation_type);
+```
+
+and destroyed as follows:
+```c
+/* destroy a layer (frees every dynamically allocated inner member, has no effect 
+if the layer has been created with conv_layer_init_load(...))*/
+void dense_layer_destroy(dense_layer_t *layer);
+```
+
+The shared operations has been developed as follows:
+```c
+/* feed the layer (copy the content of the *values pointer of the input to the corresponding inner member
+of the layer */
+void dense_layer_feed(dense_layer_t *layer, matrix3d_t *input);
+
+/* feed the layer (set the *values pointer of the corresponding inner member
+of the layer to the input */
+void dense_layer_feed_load(dense_layer_t *layer, matrix3d_t *const input);
+
+/* perform the forwarding stage. The result will be available inside the *output* and *output_activated*
+inner members */
+void dense_layer_forwarding(dense_layer_t *layer);
+
+/* perform the back-propagation stage. Every weight/bias will be corrected during this stage, and 
+the result will be available inside the *d_input* inner member */
+void dense_layer_backpropagation(dense_layer_t *layer,
+                                const matrix3d_t *const input,
+                                float learning_rate);
+
+```
 
 ### Forwarding
 The formula used to compute the output matrix is:
@@ -255,6 +312,62 @@ The correction of the weights/biases are performed the same way as the convoluti
 *Dense layer backpropagation*
 
 ## Pooling layer
+The **pooling layer** is implemented using the *pool_layer* struct.
+```c
+typedef struct {
+  matrix3d_t *input;
+  matrix3d_t *output;
+  matrix3d_t *indexes;
+  matrix3d_t *d_input;
+  int kernel_size;
+  int stride;
+  int padding;
+  pooling_type type;
+  bool loaded;
+} pool_layer_t;
+```
+
+A **pooling layer** can be created as follows:
+
+```c
+/* initialze a pool layer, and allocate dinamically every pointer of the struct */
+void pool_layer_init(pool_layer_t *layer, int input_height, int input_width,
+                     int input_depth, int kernel_size, int padding, int stride,
+                     pooling_type type);
+
+/* initialze a pool layer, and set every pointer of the struct to the corresponding
+argument*/
+void pool_layer_init_load(pool_layer_t *layer, matrix3d_t *output,
+                          matrix3d_t *d_input, matrix3d_t *indexes,
+                          int kernel_size, int stride, int padding,
+                          pooling_type type);
+```
+
+and destroyed as follows:
+```c
+/* destroy a layer (frees every dynamically allocated inner member, has no effect 
+if the layer has been created with conv_layer_init_load(...))*/
+void pool_layer_destroy(pool_layer_t *layer);
+```
+
+The shared operations has been developed as follows:
+```c
+/* feed the layer (copy the content of the *values pointer of the input to the corresponding inner member
+of the layer */
+void pool_layer_feed(pool_layer_t *layer, matrix3d_t *input);
+
+/* feed the layer (set the *values pointer of the corresponding inner member
+of the layer to the input */
+void pool_layer_feed_load(pool_layer_t *layer, matrix3d_t *const input);
+
+/* perform the forwarding stage. The result will be available inside the *output* and *output_activated*
+inner members */
+void pool_layer_forwarding(pool_layer_t *layer);
+
+/* perform the back-propagation stage. The result will be available inside the *d_input* inner member */
+void pool_layer_backpropagation(pool_layer_t *layer, const matrix3d_t *const input);
+```
+
 ### Average pooling layer
 #### Forwarding
 The formula used to compute the output matrix is:
@@ -294,9 +407,65 @@ During the back-propagation, we compute a derivative matrix in which we propagat
 ![Max pooling layer - Back-propagation](./assets/max_pooling_layer_backpropagation.jpg)
 
 ### Softmax layer
-![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
-![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
+The **softmax layer** is implemented using the *softmax_layer* struct.
+```c
+typedef struct {
+  matrix3d_t *input;
+  matrix3d_t *d_input;
+  matrix3d_t *output;
+  bool loaded;
+} softmax_layer_t;
+```
 
+A **softmax layer** can be created as follows:
+
+```c
+/* initialze a pool layer, and allocate dinamically every pointer of the struct */
+void softmax_layer_init(softmax_layer_t *layer, int input_n);
+
+/* initialze a pool layer, and set every pointer of the struct to the corresponding
+argument*/
+void softmax_layer_init_load(softmax_layer_t *layer, matrix3d_t *output,
+                             matrix3d_t *d_input);
+```
+
+and destroyed as follows:
+```c
+/* destroy a layer (frees every dynamically allocated inner member, has no effect 
+if the layer has been created with conv_layer_init_load(...))*/
+void softmax_layer_destroy(softmax_layer_t *layer);
+```
+
+The shared operations has been developed as follows:
+```c
+/* feed the layer (copy the content of the *values pointer of the input to the corresponding inner member
+of the layer */
+void softmax_layer_feed(softmax_layer_t *layer, matrix3d_t *input);
+
+/* feed the layer (set the *values pointer of the corresponding inner member
+of the layer to the input */
+void softmax_layer_feed_load(softmax_layer_t *layer, matrix3d_t *const input);
+
+/* perform the forwarding stage. The result will be available inside the *output* and *output_activated*
+inner members */
+void softmax_layer_forwarding(softmax_layer_t *layer);
+
+/* perform the back-propagation stage. The result will be available inside the *d_input* inner member */
+void softmax_layer_backpropagation(softmax_layer_t *layer, const matrix3d_t *const input);
+```
+
+
+#### Forwarding
+The formula to compute the output matrix is:
+$$
+\sigma(Y_{ij}) = \frac{e^{Y_{ij}}}{\sum_{j=0}^{n-1} \sum_{k=0}^{m-1} e^{Y_{jk}}}
+$$
+where Y_ij is the value of the 2D output matrix.
+
+![Softmax layer - Forwarding](./assets/softmax_layer_forwarding.jpg)
+#### Back-propagation
+
+![Softmax layer - Back-propagation](./assets/softmax_layer_backpropagation.jpg)
 
 ### Test
 2 tests are available in test/ folder:
