@@ -34,11 +34,11 @@ rm -r build
 The whole project is tested using the [Unity](https://github.com/ThrowTheSwitch/Unity.git) framework,
 whose repository has to be cloned as submodule:
 ```bash
-git clone --recurse-submodules git@github.com:p3zz/c_neural_network.git
+git clone --recurse-submodules git@github.com:p3zz/2C2N.git
 
 #or
 
-git clone git@github.com:p3zz/c_neural_network.git
+git clone git@github.com:p3zz/2C2N.git
 git submodule init
 git submodule update
 ```
