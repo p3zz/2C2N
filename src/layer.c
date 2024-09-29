@@ -256,7 +256,8 @@ void dense_layer_forwarding(dense_layer_t *layer) {
   matrix2d_t input = {0};
 
   matrix3d_get_channel_as_mut_ref(layer->output, &output, 0);
-  matrix3d_get_channel_as_mut_ref(layer->output_activated, &output_activated, 0);
+  matrix3d_get_channel_as_mut_ref(layer->output_activated, &output_activated,
+                                  0);
   matrix3d_get_channel_as_mut_ref(layer->input, &input, 0);
 
   for (int i = 0; i < output.width; i++) {
@@ -304,8 +305,8 @@ void pool_layer_forwarding(pool_layer_t *layer) {
                   layer->stride);
       break;
     case POOLING_TYPE_MAX:
-      max_pooling(&in_channel, &out_channel, &layer->indexes[i], layer->kernel_size,
-                  layer->padding, layer->stride);
+      max_pooling(&in_channel, &out_channel, &layer->indexes[i],
+                  layer->kernel_size, layer->padding, layer->stride);
       break;
     }
   }
@@ -323,7 +324,8 @@ void conv_layer_forwarding(conv_layer_t *layer) {
   /* for each kernel */
   for (int i = 0; i < layer->kernels_n; i++) {
     matrix3d_get_channel_as_mut_ref(layer->output, &out_channel, i);
-    matrix3d_get_channel_as_mut_ref(layer->output_activated, &out_act_channel, i);
+    matrix3d_get_channel_as_mut_ref(layer->output_activated, &out_act_channel,
+                                    i);
 
     /* for each channel of the kernel */
     for (int j = 0; j < layer->kernels[i].depth; j++) {
@@ -541,8 +543,8 @@ void conv_layer_backpropagation(conv_layer_t *layer,
       matrix3d_get_channel_as_mut_ref(layer->d_input, &d_input_channel, j);
 
       /* compute the derivative for the correction of the kernel */
-      cross_correlation(&in_channel, &d_output, &d_kernel_channel, layer->padding,
-                        1);
+      cross_correlation(&in_channel, &d_output, &d_kernel_channel,
+                        layer->padding, 1);
       /* compute the derivative for the correction of the input */
       convolution(&d_output, &kernel_channel, &d_input_aux,
                   kernel->height - input->height + 1, 1);

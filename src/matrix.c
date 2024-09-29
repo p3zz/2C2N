@@ -65,7 +65,7 @@ void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
 }
 
 void matrix3d_get_channel_as_mut_ref(const matrix3d_t *const m,
-                                   matrix2d_t *const result, int z_idx) {
+                                     matrix2d_t *const result, int z_idx) {
   if (z_idx >= m->depth) {
     return;
   }

@@ -261,7 +261,8 @@ void test_backpropagation_dense_layer(void) {
   matrix3d_get_channel_as_mut_ref(&output_target, &out_tgt_channel, 0);
   matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
-  mean_squared_error_derivative(&out_act_channel, &out_tgt_channel, &d_input_channel);
+  mean_squared_error_derivative(&out_act_channel, &out_tgt_channel,
+                                &d_input_channel);
 
   TEST_ASSERT_EQUAL_FLOAT(2.524f, matrix2d_get_elem(&d_input_channel, 0, 0));
   TEST_ASSERT_EQUAL_FLOAT(6.858f, matrix2d_get_elem(&d_input_channel, 0, 1));
@@ -355,7 +356,8 @@ void test_backpropagation_conv_layer(void) {
   matrix2d_t d_input_channel = {0};
 
   for (int i = 0; i < d_input.depth; i++) {
-    matrix3d_get_channel_as_mut_ref(layer.output_activated, &out_act_channel, i);
+    matrix3d_get_channel_as_mut_ref(layer.output_activated, &out_act_channel,
+                                    i);
     matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
     matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
 
@@ -411,7 +413,8 @@ void test_backpropagation_max_pool_layer(void) {
     matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
     matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
 
-    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                  &d_input_channel);
   }
 
   pool_layer_backpropagation(&layer, &d_input);
@@ -472,7 +475,8 @@ void test_backpropagation_avg_pool_layer(void) {
     matrix3d_get_channel_as_mut_ref(layer.output, &out_channel, i);
     matrix3d_get_channel_as_mut_ref(&output_targets, &out_tgt_channel, i);
     matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, i);
-    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                  &d_input_channel);
   }
 
   TEST_ASSERT_EQUAL_FLOAT(4.0, matrix3d_get_elem(&d_input, 0, 0, 0));
@@ -549,7 +553,8 @@ void test_perceptron_or(void) {
   matrix2d_t out_tgt_channel = {0};
   matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel, 0);
+  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel,
+                                  0);
   matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations_n; i++) {
@@ -559,7 +564,8 @@ void test_perceptron_or(void) {
       dense_layer_forwarding(&input_layer);
       dense_layer_feed(&hidden_layer, input_layer.output_activated);
       dense_layer_forwarding(&hidden_layer);
-      mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+      mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                    &d_input_channel);
       dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
       dense_layer_backpropagation(&input_layer, hidden_layer.d_input,
                                   learning_rate);
@@ -632,7 +638,8 @@ void test_perceptron_and(void) {
   matrix2d_t out_tgt_channel = {0};
   matrix2d_t d_input_channel = {0};
 
-  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel, 0);
+  matrix3d_get_channel_as_mut_ref(hidden_layer.output_activated, &out_channel,
+                                  0);
   matrix3d_get_channel_as_mut_ref(&d_input, &d_input_channel, 0);
 
   for (int i = 0; i < iterations_n; i++) {
@@ -642,7 +649,8 @@ void test_perceptron_and(void) {
       dense_layer_forwarding(&input_layer);
       dense_layer_feed(&hidden_layer, input_layer.output_activated);
       dense_layer_forwarding(&hidden_layer);
-      mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+      mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                    &d_input_channel);
       dense_layer_backpropagation(&hidden_layer, &d_input, learning_rate);
       dense_layer_backpropagation(&input_layer, hidden_layer.d_input,
                                   learning_rate);
@@ -705,7 +713,8 @@ void test_conv_layer_backpropagation_freerun(void) {
     conv_layer_forwarding(&in_layer);
     matrix3d_reshape(in_layer.output_activated, &aux);
     matrix3d_get_channel_as_mut_ref(&aux, &out_channel, 0);
-    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                  &d_input_channel);
     matrix3d_reshape(&d_input, &aux_rev);
     conv_layer_backpropagation(&in_layer, &aux_rev, learning_rate);
   }
@@ -795,7 +804,8 @@ void test_lenet5_cnn(void) {
     softmax_layer_feed(&layer7, layer6.output_activated);
     softmax_layer_forwarding(&layer7);
 
-    mean_squared_error_derivative(&out_channel, &out_tgt_channel, &d_input_channel);
+    mean_squared_error_derivative(&out_channel, &out_tgt_channel,
+                                  &d_input_channel);
 
     softmax_layer_backpropagation(&layer7, &d_input);
     dense_layer_backpropagation(&layer6, layer7.d_input, learning_rate);

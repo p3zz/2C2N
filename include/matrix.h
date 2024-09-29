@@ -238,7 +238,7 @@ void matrix3d_set_elem(const matrix3d_t *const m, int row_idx, int col_idx,
  * @param z_idx: the index of the channel
  */
 void matrix3d_get_channel_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
-                                   int z_idx);
+                                     int z_idx);
 
 /**
  * @brief Initialize a 3D matrix. The data of the matrix is dinamically
