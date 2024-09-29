@@ -93,6 +93,34 @@ void matrix3d_get_slice_as_mut_ref(const matrix3d_t *m, matrix2d_t *result,
 
 ```
 
+Furthermore, the framework expose a bunch of useful functions for matrix operations:
+```c
+// copy the content of *values* of the input matrix inside the output matriux
+void matrix3d_copy_content(const matrix3d_t *const input,
+                           const matrix3d_t *output);
+void matrix2d_copy_content(const matrix2d_t *const input,
+                           const matrix2d_t *output);
+
+// randomize the content of *values* with floats between 0 and 1
+void matrix2d_randomize(matrix2d_t *input);
+void matrix3d_randomize(matrix3d_t *input);
+
+// flip a matrix upwise-down
+void matrix2d_rotate180_inplace(const matrix2d_t *const input);
+
+// perform an element-wise product between two 2D matrixes
+void matrix2d_element_wise_product_inplace(const matrix2d_t *const m1,
+                                           const matrix2d_t *const m2);
+
+// perform an element-wise sum between two 2D matrixes
+void matrix2d_sum_inplace(const matrix2d_t *const m1,
+                          const matrix2d_t *const m2);
+
+// reshape a 3D matrix inside another 3D matrix with given height, width and depth
+void matrix3d_reshape(const matrix3d_t *const input, matrix3d_t *output);
+
+```
+
 ## Convolutional layer
 The **convolutional layer** is implemented using the *conv_layer* struct.
 ```c
