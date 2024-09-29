@@ -911,6 +911,14 @@ void test_doc_example(void){
     matrix3d_reshape(layer2.d_input, &aux);
     pool_layer_backpropagation(&layer1, &aux);
     conv_layer_backpropagation(&layer0, layer1.d_input, learning_rate);
+
+    conv_layer_destroy(&layer0);
+    pool_layer_destroy(&layer1);
+    dense_layer_destroy(&layer2);
+
+    matrix3d_destroy(&input);
+    matrix3d_destroy(&d_error);
+    matrix3d_destroy(&aux);
 }
 
 int main(void)
